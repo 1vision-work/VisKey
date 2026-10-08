@@ -1,0 +1,76 @@
+{
+  "sourceLanguage": "vi",
+  "strings": {
+    "Kiểu gõ": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Input method"
+          }
+        }
+      }
+    },
+    "Mở Cài đặt hệ thống…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open System Settings…"
+          }
+        }
+      }
+    },
+    "Thoát VisKey": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quit VisKey"
+          }
+        }
+      }
+    },
+    "Tiếng Anh": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "English"
+          }
+        }
+      }
+    },
+    "Tiếng Việt": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vietnamese"
+          }
+        }
+      }
+    },
+    "VisKey chưa có quyền Trợ năng": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "VisKey doesn’t have Accessibility permission"
+          }
+        }
+      }
+    },
+    "⌃⇧ để chuyển": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "⌃⇧ to switch"
+          }
+        }
+      }
+    }
+  },
+  "version": "1.0"
+}
