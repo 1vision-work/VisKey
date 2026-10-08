@@ -10,7 +10,7 @@ keys: quowrn
   w        c=1 b=1 n=1 e=3 w=20001A1 m=-
   r        c=1 b=1 n=1 e=3 w=2001EDF m=-
   n        c=1 b=1 n=2 e=4 w=2001EDF,2D m=-
-  <sp>     c=0 b=1 n=2 e=4 w=- m=-
+  <sp>     c=0 b=0 n=0 e=4 w=- m=-
 => quởn 
 
 ## must/tuyet
@@ -23,7 +23,7 @@ keys: tuyeetj
   e        c=1 b=1 n=1 e=3 w=20000EA m=-
   t        c=0 b=0 n=0 e=3 w=- m=-
   j        c=1 b=4 n=4 e=3 w=20,10,2001EC7,11 m=-
-  <sp>     c=0 b=4 n=4 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => tuyệt 
 
 ## must/quet
@@ -34,7 +34,7 @@ keys: quets
   e        c=0 b=0 n=0 e=3 w=- m=-
   t        c=0 b=0 n=0 e=3 w=- m=-
   s        c=1 b=2 n=2 e=3 w=20000E9,11 m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => quét 
 
 ## must/dui9-vni
@@ -44,7 +44,7 @@ keys: dui9
   u        c=0 b=0 n=0 e=3 w=- m=-
   i        c=0 b=0 n=0 e=3 w=- m=-
   9        c=1 b=3 n=3 e=3 w=2000111,20,22 m=-
-  <sp>     c=0 b=3 n=3 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => đui 
 
 ## must/duoi96-vni
@@ -56,7 +56,7 @@ keys: duoi96
   i        c=0 b=0 n=0 e=3 w=- m=-
   9        c=1 b=4 n=4 e=3 w=2000111,20,1F,22 m=-
   6        c=1 b=2 n=2 e=3 w=20000F4,22 m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => đuôi 
 
 ## must/tuyps
@@ -67,7 +67,7 @@ keys: tuyps
   y        c=0 b=0 n=0 e=3 w=- m=-
   p        c=0 b=0 n=0 e=3 w=- m=-
   s        c=1 b=3 n=3 e=3 w=20,20000FD,23 m=-
-  <sp>     c=0 b=3 n=3 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => tuýp 
 
 ## must/chua-a-issue312 [known-bug]
@@ -77,9 +77,9 @@ keys: chuwaa
   h        c=0 b=0 n=0 e=3 w=- m=-
   u        c=0 b=0 n=0 e=3 w=- m=-
   w        c=1 b=1 n=1 e=3 w=20001B0 m=-
-  a        c=0 b=1 n=1 e=3 w=- m=-
+  a        c=0 b=0 n=0 e=3 w=- m=-
   a        c=1 b=1 n=1 e=3 w=20000E2 m=-
-  <sp>     c=0 b=1 n=1 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => chưâ 
 
 ## must/chua-a-issue312-separate [known-bug]
@@ -89,7 +89,7 @@ keys: chuwaa
   h        c=0 b=0 n=0 e=3 w=- m=-
   u        c=0 b=0 n=0 e=3 w=- m=-
   w        c=1 b=1 n=1 e=3 w=20001B0 m=-
-  a        c=0 b=1 n=1 e=3 w=- m=-
+  a        c=0 b=0 n=0 e=3 w=- m=-
   a        c=1 b=1 n=1 e=3 w=20000E2 m=-
 => chưâ
 
@@ -100,7 +100,7 @@ keys: hoaf
   o        c=0 b=0 n=0 e=3 w=- m=-
   a        c=0 b=0 n=0 e=3 w=- m=-
   f        c=1 b=2 n=2 e=3 w=1F,20000E0 m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => hoà 
 
 ## must/khoe-modern
@@ -111,7 +111,7 @@ keys: khoer
   o        c=0 b=0 n=0 e=3 w=- m=-
   e        c=0 b=0 n=0 e=3 w=- m=-
   r        c=1 b=2 n=2 e=3 w=1F,2001EBB m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => khoẻ 
 
 ## must/thuy-modern
@@ -122,7 +122,7 @@ keys: thuyr
   u        c=0 b=0 n=0 e=3 w=- m=-
   y        c=0 b=0 n=0 e=3 w=- m=-
   r        c=1 b=2 n=2 e=3 w=20,2001EF7 m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => thuỷ 
 
 ## must/hoa-old
@@ -132,7 +132,7 @@ keys: hoaf
   o        c=0 b=0 n=0 e=3 w=- m=-
   a        c=0 b=0 n=0 e=3 w=- m=-
   f        c=1 b=2 n=2 e=3 w=20000F2,0 m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => hòa 
 
 ## must/khoe-old
@@ -143,7 +143,7 @@ keys: khoer
   o        c=0 b=0 n=0 e=3 w=- m=-
   e        c=0 b=0 n=0 e=3 w=- m=-
   r        c=1 b=2 n=2 e=3 w=2001ECF,E m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => khỏe 
 
 ## must/thuy-old
@@ -154,7 +154,7 @@ keys: thuyr
   u        c=0 b=0 n=0 e=3 w=- m=-
   y        c=0 b=0 n=0 e=3 w=- m=-
   r        c=1 b=2 n=2 e=3 w=2001EE7,10 m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => thủy 
 
 ## must/tuy-del-a
@@ -164,8 +164,8 @@ keys: tuyfa<bs>
   u        c=0 b=0 n=0 e=3 w=- m=-
   y        c=0 b=0 n=0 e=3 w=- m=-
   f        c=1 b=2 n=2 e=3 w=20,2001EF3 m=-
-  a        c=0 b=3 n=3 e=3 w=- m=-
-  <bs>     c=0 b=2 n=2 e=2 w=- m=-
+  a        c=0 b=0 n=0 e=3 w=- m=-
+  <bs>     c=0 b=0 n=0 e=2 w=- m=-
 => tuỳ
 
 ## must/tuy-del-a-old
@@ -188,7 +188,7 @@ keys: tuyfa<bs><bs>
   f        c=1 b=2 n=2 e=3 w=20000F9,10 m=-
   a        c=1 b=2 n=3 e=4 w=20,2001EF3,0 m=-
   <bs>     c=1 b=3 n=2 e=4 w=20000F9,10 m=-
-  <bs>     c=0 b=1 n=1 e=2 w=- m=-
+  <bs>     c=0 b=0 n=0 e=2 w=- m=-
 => tù
 
 ## quicktelex/cc
@@ -197,7 +197,7 @@ keys: acc
   a        c=0 b=0 n=0 e=3 w=- m=-
   c        c=0 b=0 n=0 e=3 w=- m=-
   c        c=1 b=1 n=2 e=3 w=8,4 m=-
-  <sp>     c=0 b=1 n=2 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => ach 
 
 ## quicktelex/gg
@@ -206,7 +206,7 @@ keys: agg
   a        c=0 b=0 n=0 e=3 w=- m=-
   g        c=0 b=0 n=0 e=3 w=- m=-
   g        c=1 b=1 n=2 e=3 w=5,22 m=-
-  <sp>     c=0 b=1 n=2 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => agi 
 
 ## quicktelex/kk
@@ -215,7 +215,7 @@ keys: akk
   a        c=0 b=0 n=0 e=3 w=- m=-
   k        c=0 b=0 n=0 e=3 w=- m=-
   k        c=1 b=1 n=2 e=3 w=28,4 m=-
-  <sp>     c=0 b=1 n=2 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => akh 
 
 ## quicktelex/nn
@@ -224,7 +224,7 @@ keys: ann
   a        c=0 b=0 n=0 e=3 w=- m=-
   n        c=0 b=0 n=0 e=3 w=- m=-
   n        c=1 b=1 n=2 e=3 w=2D,5 m=-
-  <sp>     c=0 b=1 n=2 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => ang 
 
 ## quicktelex/qq
@@ -233,7 +233,7 @@ keys: aqq
   a        c=0 b=0 n=0 e=3 w=- m=-
   q        c=0 b=0 n=0 e=3 w=- m=-
   q        c=1 b=1 n=2 e=3 w=C,20 m=-
-  <sp>     c=0 b=1 n=2 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => aqu 
 
 ## quicktelex/pp
@@ -242,7 +242,7 @@ keys: app
   a        c=0 b=0 n=0 e=3 w=- m=-
   p        c=0 b=0 n=0 e=3 w=- m=-
   p        c=1 b=1 n=2 e=3 w=23,4 m=-
-  <sp>     c=0 b=1 n=2 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => aph 
 
 ## quicktelex/tt
@@ -251,7 +251,7 @@ keys: att
   a        c=0 b=0 n=0 e=3 w=- m=-
   t        c=0 b=0 n=0 e=3 w=- m=-
   t        c=1 b=1 n=2 e=3 w=11,4 m=-
-  <sp>     c=0 b=1 n=2 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => ath 
 
 ## quicktelex/uu
@@ -268,8 +268,8 @@ cfg: input=0 table=0 lang=1 spell=1 modern=0 quick=1 restore=0 macro=0/0 autocap
 keys: cca 
   c        c=0 b=0 n=0 e=3 w=- m=-
   c        c=1 b=1 n=2 e=3 w=8,4 m=-
-  a        c=0 b=1 n=2 e=3 w=- m=-
-  <sp>     c=0 b=1 n=2 e=3 w=- m=-
+  a        c=0 b=0 n=0 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => cha 
 
 ## quicktelex/nhieefu
@@ -290,12 +290,12 @@ cfg: input=0 table=0 lang=1 spell=1 modern=0 quick=1 restore=0 macro=0/0 autocap
 keys: ccos ttrasn ggias 
   c        c=0 b=0 n=0 e=3 w=- m=-
   c        c=1 b=1 n=2 e=3 w=8,4 m=-
-  o        c=0 b=1 n=2 e=3 w=- m=-
+  o        c=0 b=0 n=0 e=3 w=- m=-
   s        c=1 b=1 n=1 e=3 w=20000F3 m=-
-  <sp>     c=0 b=1 n=1 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
   t        c=0 b=0 n=0 e=3 w=- m=-
   t        c=1 b=1 n=2 e=3 w=11,4 m=-
-  r        c=0 b=1 n=2 e=3 w=- m=-
+  r        c=0 b=0 n=0 e=3 w=- m=-
   a        c=0 b=0 n=0 e=3 w=- m=-
   s        c=0 b=0 n=0 e=3 w=- m=-
   n        c=0 b=0 n=0 e=3 w=- m=-
@@ -305,7 +305,7 @@ keys: ccos ttrasn ggias
   i        c=0 b=0 n=0 e=3 w=- m=-
   a        c=0 b=0 n=0 e=3 w=- m=-
   s        c=1 b=2 n=2 e=3 w=20000ED,0 m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => chó thrasn giía 
 
 ## quicktelex/off
@@ -341,8 +341,8 @@ keys: ja
 cfg: input=0 table=0 lang=1 spell=1 modern=0 quick=0 restore=0 macro=0/0 autocaps=0 upper1=0 zfwj=1 qstart=0 qend=0 free=0
 keys: wa 
   w        c=1 b=0 n=1 e=4 w=20001B0 m=-
-  a        c=0 b=0 n=1 e=3 w=- m=-
-  <sp>     c=0 b=0 n=1 e=3 w=- m=-
+  a        c=0 b=0 n=0 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => ưa 
 
 ## zfwj/za
@@ -375,7 +375,7 @@ keys: jam
 cfg: input=0 table=0 lang=1 spell=1 modern=0 quick=0 restore=0 macro=0/0 autocaps=0 upper1=0 zfwj=1 qstart=0 qend=0 free=0
 keys: wen 
   w        c=1 b=0 n=1 e=4 w=20001B0 m=-
-  e        c=0 b=0 n=1 e=3 w=- m=-
+  e        c=0 b=0 n=0 e=3 w=- m=-
   n        c=0 b=0 n=0 e=3 w=- m=-
   <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => ưen 
@@ -386,7 +386,7 @@ keys: zoo
   z        c=0 b=0 n=0 e=3 w=- m=-
   o        c=0 b=0 n=0 e=3 w=- m=-
   o        c=1 b=1 n=1 e=3 w=20000F4 m=-
-  <sp>     c=0 b=1 n=1 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => zô 
 
 ## zfwj/fanh
@@ -411,7 +411,7 @@ keys: fa
 cfg: input=0 table=0 lang=1 spell=1 modern=0 quick=0 restore=0 macro=0/0 autocaps=0 upper1=0 zfwj=0 qstart=0 qend=0 free=0
 keys: wen 
   w        c=1 b=0 n=1 e=4 w=20001B0 m=-
-  e        c=0 b=0 n=1 e=3 w=- m=-
+  e        c=0 b=0 n=0 e=3 w=- m=-
   n        c=0 b=0 n=0 e=3 w=- m=-
   <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => ưen 
@@ -440,7 +440,7 @@ keys: jang
 cfg: input=0 table=0 lang=1 spell=1 modern=0 quick=0 restore=0 macro=0/0 autocaps=0 upper1=0 zfwj=0 qstart=1 qend=0 free=0
 keys: wen 
   w        c=1 b=0 n=1 e=4 w=20001B0 m=-
-  e        c=0 b=0 n=1 e=3 w=- m=-
+  e        c=0 b=0 n=0 e=3 w=- m=-
   n        c=0 b=0 n=0 e=3 w=- m=-
   <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => ưen 
@@ -466,8 +466,8 @@ keys: jo
 cfg: input=0 table=0 lang=1 spell=1 modern=0 quick=0 restore=0 macro=0/0 autocaps=0 upper1=0 zfwj=0 qstart=1 qend=0 free=0
 keys: wa 
   w        c=1 b=0 n=1 e=4 w=20001B0 m=-
-  a        c=0 b=0 n=1 e=3 w=- m=-
-  <sp>     c=0 b=0 n=1 e=3 w=- m=-
+  a        c=0 b=0 n=0 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => ưa 
 
 ## qstart/fim
@@ -512,7 +512,7 @@ keys: taj
   t        c=0 b=0 n=0 e=3 w=- m=-
   a        c=0 b=0 n=0 e=3 w=- m=-
   j        c=1 b=1 n=1 e=3 w=2001EA1 m=-
-  <sp>     c=0 b=1 n=1 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => tạ 
 
 ## qend/lah
@@ -584,15 +584,15 @@ keys: fanh hag ccos nnhaf
   <sp>     c=3 b=1 n=2 e=3 w=2D,5 m=-
   c        c=0 b=0 n=0 e=3 w=- m=-
   c        c=1 b=1 n=2 e=3 w=8,4 m=-
-  o        c=0 b=1 n=2 e=3 w=- m=-
+  o        c=0 b=0 n=0 e=3 w=- m=-
   s        c=1 b=1 n=1 e=3 w=20000F3 m=-
-  <sp>     c=0 b=1 n=1 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
   n        c=0 b=0 n=0 e=3 w=- m=-
   n        c=1 b=1 n=2 e=3 w=2D,5 m=-
   h        c=0 b=0 n=0 e=3 w=- m=-
   a        c=0 b=0 n=0 e=3 w=- m=-
   f        c=1 b=1 n=1 e=3 w=20000E0 m=-
-  <sp>     c=0 b=1 n=1 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => phanh hang chó nghà 
 
 ## restore/text
@@ -601,7 +601,7 @@ keys: text
   t        c=0 b=0 n=0 e=3 w=- m=-
   e        c=0 b=0 n=0 e=3 w=- m=-
   x        c=1 b=1 n=1 e=3 w=2001EBD m=-
-  t        c=0 b=2 n=2 e=3 w=- m=-
+  t        c=0 b=0 n=0 e=3 w=- m=-
   <sp>     c=3 b=3 n=4 e=3 w=11,E,7,11 m=-
 => text 
 
@@ -610,10 +610,10 @@ cfg: input=0 table=0 lang=1 spell=1 modern=0 quick=0 restore=1 macro=0/0 autocap
 keys: expect 
   e        c=0 b=0 n=0 e=3 w=- m=-
   x        c=1 b=1 n=1 e=3 w=2001EBD m=-
-  p        c=0 b=2 n=2 e=3 w=- m=-
+  p        c=0 b=0 n=0 e=3 w=- m=-
   e        c=1 b=2 n=2 e=3 w=2001EC5,23 m=-
-  c        c=0 b=3 n=3 e=3 w=- m=-
-  t        c=0 b=4 n=4 e=3 w=- m=-
+  c        c=0 b=0 n=0 e=3 w=- m=-
+  t        c=0 b=0 n=0 e=3 w=- m=-
   <sp>     c=3 b=4 n=6 e=3 w=E,7,23,E,8,11 m=-
 => expect 
 
@@ -622,7 +622,7 @@ cfg: input=0 table=0 lang=1 spell=1 modern=0 quick=0 restore=1 macro=0/0 autocap
 keys: user 
   u        c=0 b=0 n=0 e=3 w=- m=-
   s        c=1 b=1 n=1 e=3 w=20000FA m=-
-  e        c=0 b=2 n=2 e=3 w=- m=-
+  e        c=0 b=0 n=0 e=3 w=- m=-
   r        c=1 b=2 n=2 e=3 w=2001EE7,E m=-
   <sp>     c=3 b=2 n=4 e=3 w=20,1,E,F m=-
 => user 
@@ -645,7 +645,7 @@ keys: service
   s        c=0 b=0 n=0 e=3 w=- m=-
   e        c=0 b=0 n=0 e=3 w=- m=-
   r        c=1 b=1 n=1 e=3 w=2001EBB m=-
-  v        c=0 b=2 n=2 e=3 w=- m=-
+  v        c=0 b=0 n=0 e=3 w=- m=-
   i        c=0 b=0 n=0 e=3 w=- m=-
   c        c=0 b=0 n=0 e=3 w=- m=-
   e        c=0 b=0 n=0 e=3 w=- m=-
@@ -667,7 +667,7 @@ keys: first
 cfg: input=0 table=0 lang=1 spell=1 modern=0 quick=0 restore=1 macro=0/0 autocaps=0 upper1=0 zfwj=0 qstart=0 qend=0 free=0
 keys: worrk 
   w        c=1 b=0 n=1 e=4 w=20001B0 m=-
-  o        c=0 b=0 n=1 e=3 w=- m=-
+  o        c=0 b=0 n=0 e=3 w=- m=-
   r        c=1 b=2 n=2 e=3 w=2001EED,1F m=-
   r        c=3 b=2 n=2 e=3 w=20001B0,1F m=-
   k        c=0 b=0 n=0 e=3 w=- m=-
@@ -691,7 +691,7 @@ keys: ass
   a        c=0 b=0 n=0 e=3 w=- m=-
   s        c=1 b=1 n=1 e=3 w=20000E1 m=-
   s        c=3 b=1 n=1 e=3 w=0 m=-
-  <sp>     c=0 b=1 n=1 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => as 
 
 ## restore/bass
@@ -701,7 +701,7 @@ keys: bass
   a        c=0 b=0 n=0 e=3 w=- m=-
   s        c=1 b=1 n=1 e=3 w=20000E1 m=-
   s        c=3 b=1 n=1 e=3 w=0 m=-
-  <sp>     c=0 b=1 n=1 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => bas 
 
 ## restore/kick
@@ -720,9 +720,9 @@ keys: text,
   t        c=0 b=0 n=0 e=3 w=- m=-
   e        c=0 b=0 n=0 e=3 w=- m=-
   x        c=1 b=1 n=1 e=3 w=2001EBD m=-
-  t        c=0 b=2 n=2 e=3 w=- m=-
+  t        c=0 b=0 n=0 e=3 w=- m=-
   ,        c=5 b=3 n=4 e=3 w=11,E,7,11 m=-
-  <sp>     c=0 b=3 n=4 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => text, 
 
 ## restore/dot
@@ -730,7 +730,7 @@ cfg: input=0 table=0 lang=1 spell=1 modern=0 quick=0 restore=1 macro=0/0 autocap
 keys: user.
   u        c=0 b=0 n=0 e=3 w=- m=-
   s        c=1 b=1 n=1 e=3 w=20000FA m=-
-  e        c=0 b=2 n=2 e=3 w=- m=-
+  e        c=0 b=0 n=0 e=3 w=- m=-
   r        c=1 b=2 n=2 e=3 w=2001EE7,E m=-
   .        c=5 b=2 n=4 e=3 w=20,1,E,F m=-
 => user.
@@ -740,10 +740,10 @@ cfg: input=0 table=0 lang=1 spell=1 modern=0 quick=0 restore=1 macro=0/0 autocap
 keys: expect<enter>
   e        c=0 b=0 n=0 e=3 w=- m=-
   x        c=1 b=1 n=1 e=3 w=2001EBD m=-
-  p        c=0 b=2 n=2 e=3 w=- m=-
+  p        c=0 b=0 n=0 e=3 w=- m=-
   e        c=1 b=2 n=2 e=3 w=2001EC5,23 m=-
-  c        c=0 b=3 n=3 e=3 w=- m=-
-  t        c=0 b=4 n=4 e=3 w=- m=-
+  c        c=0 b=0 n=0 e=3 w=- m=-
+  t        c=0 b=0 n=0 e=3 w=- m=-
   <enter>  c=5 b=4 n=6 e=1 w=E,7,23,E,8,11 m=-
 => expect\n
 
@@ -753,7 +753,7 @@ keys: text<tab>
   t        c=0 b=0 n=0 e=3 w=- m=-
   e        c=0 b=0 n=0 e=3 w=- m=-
   x        c=1 b=1 n=1 e=3 w=2001EBD m=-
-  t        c=0 b=2 n=2 e=3 w=- m=-
+  t        c=0 b=0 n=0 e=3 w=- m=-
   <tab>    c=5 b=3 n=4 e=1 w=11,E,7,11 m=-
 => text\t
 
@@ -777,8 +777,8 @@ keys: text
   t        c=0 b=0 n=0 e=3 w=- m=-
   e        c=0 b=0 n=0 e=3 w=- m=-
   x        c=1 b=1 n=1 e=3 w=2001EBD m=-
-  t        c=0 b=2 n=2 e=3 w=- m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  t        c=0 b=0 n=0 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => tẽt 
 
 ## restore-off/user
@@ -786,9 +786,9 @@ cfg: input=0 table=0 lang=1 spell=1 modern=0 quick=0 restore=0 macro=0/0 autocap
 keys: user 
   u        c=0 b=0 n=0 e=3 w=- m=-
   s        c=1 b=1 n=1 e=3 w=20000FA m=-
-  e        c=0 b=2 n=2 e=3 w=- m=-
+  e        c=0 b=0 n=0 e=3 w=- m=-
   r        c=1 b=2 n=2 e=3 w=2001EE7,E m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => ủe 
 
 ## restore-off/expect
@@ -796,11 +796,11 @@ cfg: input=0 table=0 lang=1 spell=1 modern=0 quick=0 restore=0 macro=0/0 autocap
 keys: expect 
   e        c=0 b=0 n=0 e=3 w=- m=-
   x        c=1 b=1 n=1 e=3 w=2001EBD m=-
-  p        c=0 b=2 n=2 e=3 w=- m=-
+  p        c=0 b=0 n=0 e=3 w=- m=-
   e        c=1 b=2 n=2 e=3 w=2001EC5,23 m=-
-  c        c=0 b=3 n=3 e=3 w=- m=-
-  t        c=0 b=4 n=4 e=3 w=- m=-
-  <sp>     c=0 b=4 n=4 e=3 w=- m=-
+  c        c=0 b=0 n=0 e=3 w=- m=-
+  t        c=0 b=0 n=0 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => ễpct 
 
 ## nospell/text
@@ -809,8 +809,8 @@ keys: text
   t        c=0 b=0 n=0 e=3 w=- m=-
   e        c=0 b=0 n=0 e=3 w=- m=-
   x        c=1 b=1 n=1 e=3 w=2001EBD m=-
-  t        c=0 b=2 n=2 e=3 w=- m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  t        c=0 b=0 n=0 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => tẽt 
 
 ## nospell/user
@@ -818,9 +818,9 @@ cfg: input=0 table=0 lang=1 spell=0 modern=0 quick=0 restore=0 macro=0/0 autocap
 keys: user 
   u        c=0 b=0 n=0 e=3 w=- m=-
   s        c=1 b=1 n=1 e=3 w=20000FA m=-
-  e        c=0 b=2 n=2 e=3 w=- m=-
+  e        c=0 b=0 n=0 e=3 w=- m=-
   r        c=1 b=2 n=2 e=3 w=2001EE7,E m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => ủe 
 
 ## nospell/tesst
@@ -843,7 +843,7 @@ keys: window
   d        c=0 b=0 n=0 e=3 w=- m=-
   o        c=0 b=0 n=0 e=3 w=- m=-
   w        c=1 b=1 n=1 e=3 w=20001A1 m=-
-  <sp>     c=0 b=1 n=1 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => ưindơ 
 
 ## telex/vieetj
@@ -855,7 +855,7 @@ keys: vieetj
   e        c=1 b=1 n=1 e=3 w=20000EA m=-
   t        c=0 b=0 n=0 e=3 w=- m=-
   j        c=1 b=3 n=3 e=3 w=22,2001EC7,11 m=-
-  <sp>     c=0 b=3 n=3 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => việt 
 
 ## telex/Vieetj
@@ -867,7 +867,7 @@ keys: Vieetj
   e        c=1 b=1 n=1 e=3 w=20000EA m=-
   t        c=0 b=0 n=0 e=3 w=- m=-
   j        c=1 b=3 n=3 e=3 w=22,2001EC7,11 m=-
-  <sp>     c=0 b=3 n=3 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => Việt 
 
 ## telex/VIEETJ
@@ -879,7 +879,7 @@ keys: VIEETJ
   E        c=1 b=1 n=1 e=3 w=20000CA m=-
   T        c=0 b=0 n=0 e=3 w=- m=-
   J        c=1 b=3 n=3 e=3 w=10022,2001EC6,10011 m=-
-  <sp>     c=0 b=3 n=3 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => VIỆT 
 
 ## telex/nguwowif
@@ -889,11 +889,11 @@ keys: nguwowif
   g        c=0 b=0 n=0 e=3 w=- m=-
   u        c=0 b=0 n=0 e=3 w=- m=-
   w        c=1 b=1 n=1 e=3 w=20001B0 m=-
-  o        c=0 b=1 n=1 e=3 w=- m=-
+  o        c=0 b=0 n=0 e=3 w=- m=-
   w        c=1 b=2 n=2 e=3 w=20001B0,20001A1 m=-
   i        c=0 b=0 n=0 e=3 w=- m=-
   f        c=1 b=3 n=3 e=3 w=20001B0,2001EDD,22 m=-
-  <sp>     c=0 b=3 n=3 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => người 
 
 ## telex/dduwowngf
@@ -903,12 +903,12 @@ keys: dduwowngf
   d        c=1 b=1 n=1 e=3 w=2000111 m=-
   u        c=0 b=0 n=0 e=3 w=- m=-
   w        c=1 b=1 n=1 e=3 w=20001B0 m=-
-  o        c=0 b=1 n=1 e=3 w=- m=-
+  o        c=0 b=0 n=0 e=3 w=- m=-
   w        c=1 b=2 n=2 e=3 w=20001B0,20001A1 m=-
   n        c=0 b=0 n=0 e=3 w=- m=-
   g        c=0 b=0 n=0 e=3 w=- m=-
   f        c=1 b=4 n=4 e=3 w=20001B0,2001EDD,2D,5 m=-
-  <sp>     c=0 b=4 n=4 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => đường 
 
 ## telex/ddaats
@@ -916,11 +916,11 @@ cfg: input=0 table=0 lang=1 spell=1 modern=0 quick=0 restore=0 macro=0/0 autocap
 keys: ddaats 
   d        c=0 b=0 n=0 e=3 w=- m=-
   d        c=1 b=1 n=1 e=3 w=2000111 m=-
-  a        c=0 b=1 n=1 e=3 w=- m=-
+  a        c=0 b=0 n=0 e=3 w=- m=-
   a        c=1 b=1 n=1 e=3 w=20000E2 m=-
   t        c=0 b=0 n=0 e=3 w=- m=-
   s        c=1 b=2 n=2 e=3 w=2001EA5,11 m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => đất 
 
 ## telex/Ddaats
@@ -928,11 +928,11 @@ cfg: input=0 table=0 lang=1 spell=1 modern=0 quick=0 restore=0 macro=0/0 autocap
 keys: Ddaats 
   D        c=0 b=0 n=0 e=3 w=- m=-
   d        c=1 b=1 n=1 e=3 w=2000110 m=-
-  a        c=0 b=1 n=1 e=3 w=- m=-
+  a        c=0 b=0 n=0 e=3 w=- m=-
   a        c=1 b=1 n=1 e=3 w=20000E2 m=-
   t        c=0 b=0 n=0 e=3 w=- m=-
   s        c=1 b=2 n=2 e=3 w=2001EA5,11 m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => Đất 
 
 ## telex/DDaats
@@ -940,11 +940,11 @@ cfg: input=0 table=0 lang=1 spell=1 modern=0 quick=0 restore=0 macro=0/0 autocap
 keys: DDaats 
   D        c=0 b=0 n=0 e=3 w=- m=-
   D        c=1 b=1 n=1 e=3 w=2000110 m=-
-  a        c=0 b=1 n=1 e=3 w=- m=-
+  a        c=0 b=0 n=0 e=3 w=- m=-
   a        c=1 b=1 n=1 e=3 w=20000E2 m=-
   t        c=0 b=0 n=0 e=3 w=- m=-
   s        c=1 b=2 n=2 e=3 w=2001EA5,11 m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => Đất 
 
 ## telex/quoocs
@@ -956,7 +956,7 @@ keys: quoocs
   o        c=1 b=1 n=1 e=3 w=20000F4 m=-
   c        c=0 b=0 n=0 e=3 w=- m=-
   s        c=1 b=2 n=2 e=3 w=2001ED1,8 m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => quốc 
 
 ## telex/gias
@@ -966,7 +966,7 @@ keys: gias
   i        c=0 b=0 n=0 e=3 w=- m=-
   a        c=0 b=0 n=0 e=3 w=- m=-
   s        c=1 b=1 n=1 e=3 w=20000E1 m=-
-  <sp>     c=0 b=1 n=1 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => giá 
 
 ## telex/giaf
@@ -976,7 +976,7 @@ keys: giaf
   i        c=0 b=0 n=0 e=3 w=- m=-
   a        c=0 b=0 n=0 e=3 w=- m=-
   f        c=1 b=1 n=1 e=3 w=20000E0 m=-
-  <sp>     c=0 b=1 n=1 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => già 
 
 ## telex/gixa
@@ -986,7 +986,7 @@ keys: gixa
   i        c=0 b=0 n=0 e=3 w=- m=-
   x        c=1 b=2 n=2 e=3 w=5,2000129 m=-
   a        c=1 b=1 n=2 e=4 w=22,20000E3 m=-
-  <sp>     c=0 b=1 n=2 e=4 w=- m=-
+  <sp>     c=0 b=0 n=0 e=4 w=- m=-
 => giã 
 
 ## telex/giuwx
@@ -997,7 +997,7 @@ keys: giuwx
   u        c=0 b=0 n=0 e=3 w=- m=-
   w        c=1 b=1 n=1 e=3 w=20001B0 m=-
   x        c=1 b=1 n=1 e=3 w=2001EEF m=-
-  <sp>     c=0 b=1 n=1 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => giữ 
 
 ## telex/huyeenf
@@ -1010,7 +1010,7 @@ keys: huyeenf
   e        c=1 b=1 n=1 e=3 w=20000EA m=-
   n        c=0 b=0 n=0 e=3 w=- m=-
   f        c=1 b=4 n=4 e=3 w=20,10,2001EC1,2D m=-
-  <sp>     c=0 b=4 n=4 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => huyền 
 
 ## telex/khuyeens
@@ -1024,7 +1024,7 @@ keys: khuyeens
   e        c=1 b=1 n=1 e=3 w=20000EA m=-
   n        c=0 b=0 n=0 e=3 w=- m=-
   s        c=1 b=4 n=4 e=3 w=20,10,2001EBF,2D m=-
-  <sp>     c=0 b=4 n=4 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => khuyến 
 
 ## telex/nghieeng
@@ -1065,7 +1065,7 @@ keys: nghiax
   i        c=0 b=0 n=0 e=3 w=- m=-
   a        c=0 b=0 n=0 e=3 w=- m=-
   x        c=1 b=2 n=2 e=3 w=2000129,0 m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => nghĩa 
 
 ## telex/trangw
@@ -1077,7 +1077,7 @@ keys: trangw
   n        c=0 b=0 n=0 e=3 w=- m=-
   g        c=0 b=0 n=0 e=3 w=- m=-
   w        c=1 b=3 n=3 e=3 w=2000103,2D,5 m=-
-  <sp>     c=0 b=3 n=3 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => trăng 
 
 ## telex/traawng
@@ -1101,7 +1101,7 @@ keys: hoocj
   o        c=1 b=1 n=1 e=3 w=20000F4 m=-
   c        c=0 b=0 n=0 e=3 w=- m=-
   j        c=1 b=2 n=2 e=3 w=2001ED9,8 m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => hộc 
 
 ## telex/thaayf
@@ -1113,7 +1113,7 @@ keys: thaayf
   a        c=1 b=1 n=1 e=3 w=20000E2 m=-
   y        c=0 b=0 n=0 e=3 w=- m=-
   f        c=1 b=2 n=2 e=3 w=2001EA7,10 m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => thầy 
 
 ## telex/coong
@@ -1151,11 +1151,11 @@ cfg: input=0 table=0 lang=1 spell=1 modern=0 quick=0 restore=0 macro=0/0 autocap
 keys: ddeens 
   d        c=0 b=0 n=0 e=3 w=- m=-
   d        c=1 b=1 n=1 e=3 w=2000111 m=-
-  e        c=0 b=1 n=1 e=3 w=- m=-
+  e        c=0 b=0 n=0 e=3 w=- m=-
   e        c=1 b=1 n=1 e=3 w=20000EA m=-
   n        c=0 b=0 n=0 e=3 w=- m=-
   s        c=1 b=2 n=2 e=3 w=2001EBF,2D m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => đến 
 
 ## telex/mowis
@@ -1166,7 +1166,7 @@ keys: mowis
   w        c=1 b=1 n=1 e=3 w=20001A1 m=-
   i        c=0 b=0 n=0 e=3 w=- m=-
   s        c=1 b=2 n=2 e=3 w=2001EDB,22 m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => mới 
 
 ## telex/muwowif
@@ -1175,11 +1175,11 @@ keys: muwowif
   m        c=0 b=0 n=0 e=3 w=- m=-
   u        c=0 b=0 n=0 e=3 w=- m=-
   w        c=1 b=1 n=1 e=3 w=20001B0 m=-
-  o        c=0 b=1 n=1 e=3 w=- m=-
+  o        c=0 b=0 n=0 e=3 w=- m=-
   w        c=1 b=2 n=2 e=3 w=20001B0,20001A1 m=-
   i        c=0 b=0 n=0 e=3 w=- m=-
   f        c=1 b=3 n=3 e=3 w=20001B0,2001EDD,22 m=-
-  <sp>     c=0 b=3 n=3 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => mười 
 
 ## telex/chuyeenx
@@ -1193,7 +1193,7 @@ keys: chuyeenx
   e        c=1 b=1 n=1 e=3 w=20000EA m=-
   n        c=0 b=0 n=0 e=3 w=- m=-
   x        c=1 b=4 n=4 e=3 w=20,10,2001EC5,2D m=-
-  <sp>     c=0 b=4 n=4 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => chuyễn 
 
 ## telex/chuyeenj
@@ -1207,7 +1207,7 @@ keys: chuyeenj
   e        c=1 b=1 n=1 e=3 w=20000EA m=-
   n        c=0 b=0 n=0 e=3 w=- m=-
   j        c=1 b=4 n=4 e=3 w=20,10,2001EC7,2D m=-
-  <sp>     c=0 b=4 n=4 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => chuyện 
 
 ## telex/xuyeen
@@ -1274,7 +1274,7 @@ keys: quanj
   a        c=0 b=0 n=0 e=3 w=- m=-
   n        c=0 b=0 n=0 e=3 w=- m=-
   j        c=1 b=2 n=2 e=3 w=2001EA1,2D m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => quạn 
 
 ## telex/quaan
@@ -1298,7 +1298,7 @@ keys: quyeets
   e        c=1 b=1 n=1 e=3 w=20000EA m=-
   t        c=0 b=0 n=0 e=3 w=- m=-
   s        c=1 b=3 n=3 e=3 w=10,2001EBF,11 m=-
-  <sp>     c=0 b=3 n=3 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => quyết 
 
 ## telex/quyr
@@ -1308,7 +1308,7 @@ keys: quyr
   u        c=0 b=0 n=0 e=3 w=- m=-
   y        c=0 b=0 n=0 e=3 w=- m=-
   r        c=1 b=1 n=1 e=3 w=2001EF7 m=-
-  <sp>     c=0 b=1 n=1 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => quỷ 
 
 ## telex/quyf
@@ -1318,7 +1318,7 @@ keys: quyf
   u        c=0 b=0 n=0 e=3 w=- m=-
   y        c=0 b=0 n=0 e=3 w=- m=-
   f        c=1 b=1 n=1 e=3 w=2001EF3 m=-
-  <sp>     c=0 b=1 n=1 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => quỳ 
 
 ## telex/luaatj
@@ -1330,7 +1330,7 @@ keys: luaatj
   a        c=1 b=1 n=1 e=3 w=20000E2 m=-
   t        c=0 b=0 n=0 e=3 w=- m=-
   j        c=1 b=3 n=3 e=3 w=20,2001EAD,11 m=-
-  <sp>     c=0 b=3 n=3 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => luật 
 
 ## telex/luaan
@@ -1353,7 +1353,7 @@ keys: tuaans
   a        c=1 b=1 n=1 e=3 w=20000E2 m=-
   n        c=0 b=0 n=0 e=3 w=- m=-
   s        c=1 b=3 n=3 e=3 w=20,2001EA5,2D m=-
-  <sp>     c=0 b=3 n=3 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => tuấn 
 
 ## telex/ngoaif
@@ -1365,7 +1365,7 @@ keys: ngoaif
   a        c=0 b=0 n=0 e=3 w=- m=-
   i        c=0 b=0 n=0 e=3 w=- m=-
   f        c=1 b=3 n=3 e=3 w=1F,20000E0,22 m=-
-  <sp>     c=0 b=3 n=3 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => ngoài 
 
 ## telex/ngoaair
@@ -1378,7 +1378,7 @@ keys: ngoaair
   a        c=1 b=1 n=1 e=3 w=20000E2 m=-
   i        c=0 b=0 n=0 e=3 w=- m=-
   r        c=1 b=3 n=3 e=3 w=1F,2001EA9,22 m=-
-  <sp>     c=0 b=3 n=3 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => ngoẩi 
 
 ## telex/toanf
@@ -1389,7 +1389,7 @@ keys: toanf
   a        c=0 b=0 n=0 e=3 w=- m=-
   n        c=0 b=0 n=0 e=3 w=- m=-
   f        c=1 b=3 n=3 e=3 w=1F,20000E0,2D m=-
-  <sp>     c=0 b=3 n=3 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => toàn 
 
 ## telex/hoang
@@ -1411,8 +1411,8 @@ keys: khoeeo
   o        c=0 b=0 n=0 e=3 w=- m=-
   e        c=0 b=0 n=0 e=3 w=- m=-
   e        c=1 b=1 n=1 e=3 w=20000EA m=-
-  o        c=0 b=1 n=1 e=3 w=- m=-
-  <sp>     c=0 b=1 n=1 e=3 w=- m=-
+  o        c=0 b=0 n=0 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => khoêo 
 
 ## telex/boongf
@@ -1424,7 +1424,7 @@ keys: boongf
   n        c=0 b=0 n=0 e=3 w=- m=-
   g        c=0 b=0 n=0 e=3 w=- m=-
   f        c=1 b=3 n=3 e=3 w=2001ED3,2D,5 m=-
-  <sp>     c=0 b=3 n=3 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => bồng 
 
 ## telex/buoonf
@@ -1436,7 +1436,7 @@ keys: buoonf
   o        c=1 b=1 n=1 e=3 w=20000F4 m=-
   n        c=0 b=0 n=0 e=3 w=- m=-
   f        c=1 b=3 n=3 e=3 w=20,2001ED3,2D m=-
-  <sp>     c=0 b=3 n=3 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => buồn 
 
 ## telex/cuoocj
@@ -1448,7 +1448,7 @@ keys: cuoocj
   o        c=1 b=1 n=1 e=3 w=20000F4 m=-
   c        c=0 b=0 n=0 e=3 w=- m=-
   j        c=1 b=3 n=3 e=3 w=20,2001ED9,8 m=-
-  <sp>     c=0 b=3 n=3 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => cuộc 
 
 ## telex/ruoouj
@@ -1460,7 +1460,7 @@ keys: ruoouj
   o        c=1 b=1 n=1 e=3 w=20000F4 m=-
   u        c=0 b=0 n=0 e=3 w=- m=-
   j        c=1 b=3 n=3 e=3 w=20,2001ED9,20 m=-
-  <sp>     c=0 b=3 n=3 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => ruộu 
 
 ## telex/nuowcs
@@ -1472,7 +1472,7 @@ keys: nuowcs
   w        c=1 b=2 n=2 e=3 w=20001B0,20001A1 m=-
   c        c=0 b=0 n=0 e=3 w=- m=-
   s        c=1 b=3 n=3 e=3 w=20001B0,2001EDB,8 m=-
-  <sp>     c=0 b=3 n=3 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => nước 
 
 ## telex/ddiuf
@@ -1483,7 +1483,7 @@ keys: ddiuf
   i        c=0 b=0 n=0 e=3 w=- m=-
   u        c=0 b=0 n=0 e=3 w=- m=-
   f        c=1 b=2 n=2 e=3 w=20000EC,20 m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => đìu 
 
 ## telex/dduowcj
@@ -1496,7 +1496,7 @@ keys: dduowcj
   w        c=1 b=2 n=2 e=3 w=20001B0,20001A1 m=-
   c        c=0 b=0 n=0 e=3 w=- m=-
   j        c=1 b=3 n=3 e=3 w=20001B0,2001EE3,8 m=-
-  <sp>     c=0 b=3 n=3 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => được 
 
 ## telex/uwowng
@@ -1504,7 +1504,7 @@ cfg: input=0 table=0 lang=1 spell=1 modern=0 quick=0 restore=0 macro=0/0 autocap
 keys: uwowng 
   u        c=0 b=0 n=0 e=3 w=- m=-
   w        c=1 b=1 n=1 e=3 w=20001B0 m=-
-  o        c=0 b=1 n=1 e=3 w=- m=-
+  o        c=0 b=0 n=0 e=3 w=- m=-
   w        c=1 b=2 n=2 e=3 w=20001B0,20001A1 m=-
   n        c=0 b=0 n=0 e=3 w=- m=-
   g        c=0 b=0 n=0 e=3 w=- m=-
@@ -1516,7 +1516,7 @@ cfg: input=0 table=0 lang=1 spell=1 modern=0 quick=0 restore=0 macro=0/0 autocap
 keys: ow 
   o        c=0 b=0 n=0 e=3 w=- m=-
   w        c=1 b=1 n=1 e=3 w=20001A1 m=-
-  <sp>     c=0 b=1 n=1 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => ơ 
 
 ## telex/uw
@@ -1524,7 +1524,7 @@ cfg: input=0 table=0 lang=1 spell=1 modern=0 quick=0 restore=0 macro=0/0 autocap
 keys: uw 
   u        c=0 b=0 n=0 e=3 w=- m=-
   w        c=1 b=1 n=1 e=3 w=20001B0 m=-
-  <sp>     c=0 b=1 n=1 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => ư 
 
 ## telex/aw
@@ -1532,7 +1532,7 @@ cfg: input=0 table=0 lang=1 spell=1 modern=0 quick=0 restore=0 macro=0/0 autocap
 keys: aw 
   a        c=0 b=0 n=0 e=3 w=- m=-
   w        c=1 b=1 n=1 e=3 w=2000103 m=-
-  <sp>     c=0 b=1 n=1 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => ă 
 
 ## telex/aa
@@ -1540,7 +1540,7 @@ cfg: input=0 table=0 lang=1 spell=1 modern=0 quick=0 restore=0 macro=0/0 autocap
 keys: aa 
   a        c=0 b=0 n=0 e=3 w=- m=-
   a        c=1 b=1 n=1 e=3 w=20000E2 m=-
-  <sp>     c=0 b=1 n=1 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => â 
 
 ## telex/ee
@@ -1548,7 +1548,7 @@ cfg: input=0 table=0 lang=1 spell=1 modern=0 quick=0 restore=0 macro=0/0 autocap
 keys: ee 
   e        c=0 b=0 n=0 e=3 w=- m=-
   e        c=1 b=1 n=1 e=3 w=20000EA m=-
-  <sp>     c=0 b=1 n=1 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => ê 
 
 ## telex/oo
@@ -1556,7 +1556,7 @@ cfg: input=0 table=0 lang=1 spell=1 modern=0 quick=0 restore=0 macro=0/0 autocap
 keys: oo 
   o        c=0 b=0 n=0 e=3 w=- m=-
   o        c=1 b=1 n=1 e=3 w=20000F4 m=-
-  <sp>     c=0 b=1 n=1 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => ô 
 
 ## telex/dd
@@ -1564,7 +1564,7 @@ cfg: input=0 table=0 lang=1 spell=1 modern=0 quick=0 restore=0 macro=0/0 autocap
 keys: dd 
   d        c=0 b=0 n=0 e=3 w=- m=-
   d        c=1 b=1 n=1 e=3 w=2000111 m=-
-  <sp>     c=0 b=1 n=1 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => đ 
 
 ## telex/ddd
@@ -1573,7 +1573,7 @@ keys: ddd
   d        c=0 b=0 n=0 e=3 w=- m=-
   d        c=1 b=1 n=1 e=3 w=2000111 m=-
   d        c=3 b=1 n=1 e=3 w=2 m=-
-  <sp>     c=0 b=1 n=1 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => dd 
 
 ## telex/aaa
@@ -1582,7 +1582,7 @@ keys: aaa
   a        c=0 b=0 n=0 e=3 w=- m=-
   a        c=1 b=1 n=1 e=3 w=20000E2 m=-
   a        c=3 b=1 n=1 e=3 w=0 m=-
-  <sp>     c=0 b=1 n=1 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => aa 
 
 ## telex/ooo
@@ -1591,7 +1591,7 @@ keys: ooo
   o        c=0 b=0 n=0 e=3 w=- m=-
   o        c=1 b=1 n=1 e=3 w=20000F4 m=-
   o        c=3 b=1 n=1 e=3 w=1F m=-
-  <sp>     c=0 b=1 n=1 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => oo 
 
 ## telex/eee
@@ -1600,7 +1600,7 @@ keys: eee
   e        c=0 b=0 n=0 e=3 w=- m=-
   e        c=1 b=1 n=1 e=3 w=20000EA m=-
   e        c=3 b=1 n=1 e=3 w=E m=-
-  <sp>     c=0 b=1 n=1 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => ee 
 
 ## telex/Hanoij
@@ -1622,7 +1622,7 @@ keys: Hoof
   o        c=0 b=0 n=0 e=3 w=- m=-
   o        c=1 b=1 n=1 e=3 w=20000F4 m=-
   f        c=1 b=1 n=1 e=3 w=2001ED3 m=-
-  <sp>     c=0 b=1 n=1 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => Hồ 
 
 ## telex/Chis
@@ -1632,7 +1632,7 @@ keys: Chis
   h        c=0 b=0 n=0 e=3 w=- m=-
   i        c=0 b=0 n=0 e=3 w=- m=-
   s        c=1 b=1 n=1 e=3 w=20000ED m=-
-  <sp>     c=0 b=1 n=1 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => Chí 
 
 ## telex/Minh
@@ -1653,7 +1653,7 @@ keys: Thuyr
   u        c=0 b=0 n=0 e=3 w=- m=-
   y        c=0 b=0 n=0 e=3 w=- m=-
   r        c=1 b=2 n=2 e=3 w=2001EE7,10 m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => Thủy 
 
 ## telex/Tuyeenr
@@ -1666,7 +1666,7 @@ keys: Tuyeenr
   e        c=1 b=1 n=1 e=3 w=20000EA m=-
   n        c=0 b=0 n=0 e=3 w=- m=-
   r        c=1 b=4 n=4 e=3 w=20,10,2001EC3,2D m=-
-  <sp>     c=0 b=4 n=4 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => Tuyển 
 
 ## telex/QUOCS
@@ -1677,7 +1677,7 @@ keys: QUOCS
   O        c=0 b=0 n=0 e=3 w=- m=-
   C        c=0 b=0 n=0 e=3 w=- m=-
   S        c=1 b=2 n=2 e=3 w=20000D3,10008 m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => QUÓC 
 
 ## telex/NGUWOWIF
@@ -1687,11 +1687,11 @@ keys: NGUWOWIF
   G        c=0 b=0 n=0 e=3 w=- m=-
   U        c=0 b=0 n=0 e=3 w=- m=-
   W        c=1 b=1 n=1 e=3 w=20001AF m=-
-  O        c=0 b=1 n=1 e=3 w=- m=-
+  O        c=0 b=0 n=0 e=3 w=- m=-
   W        c=1 b=2 n=2 e=3 w=20001AF,20001A0 m=-
   I        c=0 b=0 n=0 e=3 w=- m=-
   F        c=1 b=3 n=3 e=3 w=20001AF,2001EDC,10022 m=-
-  <sp>     c=0 b=3 n=3 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => NGƯỜI 
 
 ## telex/Nguwowif
@@ -1701,11 +1701,11 @@ keys: Nguwowif
   g        c=0 b=0 n=0 e=3 w=- m=-
   u        c=0 b=0 n=0 e=3 w=- m=-
   w        c=1 b=1 n=1 e=3 w=20001B0 m=-
-  o        c=0 b=1 n=1 e=3 w=- m=-
+  o        c=0 b=0 n=0 e=3 w=- m=-
   w        c=1 b=2 n=2 e=3 w=20001B0,20001A1 m=-
   i        c=0 b=0 n=0 e=3 w=- m=-
   f        c=1 b=3 n=3 e=3 w=20001B0,2001EDD,22 m=-
-  <sp>     c=0 b=3 n=3 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => Người 
 
 ## telex/thuowngr
@@ -1719,7 +1719,7 @@ keys: thuowngr
   n        c=1 b=2 n=3 e=4 w=20001B0,20001A1,2D m=-
   g        c=0 b=0 n=0 e=3 w=- m=-
   r        c=1 b=4 n=4 e=3 w=20001B0,2001EDF,2D,5 m=-
-  <sp>     c=0 b=4 n=4 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => thưởng 
 
 ## telex/dduowngs
@@ -1733,7 +1733,7 @@ keys: dduowngs
   n        c=0 b=0 n=0 e=3 w=- m=-
   g        c=0 b=0 n=0 e=3 w=- m=-
   s        c=1 b=4 n=4 e=3 w=20001B0,2001EDB,2D,5 m=-
-  <sp>     c=0 b=4 n=4 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => đướng 
 
 ## telex/ruwowngf
@@ -1742,12 +1742,12 @@ keys: ruwowngf
   r        c=0 b=0 n=0 e=3 w=- m=-
   u        c=0 b=0 n=0 e=3 w=- m=-
   w        c=1 b=1 n=1 e=3 w=20001B0 m=-
-  o        c=0 b=1 n=1 e=3 w=- m=-
+  o        c=0 b=0 n=0 e=3 w=- m=-
   w        c=1 b=2 n=2 e=3 w=20001B0,20001A1 m=-
   n        c=0 b=0 n=0 e=3 w=- m=-
   g        c=0 b=0 n=0 e=3 w=- m=-
   f        c=1 b=4 n=4 e=3 w=20001B0,2001EDD,2D,5 m=-
-  <sp>     c=0 b=4 n=4 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => rường 
 
 ## telex/nhuwx
@@ -1758,7 +1758,7 @@ keys: nhuwx
   u        c=0 b=0 n=0 e=3 w=- m=-
   w        c=1 b=1 n=1 e=3 w=20001B0 m=-
   x        c=1 b=1 n=1 e=3 w=2001EEF m=-
-  <sp>     c=0 b=1 n=1 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => nhữ 
 
 ## telex/tuwj
@@ -1768,7 +1768,7 @@ keys: tuwj
   u        c=0 b=0 n=0 e=3 w=- m=-
   w        c=1 b=1 n=1 e=3 w=20001B0 m=-
   j        c=1 b=1 n=1 e=3 w=2001EF1 m=-
-  <sp>     c=0 b=1 n=1 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => tự 
 
 ## telex/suwr
@@ -1778,7 +1778,7 @@ keys: suwr
   u        c=0 b=0 n=0 e=3 w=- m=-
   w        c=1 b=1 n=1 e=3 w=20001B0 m=-
   r        c=1 b=1 n=1 e=3 w=2001EED m=-
-  <sp>     c=0 b=1 n=1 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => sử 
 
 ## telex/muwf
@@ -1788,7 +1788,7 @@ keys: muwf
   u        c=0 b=0 n=0 e=3 w=- m=-
   w        c=1 b=1 n=1 e=3 w=20001B0 m=-
   f        c=1 b=1 n=1 e=3 w=2001EEB m=-
-  <sp>     c=0 b=1 n=1 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => mừ 
 
 ## telex/chuwowngg
@@ -1798,7 +1798,7 @@ keys: chuwowngg
   h        c=0 b=0 n=0 e=3 w=- m=-
   u        c=0 b=0 n=0 e=3 w=- m=-
   w        c=1 b=1 n=1 e=3 w=20001B0 m=-
-  o        c=0 b=1 n=1 e=3 w=- m=-
+  o        c=0 b=0 n=0 e=3 w=- m=-
   w        c=1 b=2 n=2 e=3 w=20001B0,20001A1 m=-
   n        c=0 b=0 n=0 e=3 w=- m=-
   g        c=0 b=0 n=0 e=3 w=- m=-
@@ -1814,7 +1814,7 @@ keys: kiemr
   e        c=0 b=0 n=0 e=3 w=- m=-
   m        c=0 b=0 n=0 e=3 w=- m=-
   r        c=1 b=3 n=3 e=3 w=2001EC9,E,2E m=-
-  <sp>     c=0 b=3 n=3 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => kỉem 
 
 ## telex/khiems
@@ -1826,7 +1826,7 @@ keys: khiems
   e        c=0 b=0 n=0 e=3 w=- m=-
   m        c=0 b=0 n=0 e=3 w=- m=-
   s        c=1 b=3 n=3 e=3 w=20000ED,E,2E m=-
-  <sp>     c=0 b=3 n=3 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => khíem 
 
 ## telex/yeeu
@@ -1847,7 +1847,7 @@ keys: yeeus
   e        c=1 b=1 n=1 e=3 w=20000EA m=-
   u        c=0 b=0 n=0 e=3 w=- m=-
   s        c=1 b=3 n=3 e=3 w=10,2001EBF,20 m=-
-  <sp>     c=0 b=3 n=3 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => yếu 
 
 ## telex/yeenj
@@ -1858,7 +1858,7 @@ keys: yeenj
   e        c=1 b=1 n=1 e=3 w=20000EA m=-
   n        c=0 b=0 n=0 e=3 w=- m=-
   j        c=1 b=3 n=3 e=3 w=10,2001EC7,2D m=-
-  <sp>     c=0 b=3 n=3 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => yện 
 
 ## telex/ysj
@@ -1867,7 +1867,7 @@ keys: ysj
   y        c=0 b=0 n=0 e=3 w=- m=-
   s        c=1 b=1 n=1 e=3 w=20000FD m=-
   j        c=1 b=1 n=1 e=3 w=2001EF5 m=-
-  <sp>     c=0 b=1 n=1 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => ỵ 
 
 ## telex/yss
@@ -1876,7 +1876,7 @@ keys: yss
   y        c=0 b=0 n=0 e=3 w=- m=-
   s        c=1 b=1 n=1 e=3 w=20000FD m=-
   s        c=3 b=1 n=1 e=3 w=10 m=-
-  <sp>     c=0 b=1 n=1 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => ys 
 
 ## telex/ays
@@ -1885,7 +1885,7 @@ keys: ays
   a        c=0 b=0 n=0 e=3 w=- m=-
   y        c=0 b=0 n=0 e=3 w=- m=-
   s        c=1 b=2 n=2 e=3 w=20000E1,10 m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => áy 
 
 ## telex/aiz
@@ -1903,7 +1903,7 @@ keys: aus
   a        c=0 b=0 n=0 e=3 w=- m=-
   u        c=0 b=0 n=0 e=3 w=- m=-
   s        c=1 b=2 n=2 e=3 w=20000E1,20 m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => áu 
 
 ## telex/aur
@@ -1912,7 +1912,7 @@ keys: aur
   a        c=0 b=0 n=0 e=3 w=- m=-
   u        c=0 b=0 n=0 e=3 w=- m=-
   r        c=1 b=2 n=2 e=3 w=2001EA3,20 m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => ảu 
 
 ## telex/eus
@@ -1921,7 +1921,7 @@ keys: eus
   e        c=0 b=0 n=0 e=3 w=- m=-
   u        c=0 b=0 n=0 e=3 w=- m=-
   s        c=1 b=2 n=2 e=3 w=20000E9,20 m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => éu 
 
 ## telex/oir
@@ -1930,7 +1930,7 @@ keys: oir
   o        c=0 b=0 n=0 e=3 w=- m=-
   i        c=0 b=0 n=0 e=3 w=- m=-
   r        c=1 b=2 n=2 e=3 w=2001ECF,22 m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => ỏi 
 
 ## telex/oif
@@ -1939,7 +1939,7 @@ keys: oif
   o        c=0 b=0 n=0 e=3 w=- m=-
   i        c=0 b=0 n=0 e=3 w=- m=-
   f        c=1 b=2 n=2 e=3 w=20000F2,22 m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => òi 
 
 ## telex/giuoongf
@@ -1953,7 +1953,7 @@ keys: giuoongf
   n        c=0 b=0 n=0 e=3 w=- m=-
   g        c=0 b=0 n=0 e=3 w=- m=-
   f        c=1 b=4 n=4 e=3 w=20,2001ED3,2D,5 m=-
-  <sp>     c=0 b=4 n=4 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => giuồng 
 
 ## telex/quyenf
@@ -1965,7 +1965,7 @@ keys: quyenf
   e        c=0 b=0 n=0 e=3 w=- m=-
   n        c=0 b=0 n=0 e=3 w=- m=-
   f        c=1 b=3 n=3 e=3 w=2001EF3,E,2D m=-
-  <sp>     c=0 b=3 n=3 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => quỳen 
 
 ## telex/quynhf
@@ -1977,7 +1977,7 @@ keys: quynhf
   n        c=0 b=0 n=0 e=3 w=- m=-
   h        c=0 b=0 n=0 e=3 w=- m=-
   f        c=1 b=3 n=3 e=3 w=2001EF3,2D,4 m=-
-  <sp>     c=0 b=3 n=3 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => quỳnh 
 
 ## telex/nghiej
@@ -1989,7 +1989,7 @@ keys: nghiej
   i        c=0 b=0 n=0 e=3 w=- m=-
   e        c=0 b=0 n=0 e=3 w=- m=-
   j        c=1 b=2 n=2 e=3 w=2001ECB,E m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => nghịe 
 
 ## telex/ngheej
@@ -2001,7 +2001,7 @@ keys: ngheej
   e        c=0 b=0 n=0 e=3 w=- m=-
   e        c=1 b=1 n=1 e=3 w=20000EA m=-
   j        c=1 b=1 n=1 e=3 w=2001EC7 m=-
-  <sp>     c=0 b=1 n=1 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => nghệ 
 
 ## telex/nghee
@@ -2012,7 +2012,7 @@ keys: nghee
   h        c=0 b=0 n=0 e=3 w=- m=-
   e        c=0 b=0 n=0 e=3 w=- m=-
   e        c=1 b=1 n=1 e=3 w=20000EA m=-
-  <sp>     c=0 b=1 n=1 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => nghê 
 
 ## telex/ngheet
@@ -2036,7 +2036,7 @@ keys: ngheaj
   e        c=0 b=0 n=0 e=3 w=- m=-
   a        c=0 b=0 n=0 e=3 w=- m=-
   j        c=1 b=2 n=2 e=3 w=2001EB9,0 m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => nghẹa 
 
 ## telex-modern/hoaf
@@ -2046,7 +2046,7 @@ keys: hoaf
   o        c=0 b=0 n=0 e=3 w=- m=-
   a        c=0 b=0 n=0 e=3 w=- m=-
   f        c=1 b=2 n=2 e=3 w=1F,20000E0 m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => hoà 
 
 ## telex-modern/hoas
@@ -2056,7 +2056,7 @@ keys: hoas
   o        c=0 b=0 n=0 e=3 w=- m=-
   a        c=0 b=0 n=0 e=3 w=- m=-
   s        c=1 b=2 n=2 e=3 w=1F,20000E1 m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => hoá 
 
 ## telex-modern/hoar
@@ -2066,7 +2066,7 @@ keys: hoar
   o        c=0 b=0 n=0 e=3 w=- m=-
   a        c=0 b=0 n=0 e=3 w=- m=-
   r        c=1 b=2 n=2 e=3 w=1F,2001EA3 m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => hoả 
 
 ## telex-modern/hoax
@@ -2076,7 +2076,7 @@ keys: hoax
   o        c=0 b=0 n=0 e=3 w=- m=-
   a        c=0 b=0 n=0 e=3 w=- m=-
   x        c=1 b=2 n=2 e=3 w=1F,20000E3 m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => hoã 
 
 ## telex-modern/hoaj
@@ -2086,7 +2086,7 @@ keys: hoaj
   o        c=0 b=0 n=0 e=3 w=- m=-
   a        c=0 b=0 n=0 e=3 w=- m=-
   j        c=1 b=2 n=2 e=3 w=1F,2001EA1 m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => hoạ 
 
 ## telex-modern/khoer
@@ -2097,7 +2097,7 @@ keys: khoer
   o        c=0 b=0 n=0 e=3 w=- m=-
   e        c=0 b=0 n=0 e=3 w=- m=-
   r        c=1 b=2 n=2 e=3 w=1F,2001EBB m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => khoẻ 
 
 ## telex-modern/khoes
@@ -2108,7 +2108,7 @@ keys: khoes
   o        c=0 b=0 n=0 e=3 w=- m=-
   e        c=0 b=0 n=0 e=3 w=- m=-
   s        c=1 b=2 n=2 e=3 w=1F,20000E9 m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => khoé 
 
 ## telex-modern/khoef
@@ -2119,7 +2119,7 @@ keys: khoef
   o        c=0 b=0 n=0 e=3 w=- m=-
   e        c=0 b=0 n=0 e=3 w=- m=-
   f        c=1 b=2 n=2 e=3 w=1F,20000E8 m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => khoè 
 
 ## telex-modern/thuyr
@@ -2130,7 +2130,7 @@ keys: thuyr
   u        c=0 b=0 n=0 e=3 w=- m=-
   y        c=0 b=0 n=0 e=3 w=- m=-
   r        c=1 b=2 n=2 e=3 w=20,2001EF7 m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => thuỷ 
 
 ## telex-modern/thuyf
@@ -2141,7 +2141,7 @@ keys: thuyf
   u        c=0 b=0 n=0 e=3 w=- m=-
   y        c=0 b=0 n=0 e=3 w=- m=-
   f        c=1 b=2 n=2 e=3 w=20,2001EF3 m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => thuỳ 
 
 ## telex-modern/thuys
@@ -2152,7 +2152,7 @@ keys: thuys
   u        c=0 b=0 n=0 e=3 w=- m=-
   y        c=0 b=0 n=0 e=3 w=- m=-
   s        c=1 b=2 n=2 e=3 w=20,20000FD m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => thuý 
 
 ## telex-modern/thuyj
@@ -2163,7 +2163,7 @@ keys: thuyj
   u        c=0 b=0 n=0 e=3 w=- m=-
   y        c=0 b=0 n=0 e=3 w=- m=-
   j        c=1 b=2 n=2 e=3 w=20,2001EF5 m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => thuỵ 
 
 ## telex-modern/quys
@@ -2173,7 +2173,7 @@ keys: quys
   u        c=0 b=0 n=0 e=3 w=- m=-
   y        c=0 b=0 n=0 e=3 w=- m=-
   s        c=1 b=1 n=1 e=3 w=20000FD m=-
-  <sp>     c=0 b=1 n=1 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => quý 
 
 ## telex-modern/quyf
@@ -2183,7 +2183,7 @@ keys: quyf
   u        c=0 b=0 n=0 e=3 w=- m=-
   y        c=0 b=0 n=0 e=3 w=- m=-
   f        c=1 b=1 n=1 e=3 w=2001EF3 m=-
-  <sp>     c=0 b=1 n=1 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => quỳ 
 
 ## telex-modern/toanf
@@ -2194,7 +2194,7 @@ keys: toanf
   a        c=0 b=0 n=0 e=3 w=- m=-
   n        c=0 b=0 n=0 e=3 w=- m=-
   f        c=1 b=3 n=3 e=3 w=1F,20000E0,2D m=-
-  <sp>     c=0 b=3 n=3 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => toàn 
 
 ## telex-modern/loanj
@@ -2205,7 +2205,7 @@ keys: loanj
   a        c=0 b=0 n=0 e=3 w=- m=-
   n        c=0 b=0 n=0 e=3 w=- m=-
   j        c=1 b=3 n=3 e=3 w=1F,2001EA1,2D m=-
-  <sp>     c=0 b=3 n=3 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => loạn 
 
 ## telex-modern/xoaf
@@ -2215,7 +2215,7 @@ keys: xoaf
   o        c=0 b=0 n=0 e=3 w=- m=-
   a        c=0 b=0 n=0 e=3 w=- m=-
   f        c=1 b=2 n=2 e=3 w=1F,20000E0 m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => xoà 
 
 ## telex-modern/xoay
@@ -2234,7 +2234,7 @@ keys: uys
   u        c=0 b=0 n=0 e=3 w=- m=-
   y        c=0 b=0 n=0 e=3 w=- m=-
   s        c=1 b=2 n=2 e=3 w=20,20000FD m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => uý 
 
 ## telex-modern/oes
@@ -2243,7 +2243,7 @@ keys: oes
   o        c=0 b=0 n=0 e=3 w=- m=-
   e        c=0 b=0 n=0 e=3 w=- m=-
   s        c=1 b=2 n=2 e=3 w=1F,20000E9 m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => oé 
 
 ## telex-modern/oaf
@@ -2252,7 +2252,7 @@ keys: oaf
   o        c=0 b=0 n=0 e=3 w=- m=-
   a        c=0 b=0 n=0 e=3 w=- m=-
   f        c=1 b=2 n=2 e=3 w=1F,20000E0 m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => oà 
 
 ## telex-order/vietj
@@ -2263,7 +2263,7 @@ keys: vietj
   e        c=0 b=0 n=0 e=3 w=- m=-
   t        c=0 b=0 n=0 e=3 w=- m=-
   j        c=1 b=3 n=3 e=3 w=2001ECB,E,11 m=-
-  <sp>     c=0 b=3 n=3 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => vịet 
 
 ## telex-order/vieetj
@@ -2275,7 +2275,7 @@ keys: vieetj
   e        c=1 b=1 n=1 e=3 w=20000EA m=-
   t        c=0 b=0 n=0 e=3 w=- m=-
   j        c=1 b=3 n=3 e=3 w=22,2001EC7,11 m=-
-  <sp>     c=0 b=3 n=3 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => việt 
 
 ## telex-order/vieejt
@@ -2286,8 +2286,8 @@ keys: vieejt
   e        c=0 b=0 n=0 e=3 w=- m=-
   e        c=1 b=1 n=1 e=3 w=20000EA m=-
   j        c=1 b=2 n=2 e=3 w=22,2001EC7 m=-
-  t        c=0 b=3 n=3 e=3 w=- m=-
-  <sp>     c=0 b=3 n=3 e=3 w=- m=-
+  t        c=0 b=0 n=0 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => việt 
 
 ## telex-order/tojan
@@ -2296,9 +2296,9 @@ keys: tojan
   t        c=0 b=0 n=0 e=3 w=- m=-
   o        c=0 b=0 n=0 e=3 w=- m=-
   j        c=1 b=1 n=1 e=3 w=2001ECD m=-
-  a        c=0 b=2 n=2 e=3 w=- m=-
+  a        c=0 b=0 n=0 e=3 w=- m=-
   n        c=1 b=2 n=3 e=4 w=1F,2001EA1,2D m=-
-  <sp>     c=0 b=2 n=3 e=4 w=- m=-
+  <sp>     c=0 b=0 n=0 e=4 w=- m=-
 => toạn 
 
 ## telex-order/toaanj
@@ -2310,7 +2310,7 @@ keys: toaanj
   a        c=1 b=1 n=1 e=3 w=20000E2 m=-
   n        c=0 b=0 n=0 e=3 w=- m=-
   j        c=1 b=3 n=3 e=3 w=1F,2001EAD,2D m=-
-  <sp>     c=0 b=3 n=3 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => toận 
 
 ## telex-order/huyeenf
@@ -2323,7 +2323,7 @@ keys: huyeenf
   e        c=1 b=1 n=1 e=3 w=20000EA m=-
   n        c=0 b=0 n=0 e=3 w=- m=-
   f        c=1 b=4 n=4 e=3 w=20,10,2001EC1,2D m=-
-  <sp>     c=0 b=4 n=4 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => huyền 
 
 ## telex-order/huyfeen
@@ -2335,8 +2335,8 @@ keys: huyfeen
   f        c=1 b=2 n=2 e=3 w=20000F9,10 m=-
   e        c=1 b=2 n=3 e=4 w=20,2001EF3,E m=-
   e        c=1 b=3 n=3 e=4 w=20,10,2001EC1 m=-
-  n        c=0 b=4 n=4 e=3 w=- m=-
-  <sp>     c=0 b=4 n=4 e=3 w=- m=-
+  n        c=0 b=0 n=0 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => huyền 
 
 ## telex-order/soos
@@ -2346,7 +2346,7 @@ keys: soos
   o        c=0 b=0 n=0 e=3 w=- m=-
   o        c=1 b=1 n=1 e=3 w=20000F4 m=-
   s        c=1 b=1 n=1 e=3 w=2001ED1 m=-
-  <sp>     c=0 b=1 n=1 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => số 
 
 ## telex-order/sooos
@@ -2357,7 +2357,7 @@ keys: sooos
   o        c=1 b=1 n=1 e=3 w=20000F4 m=-
   o        c=3 b=1 n=1 e=3 w=1F m=-
   s        c=1 b=2 n=2 e=3 w=20000F3,1F m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => sóo 
 
 ## telex-order/ddaaats
@@ -2365,7 +2365,7 @@ cfg: input=0 table=0 lang=1 spell=1 modern=0 quick=0 restore=0 macro=0/0 autocap
 keys: ddaaats 
   d        c=0 b=0 n=0 e=3 w=- m=-
   d        c=1 b=1 n=1 e=3 w=2000111 m=-
-  a        c=0 b=1 n=1 e=3 w=- m=-
+  a        c=0 b=0 n=0 e=3 w=- m=-
   a        c=1 b=1 n=1 e=3 w=20000E2 m=-
   a        c=3 b=1 n=1 e=3 w=0 m=-
   t        c=0 b=0 n=0 e=3 w=- m=-
@@ -2380,8 +2380,8 @@ keys: chuwa
   h        c=0 b=0 n=0 e=3 w=- m=-
   u        c=0 b=0 n=0 e=3 w=- m=-
   w        c=1 b=1 n=1 e=3 w=20001B0 m=-
-  a        c=0 b=1 n=1 e=3 w=- m=-
-  <sp>     c=0 b=1 n=1 e=3 w=- m=-
+  a        c=0 b=0 n=0 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => chưa 
 
 ## telex-order/chuaw
@@ -2392,18 +2392,7 @@ keys: chuaw
   u        c=0 b=0 n=0 e=3 w=- m=-
   a        c=0 b=0 n=0 e=3 w=- m=-
   w        c=1 b=2 n=2 e=3 w=20001B0,0 m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
-=> chưa 
-
-## telex-order/chuaw
-cfg: input=0 table=0 lang=1 spell=1 modern=0 quick=0 restore=0 macro=0/0 autocaps=0 upper1=0 zfwj=0 qstart=0 qend=0 free=0
-keys: chuaw 
-  c        c=0 b=0 n=0 e=3 w=- m=-
-  h        c=0 b=0 n=0 e=3 w=- m=-
-  u        c=0 b=0 n=0 e=3 w=- m=-
-  a        c=0 b=0 n=0 e=3 w=- m=-
-  w        c=1 b=2 n=2 e=3 w=20001B0,0 m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => chưa 
 
 ## telex-order/nguoiwf
@@ -2416,7 +2405,7 @@ keys: nguoiwf
   i        c=0 b=0 n=0 e=3 w=- m=-
   w        c=1 b=3 n=3 e=3 w=20001B0,20001A1,22 m=-
   f        c=1 b=3 n=3 e=3 w=20001B0,2001EDD,22 m=-
-  <sp>     c=0 b=3 n=3 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => người 
 
 ## telex-order/nguowif
@@ -2429,7 +2418,7 @@ keys: nguowif
   w        c=1 b=2 n=2 e=3 w=20001B0,20001A1 m=-
   i        c=0 b=0 n=0 e=3 w=- m=-
   f        c=1 b=3 n=3 e=3 w=20001B0,2001EDD,22 m=-
-  <sp>     c=0 b=3 n=3 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => người 
 
 ## telex-order/dduowcj
@@ -2442,7 +2431,7 @@ keys: dduowcj
   w        c=1 b=2 n=2 e=3 w=20001B0,20001A1 m=-
   c        c=0 b=0 n=0 e=3 w=- m=-
   j        c=1 b=3 n=3 e=3 w=20001B0,2001EE3,8 m=-
-  <sp>     c=0 b=3 n=3 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => được 
 
 ## telex-order/dduocwj
@@ -2455,7 +2444,7 @@ keys: dduocwj
   c        c=0 b=0 n=0 e=3 w=- m=-
   w        c=1 b=3 n=3 e=3 w=20001B0,20001A1,8 m=-
   j        c=1 b=3 n=3 e=3 w=20001B0,2001EE3,8 m=-
-  <sp>     c=0 b=3 n=3 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => được 
 
 ## table1/vieetj
@@ -2467,7 +2456,7 @@ keys: vieetj
   e        c=1 b=1 n=1 e=3 w=20000AA m=-
   t        c=0 b=0 n=0 e=3 w=- m=-
   j        c=1 b=3 n=3 e=3 w=22,20000D6,11 m=-
-  <sp>     c=0 b=3 n=3 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => vi<D6>t 
 
 ## table1/nguwowif
@@ -2477,11 +2466,11 @@ keys: nguwowif
   g        c=0 b=0 n=0 e=3 w=- m=-
   u        c=0 b=0 n=0 e=3 w=- m=-
   w        c=1 b=1 n=1 e=3 w=20000AD m=-
-  o        c=0 b=1 n=1 e=3 w=- m=-
+  o        c=0 b=0 n=0 e=3 w=- m=-
   w        c=1 b=2 n=2 e=3 w=20000AD,20000AC m=-
   i        c=0 b=0 n=0 e=3 w=- m=-
   f        c=1 b=3 n=3 e=3 w=20000AD,20000EA,22 m=-
-  <sp>     c=0 b=3 n=3 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => ng<AD><EA>i 
 
 ## table1/dduowngf
@@ -2495,7 +2484,7 @@ keys: dduowngf
   n        c=0 b=0 n=0 e=3 w=- m=-
   g        c=0 b=0 n=0 e=3 w=- m=-
   f        c=1 b=4 n=4 e=3 w=20000AD,20000EA,2D,5 m=-
-  <sp>     c=0 b=4 n=4 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => <AE><AD><EA>ng 
 
 ## table1/ddaats
@@ -2503,11 +2492,11 @@ cfg: input=0 table=1 lang=1 spell=1 modern=1 quick=0 restore=0 macro=0/0 autocap
 keys: ddaats 
   d        c=0 b=0 n=0 e=3 w=- m=-
   d        c=1 b=1 n=1 e=3 w=20000AE m=-
-  a        c=0 b=1 n=1 e=3 w=- m=-
+  a        c=0 b=0 n=0 e=3 w=- m=-
   a        c=1 b=1 n=1 e=3 w=20000A9 m=-
   t        c=0 b=0 n=0 e=3 w=- m=-
   s        c=1 b=2 n=2 e=3 w=20000CA,11 m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => <AE><CA>t 
 
 ## table1/quoocs
@@ -2519,7 +2508,7 @@ keys: quoocs
   o        c=1 b=1 n=1 e=3 w=20000AB m=-
   c        c=0 b=0 n=0 e=3 w=- m=-
   s        c=1 b=2 n=2 e=3 w=20000E8,8 m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => qu<E8>c 
 
 ## table1/hoaf
@@ -2529,7 +2518,7 @@ keys: hoaf
   o        c=0 b=0 n=0 e=3 w=- m=-
   a        c=0 b=0 n=0 e=3 w=- m=-
   f        c=1 b=2 n=2 e=3 w=1F,20000B5 m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => ho<B5> 
 
 ## table1/khoer
@@ -2540,7 +2529,7 @@ keys: khoer
   o        c=0 b=0 n=0 e=3 w=- m=-
   e        c=0 b=0 n=0 e=3 w=- m=-
   r        c=1 b=2 n=2 e=3 w=1F,20000CE m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => kho<CE> 
 
 ## table1/thuyr
@@ -2551,7 +2540,7 @@ keys: thuyr
   u        c=0 b=0 n=0 e=3 w=- m=-
   y        c=0 b=0 n=0 e=3 w=- m=-
   r        c=1 b=2 n=2 e=3 w=20,20000FB m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => thu<FB> 
 
 ## table1/quowrn
@@ -2563,7 +2552,7 @@ keys: quowrn
   w        c=1 b=1 n=1 e=3 w=20000AC m=-
   r        c=1 b=1 n=1 e=3 w=20000EB m=-
   n        c=1 b=1 n=2 e=4 w=20000EB,2D m=-
-  <sp>     c=0 b=1 n=2 e=4 w=- m=-
+  <sp>     c=0 b=0 n=0 e=4 w=- m=-
 => qu<EB>n 
 
 ## table1/tuyeetj
@@ -2576,7 +2565,7 @@ keys: tuyeetj
   e        c=1 b=1 n=1 e=3 w=20000AA m=-
   t        c=0 b=0 n=0 e=3 w=- m=-
   j        c=1 b=4 n=4 e=3 w=20,10,20000D6,11 m=-
-  <sp>     c=0 b=4 n=4 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => tuy<D6>t 
 
 ## table1/quets
@@ -2587,7 +2576,7 @@ keys: quets
   e        c=0 b=0 n=0 e=3 w=- m=-
   t        c=0 b=0 n=0 e=3 w=- m=-
   s        c=1 b=2 n=2 e=3 w=20000D0,11 m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => qu<D0>t 
 
 ## table1/chuwa
@@ -2597,8 +2586,8 @@ keys: chuwa
   h        c=0 b=0 n=0 e=3 w=- m=-
   u        c=0 b=0 n=0 e=3 w=- m=-
   w        c=1 b=1 n=1 e=3 w=20000AD m=-
-  a        c=0 b=1 n=1 e=3 w=- m=-
-  <sp>     c=0 b=1 n=1 e=3 w=- m=-
+  a        c=0 b=0 n=0 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => ch<AD>a 
 
 ## table1/Vieetj
@@ -2610,7 +2599,7 @@ keys: Vieetj
   e        c=1 b=1 n=1 e=3 w=20000AA m=-
   t        c=0 b=0 n=0 e=3 w=- m=-
   j        c=1 b=3 n=3 e=3 w=22,20000D6,11 m=-
-  <sp>     c=0 b=3 n=3 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => Vi<D6>t 
 
 ## table1/uwowng
@@ -2618,7 +2607,7 @@ cfg: input=0 table=1 lang=1 spell=1 modern=1 quick=0 restore=0 macro=0/0 autocap
 keys: uwowng 
   u        c=0 b=0 n=0 e=3 w=- m=-
   w        c=1 b=1 n=1 e=3 w=20000AD m=-
-  o        c=0 b=1 n=1 e=3 w=- m=-
+  o        c=0 b=0 n=0 e=3 w=- m=-
   w        c=1 b=2 n=2 e=3 w=20000AD,20000AC m=-
   n        c=0 b=0 n=0 e=3 w=- m=-
   g        c=0 b=0 n=0 e=3 w=- m=-
@@ -2633,7 +2622,7 @@ keys: hoocj
   o        c=1 b=1 n=1 e=3 w=20000AB m=-
   c        c=0 b=0 n=0 e=3 w=- m=-
   j        c=1 b=2 n=2 e=3 w=20000E9,8 m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => h<E9>c 
 
 ## table1/muwowif
@@ -2642,11 +2631,11 @@ keys: muwowif
   m        c=0 b=0 n=0 e=3 w=- m=-
   u        c=0 b=0 n=0 e=3 w=- m=-
   w        c=1 b=1 n=1 e=3 w=20000AD m=-
-  o        c=0 b=1 n=1 e=3 w=- m=-
+  o        c=0 b=0 n=0 e=3 w=- m=-
   w        c=1 b=2 n=2 e=3 w=20000AD,20000AC m=-
   i        c=0 b=0 n=0 e=3 w=- m=-
   f        c=1 b=3 n=3 e=3 w=20000AD,20000EA,22 m=-
-  <sp>     c=0 b=3 n=3 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => m<AD><EA>i 
 
 ## table1/nghieeng
@@ -2684,7 +2673,7 @@ keys: ddiuf
   i        c=0 b=0 n=0 e=3 w=- m=-
   u        c=0 b=0 n=0 e=3 w=- m=-
   f        c=1 b=2 n=2 e=3 w=20000D7,20 m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => <AE><D7>u 
 
 ## table1/yeeu
@@ -2726,7 +2715,7 @@ keys: gias
   i        c=0 b=0 n=0 e=3 w=- m=-
   a        c=0 b=0 n=0 e=3 w=- m=-
   s        c=1 b=1 n=1 e=3 w=20000B8 m=-
-  <sp>     c=0 b=1 n=1 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => gi<B8> 
 
 ## table1/xin
@@ -2746,7 +2735,7 @@ keys: chaof
   a        c=0 b=0 n=0 e=3 w=- m=-
   o        c=0 b=0 n=0 e=3 w=- m=-
   f        c=1 b=2 n=2 e=3 w=20000B5,1F m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => ch<B5>o 
 
 ## table1/ca
@@ -2763,7 +2752,7 @@ keys: tuw
   t        c=0 b=0 n=0 e=3 w=- m=-
   u        c=0 b=0 n=0 e=3 w=- m=-
   w        c=1 b=1 n=1 e=3 w=20000AD m=-
-  <sp>     c=0 b=1 n=1 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => t<AD> 
 
 ## table1/nhuwx
@@ -2774,7 +2763,7 @@ keys: nhuwx
   u        c=0 b=0 n=0 e=3 w=- m=-
   w        c=1 b=1 n=1 e=3 w=20000AD m=-
   x        c=1 b=1 n=1 e=3 w=20000F7 m=-
-  <sp>     c=0 b=1 n=1 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => nh<F7> 
 
 ## table1/luaatj
@@ -2786,7 +2775,7 @@ keys: luaatj
   a        c=1 b=1 n=1 e=3 w=20000A9 m=-
   t        c=0 b=0 n=0 e=3 w=- m=-
   j        c=1 b=3 n=3 e=3 w=20,20000CB,11 m=-
-  <sp>     c=0 b=3 n=3 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => lu<CB>t 
 
 ## table1/quyeets
@@ -2799,7 +2788,7 @@ keys: quyeets
   e        c=1 b=1 n=1 e=3 w=20000AA m=-
   t        c=0 b=0 n=0 e=3 w=- m=-
   s        c=1 b=3 n=3 e=3 w=10,20000D5,11 m=-
-  <sp>     c=0 b=3 n=3 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => quy<D5>t 
 
 ## table2/vieetj
@@ -2811,7 +2800,7 @@ keys: vieetj
   e        c=1 b=1 n=1 e=3 w=200E265 m=-
   t        c=0 b=0 n=0 e=3 w=- m=-
   j        c=1 b=3 n=3 e=3 w=22,200E465,11 m=-
-  <sp>     c=0 b=3 n=3 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => vie<E4>t 
 
 ## table2/nguwowif
@@ -2821,11 +2810,11 @@ keys: nguwowif
   g        c=0 b=0 n=0 e=3 w=- m=-
   u        c=0 b=0 n=0 e=3 w=- m=-
   w        c=1 b=1 n=1 e=3 w=20000F6 m=-
-  o        c=0 b=1 n=1 e=3 w=- m=-
+  o        c=0 b=0 n=0 e=3 w=- m=-
   w        c=1 b=2 n=2 e=3 w=20000F6,20000F4 m=-
   i        c=0 b=0 n=0 e=3 w=- m=-
   f        c=1 b=3 n=3 e=3 w=20000F6,200F8F4,22 m=-
-  <sp>     c=0 b=3 n=3 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => ng<F6><F4><F8>i 
 
 ## table2/dduowngf
@@ -2839,7 +2828,7 @@ keys: dduowngf
   n        c=0 b=0 n=0 e=3 w=- m=-
   g        c=0 b=0 n=0 e=3 w=- m=-
   f        c=1 b=4 n=4 e=3 w=20000F6,200F8F4,2D,5 m=-
-  <sp>     c=0 b=4 n=4 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => <F1><F6><F4><F8>ng 
 
 ## table2/ddaats
@@ -2847,11 +2836,11 @@ cfg: input=0 table=2 lang=1 spell=1 modern=1 quick=0 restore=0 macro=0/0 autocap
 keys: ddaats 
   d        c=0 b=0 n=0 e=3 w=- m=-
   d        c=1 b=1 n=1 e=3 w=20000F1 m=-
-  a        c=0 b=1 n=1 e=3 w=- m=-
+  a        c=0 b=0 n=0 e=3 w=- m=-
   a        c=1 b=1 n=1 e=3 w=200E261 m=-
   t        c=0 b=0 n=0 e=3 w=- m=-
   s        c=1 b=2 n=2 e=3 w=200E161,11 m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => <F1>a<E1>t 
 
 ## table2/quoocs
@@ -2863,7 +2852,7 @@ keys: quoocs
   o        c=1 b=1 n=1 e=3 w=200E26F m=-
   c        c=0 b=0 n=0 e=3 w=- m=-
   s        c=1 b=2 n=2 e=3 w=200E16F,8 m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => quo<E1>c 
 
 ## table2/hoaf
@@ -2873,7 +2862,7 @@ keys: hoaf
   o        c=0 b=0 n=0 e=3 w=- m=-
   a        c=0 b=0 n=0 e=3 w=- m=-
   f        c=1 b=2 n=2 e=3 w=1F,200F861 m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => hoa<F8> 
 
 ## table2/khoer
@@ -2884,7 +2873,7 @@ keys: khoer
   o        c=0 b=0 n=0 e=3 w=- m=-
   e        c=0 b=0 n=0 e=3 w=- m=-
   r        c=1 b=2 n=2 e=3 w=1F,200FB65 m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => khoe<FB> 
 
 ## table2/thuyr
@@ -2895,7 +2884,7 @@ keys: thuyr
   u        c=0 b=0 n=0 e=3 w=- m=-
   y        c=0 b=0 n=0 e=3 w=- m=-
   r        c=1 b=2 n=2 e=3 w=20,200FB79 m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => thuy<FB> 
 
 ## table2/quowrn
@@ -2907,7 +2896,7 @@ keys: quowrn
   w        c=1 b=1 n=1 e=3 w=20000F4 m=-
   r        c=1 b=1 n=1 e=3 w=200FBF4 m=-
   n        c=1 b=1 n=2 e=4 w=200FBF4,2D m=-
-  <sp>     c=0 b=1 n=2 e=4 w=- m=-
+  <sp>     c=0 b=0 n=0 e=4 w=- m=-
 => qu<F4><FB>n 
 
 ## table2/tuyeetj
@@ -2920,7 +2909,7 @@ keys: tuyeetj
   e        c=1 b=1 n=1 e=3 w=200E265 m=-
   t        c=0 b=0 n=0 e=3 w=- m=-
   j        c=1 b=4 n=4 e=3 w=20,10,200E465,11 m=-
-  <sp>     c=0 b=4 n=4 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => tuye<E4>t 
 
 ## table2/quets
@@ -2931,7 +2920,7 @@ keys: quets
   e        c=0 b=0 n=0 e=3 w=- m=-
   t        c=0 b=0 n=0 e=3 w=- m=-
   s        c=1 b=2 n=2 e=3 w=200F965,11 m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => que<F9>t 
 
 ## table2/chuwa
@@ -2941,8 +2930,8 @@ keys: chuwa
   h        c=0 b=0 n=0 e=3 w=- m=-
   u        c=0 b=0 n=0 e=3 w=- m=-
   w        c=1 b=1 n=1 e=3 w=20000F6 m=-
-  a        c=0 b=1 n=1 e=3 w=- m=-
-  <sp>     c=0 b=1 n=1 e=3 w=- m=-
+  a        c=0 b=0 n=0 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => ch<F6>a 
 
 ## table2/Vieetj
@@ -2954,7 +2943,7 @@ keys: Vieetj
   e        c=1 b=1 n=1 e=3 w=200E265 m=-
   t        c=0 b=0 n=0 e=3 w=- m=-
   j        c=1 b=3 n=3 e=3 w=22,200E465,11 m=-
-  <sp>     c=0 b=3 n=3 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => Vie<E4>t 
 
 ## table2/uwowng
@@ -2962,7 +2951,7 @@ cfg: input=0 table=2 lang=1 spell=1 modern=1 quick=0 restore=0 macro=0/0 autocap
 keys: uwowng 
   u        c=0 b=0 n=0 e=3 w=- m=-
   w        c=1 b=1 n=1 e=3 w=20000F6 m=-
-  o        c=0 b=1 n=1 e=3 w=- m=-
+  o        c=0 b=0 n=0 e=3 w=- m=-
   w        c=1 b=2 n=2 e=3 w=20000F6,20000F4 m=-
   n        c=0 b=0 n=0 e=3 w=- m=-
   g        c=0 b=0 n=0 e=3 w=- m=-
@@ -2977,7 +2966,7 @@ keys: hoocj
   o        c=1 b=1 n=1 e=3 w=200E26F m=-
   c        c=0 b=0 n=0 e=3 w=- m=-
   j        c=1 b=2 n=2 e=3 w=200E46F,8 m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => ho<E4>c 
 
 ## table2/muwowif
@@ -2986,11 +2975,11 @@ keys: muwowif
   m        c=0 b=0 n=0 e=3 w=- m=-
   u        c=0 b=0 n=0 e=3 w=- m=-
   w        c=1 b=1 n=1 e=3 w=20000F6 m=-
-  o        c=0 b=1 n=1 e=3 w=- m=-
+  o        c=0 b=0 n=0 e=3 w=- m=-
   w        c=1 b=2 n=2 e=3 w=20000F6,20000F4 m=-
   i        c=0 b=0 n=0 e=3 w=- m=-
   f        c=1 b=3 n=3 e=3 w=20000F6,200F8F4,22 m=-
-  <sp>     c=0 b=3 n=3 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => m<F6><F4><F8>i 
 
 ## table2/nghieeng
@@ -3028,7 +3017,7 @@ keys: ddiuf
   i        c=0 b=0 n=0 e=3 w=- m=-
   u        c=0 b=0 n=0 e=3 w=- m=-
   f        c=1 b=2 n=2 e=3 w=20000EC,20 m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => <F1><EC>u 
 
 ## table2/yeeu
@@ -3070,7 +3059,7 @@ keys: gias
   i        c=0 b=0 n=0 e=3 w=- m=-
   a        c=0 b=0 n=0 e=3 w=- m=-
   s        c=1 b=1 n=1 e=3 w=200F961 m=-
-  <sp>     c=0 b=1 n=1 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => gia<F9> 
 
 ## table2/xin
@@ -3090,7 +3079,7 @@ keys: chaof
   a        c=0 b=0 n=0 e=3 w=- m=-
   o        c=0 b=0 n=0 e=3 w=- m=-
   f        c=1 b=2 n=2 e=3 w=200F861,1F m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => cha<F8>o 
 
 ## table2/ca
@@ -3107,7 +3096,7 @@ keys: tuw
   t        c=0 b=0 n=0 e=3 w=- m=-
   u        c=0 b=0 n=0 e=3 w=- m=-
   w        c=1 b=1 n=1 e=3 w=20000F6 m=-
-  <sp>     c=0 b=1 n=1 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => t<F6> 
 
 ## table2/nhuwx
@@ -3118,7 +3107,7 @@ keys: nhuwx
   u        c=0 b=0 n=0 e=3 w=- m=-
   w        c=1 b=1 n=1 e=3 w=20000F6 m=-
   x        c=1 b=1 n=1 e=3 w=200F5F6 m=-
-  <sp>     c=0 b=1 n=1 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => nh<F6><F5> 
 
 ## table2/luaatj
@@ -3130,7 +3119,7 @@ keys: luaatj
   a        c=1 b=1 n=1 e=3 w=200E261 m=-
   t        c=0 b=0 n=0 e=3 w=- m=-
   j        c=1 b=3 n=3 e=3 w=20,200E461,11 m=-
-  <sp>     c=0 b=3 n=3 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => lua<E4>t 
 
 ## table2/quyeets
@@ -3143,7 +3132,7 @@ keys: quyeets
   e        c=1 b=1 n=1 e=3 w=200E265 m=-
   t        c=0 b=0 n=0 e=3 w=- m=-
   s        c=1 b=3 n=3 e=3 w=10,200E165,11 m=-
-  <sp>     c=0 b=3 n=3 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => quye<E1>t 
 
 ## table3/vieetj
@@ -3155,7 +3144,7 @@ keys: vieetj
   e        c=1 b=1 n=1 e=3 w=20000EA m=-
   t        c=0 b=0 n=0 e=3 w=- m=-
   j        c=1 b=3 n=3 e=3 w=22,200A0EA,11 m=-
-  <sp>     c=0 b=3 n=3 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => việt 
 
 ## table3/nguwowif
@@ -3165,11 +3154,11 @@ keys: nguwowif
   g        c=0 b=0 n=0 e=3 w=- m=-
   u        c=0 b=0 n=0 e=3 w=- m=-
   w        c=1 b=1 n=1 e=3 w=20001B0 m=-
-  o        c=0 b=1 n=1 e=3 w=- m=-
+  o        c=0 b=0 n=0 e=3 w=- m=-
   w        c=1 b=2 n=2 e=3 w=20001B0,20001A1 m=-
   i        c=0 b=0 n=0 e=3 w=- m=-
   f        c=1 b=3 n=3 e=3 w=20001B0,20041A1,22 m=-
-  <sp>     c=0 b=3 n=3 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => người 
 
 ## table3/dduowngf
@@ -3183,7 +3172,7 @@ keys: dduowngf
   n        c=0 b=0 n=0 e=3 w=- m=-
   g        c=0 b=0 n=0 e=3 w=- m=-
   f        c=1 b=4 n=4 e=3 w=20001B0,20041A1,2D,5 m=-
-  <sp>     c=0 b=4 n=4 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => đường 
 
 ## table3/ddaats
@@ -3191,11 +3180,11 @@ cfg: input=0 table=3 lang=1 spell=1 modern=1 quick=0 restore=0 macro=0/0 autocap
 keys: ddaats 
   d        c=0 b=0 n=0 e=3 w=- m=-
   d        c=1 b=1 n=1 e=3 w=2000111 m=-
-  a        c=0 b=1 n=1 e=3 w=- m=-
+  a        c=0 b=0 n=0 e=3 w=- m=-
   a        c=1 b=1 n=1 e=3 w=20000E2 m=-
   t        c=0 b=0 n=0 e=3 w=- m=-
   s        c=1 b=2 n=2 e=3 w=20020E2,11 m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => đất 
 
 ## table3/quoocs
@@ -3207,7 +3196,7 @@ keys: quoocs
   o        c=1 b=1 n=1 e=3 w=20000F4 m=-
   c        c=0 b=0 n=0 e=3 w=- m=-
   s        c=1 b=2 n=2 e=3 w=20020F4,8 m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => quốc 
 
 ## table3/hoaf
@@ -3217,7 +3206,7 @@ keys: hoaf
   o        c=0 b=0 n=0 e=3 w=- m=-
   a        c=0 b=0 n=0 e=3 w=- m=-
   f        c=1 b=2 n=2 e=3 w=1F,2004061 m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => hoà 
 
 ## table3/khoer
@@ -3228,7 +3217,7 @@ keys: khoer
   o        c=0 b=0 n=0 e=3 w=- m=-
   e        c=0 b=0 n=0 e=3 w=- m=-
   r        c=1 b=2 n=2 e=3 w=1F,2006065 m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => khoẻ 
 
 ## table3/thuyr
@@ -3239,7 +3228,7 @@ keys: thuyr
   u        c=0 b=0 n=0 e=3 w=- m=-
   y        c=0 b=0 n=0 e=3 w=- m=-
   r        c=1 b=2 n=2 e=3 w=20,2006079 m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => thuỷ 
 
 ## table3/quowrn
@@ -3251,7 +3240,7 @@ keys: quowrn
   w        c=1 b=1 n=1 e=3 w=20001A1 m=-
   r        c=1 b=1 n=1 e=3 w=20061A1 m=-
   n        c=1 b=1 n=2 e=4 w=20061A1,2D m=-
-  <sp>     c=0 b=1 n=2 e=4 w=- m=-
+  <sp>     c=0 b=0 n=0 e=4 w=- m=-
 => quởn 
 
 ## table3/tuyeetj
@@ -3264,7 +3253,7 @@ keys: tuyeetj
   e        c=1 b=1 n=1 e=3 w=20000EA m=-
   t        c=0 b=0 n=0 e=3 w=- m=-
   j        c=1 b=4 n=4 e=3 w=20,10,200A0EA,11 m=-
-  <sp>     c=0 b=4 n=4 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => tuyệt 
 
 ## table3/quets
@@ -3275,7 +3264,7 @@ keys: quets
   e        c=0 b=0 n=0 e=3 w=- m=-
   t        c=0 b=0 n=0 e=3 w=- m=-
   s        c=1 b=2 n=2 e=3 w=2002065,11 m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => quét 
 
 ## table3/chuwa
@@ -3285,8 +3274,8 @@ keys: chuwa
   h        c=0 b=0 n=0 e=3 w=- m=-
   u        c=0 b=0 n=0 e=3 w=- m=-
   w        c=1 b=1 n=1 e=3 w=20001B0 m=-
-  a        c=0 b=1 n=1 e=3 w=- m=-
-  <sp>     c=0 b=1 n=1 e=3 w=- m=-
+  a        c=0 b=0 n=0 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => chưa 
 
 ## table3/Vieetj
@@ -3298,7 +3287,7 @@ keys: Vieetj
   e        c=1 b=1 n=1 e=3 w=20000EA m=-
   t        c=0 b=0 n=0 e=3 w=- m=-
   j        c=1 b=3 n=3 e=3 w=22,200A0EA,11 m=-
-  <sp>     c=0 b=3 n=3 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => Việt 
 
 ## table3/uwowng
@@ -3306,7 +3295,7 @@ cfg: input=0 table=3 lang=1 spell=1 modern=1 quick=0 restore=0 macro=0/0 autocap
 keys: uwowng 
   u        c=0 b=0 n=0 e=3 w=- m=-
   w        c=1 b=1 n=1 e=3 w=20001B0 m=-
-  o        c=0 b=1 n=1 e=3 w=- m=-
+  o        c=0 b=0 n=0 e=3 w=- m=-
   w        c=1 b=2 n=2 e=3 w=20001B0,20001A1 m=-
   n        c=0 b=0 n=0 e=3 w=- m=-
   g        c=0 b=0 n=0 e=3 w=- m=-
@@ -3321,7 +3310,7 @@ keys: hoocj
   o        c=1 b=1 n=1 e=3 w=20000F4 m=-
   c        c=0 b=0 n=0 e=3 w=- m=-
   j        c=1 b=2 n=2 e=3 w=200A0F4,8 m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => hộc 
 
 ## table3/muwowif
@@ -3330,11 +3319,11 @@ keys: muwowif
   m        c=0 b=0 n=0 e=3 w=- m=-
   u        c=0 b=0 n=0 e=3 w=- m=-
   w        c=1 b=1 n=1 e=3 w=20001B0 m=-
-  o        c=0 b=1 n=1 e=3 w=- m=-
+  o        c=0 b=0 n=0 e=3 w=- m=-
   w        c=1 b=2 n=2 e=3 w=20001B0,20001A1 m=-
   i        c=0 b=0 n=0 e=3 w=- m=-
   f        c=1 b=3 n=3 e=3 w=20001B0,20041A1,22 m=-
-  <sp>     c=0 b=3 n=3 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => mười 
 
 ## table3/nghieeng
@@ -3372,7 +3361,7 @@ keys: ddiuf
   i        c=0 b=0 n=0 e=3 w=- m=-
   u        c=0 b=0 n=0 e=3 w=- m=-
   f        c=1 b=2 n=2 e=3 w=2004069,20 m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => đìu 
 
 ## table3/yeeu
@@ -3414,7 +3403,7 @@ keys: gias
   i        c=0 b=0 n=0 e=3 w=- m=-
   a        c=0 b=0 n=0 e=3 w=- m=-
   s        c=1 b=1 n=1 e=3 w=2002061 m=-
-  <sp>     c=0 b=1 n=1 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => giá 
 
 ## table3/xin
@@ -3434,7 +3423,7 @@ keys: chaof
   a        c=0 b=0 n=0 e=3 w=- m=-
   o        c=0 b=0 n=0 e=3 w=- m=-
   f        c=1 b=2 n=2 e=3 w=2004061,1F m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => chào 
 
 ## table3/ca
@@ -3451,7 +3440,7 @@ keys: tuw
   t        c=0 b=0 n=0 e=3 w=- m=-
   u        c=0 b=0 n=0 e=3 w=- m=-
   w        c=1 b=1 n=1 e=3 w=20001B0 m=-
-  <sp>     c=0 b=1 n=1 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => tư 
 
 ## table3/nhuwx
@@ -3462,7 +3451,7 @@ keys: nhuwx
   u        c=0 b=0 n=0 e=3 w=- m=-
   w        c=1 b=1 n=1 e=3 w=20001B0 m=-
   x        c=1 b=1 n=1 e=3 w=20081B0 m=-
-  <sp>     c=0 b=1 n=1 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => nhữ 
 
 ## table3/luaatj
@@ -3474,7 +3463,7 @@ keys: luaatj
   a        c=1 b=1 n=1 e=3 w=20000E2 m=-
   t        c=0 b=0 n=0 e=3 w=- m=-
   j        c=1 b=3 n=3 e=3 w=20,200A0E2,11 m=-
-  <sp>     c=0 b=3 n=3 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => luật 
 
 ## table3/quyeets
@@ -3487,7 +3476,7 @@ keys: quyeets
   e        c=1 b=1 n=1 e=3 w=20000EA m=-
   t        c=0 b=0 n=0 e=3 w=- m=-
   s        c=1 b=3 n=3 e=3 w=10,20020EA,11 m=-
-  <sp>     c=0 b=3 n=3 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => quyết 
 
 ## table4/vieetj
@@ -3499,7 +3488,7 @@ keys: vieetj
   e        c=1 b=1 n=1 e=3 w=20000EA m=-
   t        c=0 b=0 n=0 e=3 w=- m=-
   j        c=1 b=3 n=3 e=3 w=22,200F2EA,11 m=-
-  <sp>     c=0 b=3 n=3 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => vi<EA><F2>t 
 
 ## table4/nguwowif
@@ -3509,11 +3498,11 @@ keys: nguwowif
   g        c=0 b=0 n=0 e=3 w=- m=-
   u        c=0 b=0 n=0 e=3 w=- m=-
   w        c=1 b=1 n=1 e=3 w=20000FD m=-
-  o        c=0 b=1 n=1 e=3 w=- m=-
+  o        c=0 b=0 n=0 e=3 w=- m=-
   w        c=1 b=2 n=2 e=3 w=20000FD,20000F5 m=-
   i        c=0 b=0 n=0 e=3 w=- m=-
   f        c=1 b=3 n=3 e=3 w=20000FD,200CCF5,22 m=-
-  <sp>     c=0 b=3 n=3 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => ng<FD><F5><CC>i 
 
 ## table4/dduowngf
@@ -3527,7 +3516,7 @@ keys: dduowngf
   n        c=0 b=0 n=0 e=3 w=- m=-
   g        c=0 b=0 n=0 e=3 w=- m=-
   f        c=1 b=4 n=4 e=3 w=20000FD,200CCF5,2D,5 m=-
-  <sp>     c=0 b=4 n=4 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => <F0><FD><F5><CC>ng 
 
 ## table4/ddaats
@@ -3535,11 +3524,11 @@ cfg: input=0 table=4 lang=1 spell=1 modern=1 quick=0 restore=0 macro=0/0 autocap
 keys: ddaats 
   d        c=0 b=0 n=0 e=3 w=- m=-
   d        c=1 b=1 n=1 e=3 w=20000F0 m=-
-  a        c=0 b=1 n=1 e=3 w=- m=-
+  a        c=0 b=0 n=0 e=3 w=- m=-
   a        c=1 b=1 n=1 e=3 w=20000E2 m=-
   t        c=0 b=0 n=0 e=3 w=- m=-
   s        c=1 b=2 n=2 e=3 w=200ECE2,11 m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => <F0><E2><EC>t 
 
 ## table4/quoocs
@@ -3551,7 +3540,7 @@ keys: quoocs
   o        c=1 b=1 n=1 e=3 w=20000F4 m=-
   c        c=0 b=0 n=0 e=3 w=- m=-
   s        c=1 b=2 n=2 e=3 w=200ECF4,8 m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => qu<F4><EC>c 
 
 ## table4/hoaf
@@ -3561,7 +3550,7 @@ keys: hoaf
   o        c=0 b=0 n=0 e=3 w=- m=-
   a        c=0 b=0 n=0 e=3 w=- m=-
   f        c=1 b=2 n=2 e=3 w=1F,200CC61 m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => hoa<CC> 
 
 ## table4/khoer
@@ -3572,7 +3561,7 @@ keys: khoer
   o        c=0 b=0 n=0 e=3 w=- m=-
   e        c=0 b=0 n=0 e=3 w=- m=-
   r        c=1 b=2 n=2 e=3 w=1F,200D265 m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => khoe<D2> 
 
 ## table4/thuyr
@@ -3583,7 +3572,7 @@ keys: thuyr
   u        c=0 b=0 n=0 e=3 w=- m=-
   y        c=0 b=0 n=0 e=3 w=- m=-
   r        c=1 b=2 n=2 e=3 w=20,200D279 m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => thuy<D2> 
 
 ## table4/quowrn
@@ -3595,7 +3584,7 @@ keys: quowrn
   w        c=1 b=1 n=1 e=3 w=20000F5 m=-
   r        c=1 b=1 n=1 e=3 w=200D2F5 m=-
   n        c=1 b=1 n=2 e=4 w=200D2F5,2D m=-
-  <sp>     c=0 b=1 n=2 e=4 w=- m=-
+  <sp>     c=0 b=0 n=0 e=4 w=- m=-
 => qu<F5><D2>n 
 
 ## table4/tuyeetj
@@ -3608,7 +3597,7 @@ keys: tuyeetj
   e        c=1 b=1 n=1 e=3 w=20000EA m=-
   t        c=0 b=0 n=0 e=3 w=- m=-
   j        c=1 b=4 n=4 e=3 w=20,10,200F2EA,11 m=-
-  <sp>     c=0 b=4 n=4 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => tuy<EA><F2>t 
 
 ## table4/quets
@@ -3619,7 +3608,7 @@ keys: quets
   e        c=0 b=0 n=0 e=3 w=- m=-
   t        c=0 b=0 n=0 e=3 w=- m=-
   s        c=1 b=2 n=2 e=3 w=200EC65,11 m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => que<EC>t 
 
 ## table4/chuwa
@@ -3629,8 +3618,8 @@ keys: chuwa
   h        c=0 b=0 n=0 e=3 w=- m=-
   u        c=0 b=0 n=0 e=3 w=- m=-
   w        c=1 b=1 n=1 e=3 w=20000FD m=-
-  a        c=0 b=1 n=1 e=3 w=- m=-
-  <sp>     c=0 b=1 n=1 e=3 w=- m=-
+  a        c=0 b=0 n=0 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => ch<FD>a 
 
 ## table4/Vieetj
@@ -3642,7 +3631,7 @@ keys: Vieetj
   e        c=1 b=1 n=1 e=3 w=20000EA m=-
   t        c=0 b=0 n=0 e=3 w=- m=-
   j        c=1 b=3 n=3 e=3 w=22,200F2EA,11 m=-
-  <sp>     c=0 b=3 n=3 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => Vi<EA><F2>t 
 
 ## table4/uwowng
@@ -3650,7 +3639,7 @@ cfg: input=0 table=4 lang=1 spell=1 modern=1 quick=0 restore=0 macro=0/0 autocap
 keys: uwowng 
   u        c=0 b=0 n=0 e=3 w=- m=-
   w        c=1 b=1 n=1 e=3 w=20000FD m=-
-  o        c=0 b=1 n=1 e=3 w=- m=-
+  o        c=0 b=0 n=0 e=3 w=- m=-
   w        c=1 b=2 n=2 e=3 w=20000FD,20000F5 m=-
   n        c=0 b=0 n=0 e=3 w=- m=-
   g        c=0 b=0 n=0 e=3 w=- m=-
@@ -3665,7 +3654,7 @@ keys: hoocj
   o        c=1 b=1 n=1 e=3 w=20000F4 m=-
   c        c=0 b=0 n=0 e=3 w=- m=-
   j        c=1 b=2 n=2 e=3 w=200F2F4,8 m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => h<F4><F2>c 
 
 ## table4/muwowif
@@ -3674,11 +3663,11 @@ keys: muwowif
   m        c=0 b=0 n=0 e=3 w=- m=-
   u        c=0 b=0 n=0 e=3 w=- m=-
   w        c=1 b=1 n=1 e=3 w=20000FD m=-
-  o        c=0 b=1 n=1 e=3 w=- m=-
+  o        c=0 b=0 n=0 e=3 w=- m=-
   w        c=1 b=2 n=2 e=3 w=20000FD,20000F5 m=-
   i        c=0 b=0 n=0 e=3 w=- m=-
   f        c=1 b=3 n=3 e=3 w=20000FD,200CCF5,22 m=-
-  <sp>     c=0 b=3 n=3 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => m<FD><F5><CC>i 
 
 ## table4/nghieeng
@@ -3716,7 +3705,7 @@ keys: ddiuf
   i        c=0 b=0 n=0 e=3 w=- m=-
   u        c=0 b=0 n=0 e=3 w=- m=-
   f        c=1 b=2 n=2 e=3 w=200CC69,20 m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => <F0>i<CC>u 
 
 ## table4/yeeu
@@ -3758,7 +3747,7 @@ keys: gias
   i        c=0 b=0 n=0 e=3 w=- m=-
   a        c=0 b=0 n=0 e=3 w=- m=-
   s        c=1 b=1 n=1 e=3 w=200EC61 m=-
-  <sp>     c=0 b=1 n=1 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => gia<EC> 
 
 ## table4/xin
@@ -3778,7 +3767,7 @@ keys: chaof
   a        c=0 b=0 n=0 e=3 w=- m=-
   o        c=0 b=0 n=0 e=3 w=- m=-
   f        c=1 b=2 n=2 e=3 w=200CC61,1F m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => cha<CC>o 
 
 ## table4/ca
@@ -3795,7 +3784,7 @@ keys: tuw
   t        c=0 b=0 n=0 e=3 w=- m=-
   u        c=0 b=0 n=0 e=3 w=- m=-
   w        c=1 b=1 n=1 e=3 w=20000FD m=-
-  <sp>     c=0 b=1 n=1 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => t<FD> 
 
 ## table4/nhuwx
@@ -3806,7 +3795,7 @@ keys: nhuwx
   u        c=0 b=0 n=0 e=3 w=- m=-
   w        c=1 b=1 n=1 e=3 w=20000FD m=-
   x        c=1 b=1 n=1 e=3 w=200DEFD m=-
-  <sp>     c=0 b=1 n=1 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => nh<FD><DE> 
 
 ## table4/luaatj
@@ -3818,7 +3807,7 @@ keys: luaatj
   a        c=1 b=1 n=1 e=3 w=20000E2 m=-
   t        c=0 b=0 n=0 e=3 w=- m=-
   j        c=1 b=3 n=3 e=3 w=20,200F2E2,11 m=-
-  <sp>     c=0 b=3 n=3 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => lu<E2><F2>t 
 
 ## table4/quyeets
@@ -3831,7 +3820,7 @@ keys: quyeets
   e        c=1 b=1 n=1 e=3 w=20000EA m=-
   t        c=0 b=0 n=0 e=3 w=- m=-
   s        c=1 b=3 n=3 e=3 w=10,200ECEA,11 m=-
-  <sp>     c=0 b=3 n=3 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => quy<EA><EC>t 
 
 ## table2/delete-mid
@@ -3843,7 +3832,7 @@ keys: vieetj<bs><bs>
   e        c=1 b=1 n=1 e=3 w=200E265 m=-
   t        c=0 b=0 n=0 e=3 w=- m=-
   j        c=1 b=3 n=3 e=3 w=22,200E465,11 m=-
-  <bs>     c=0 b=2 n=2 e=2 w=- m=-
+  <bs>     c=0 b=0 n=0 e=2 w=- m=-
   <bs>     c=0 b=0 n=0 e=2 w=- m=-
 => vi
 
@@ -3854,11 +3843,11 @@ keys: nguwowif<bs><bs><bs><bs><bs><bs>
   g        c=0 b=0 n=0 e=3 w=- m=-
   u        c=0 b=0 n=0 e=3 w=- m=-
   w        c=1 b=1 n=1 e=3 w=20000F6 m=-
-  o        c=0 b=1 n=1 e=3 w=- m=-
+  o        c=0 b=0 n=0 e=3 w=- m=-
   w        c=1 b=2 n=2 e=3 w=20000F6,20000F4 m=-
   i        c=0 b=0 n=0 e=3 w=- m=-
   f        c=1 b=3 n=3 e=3 w=20000F6,200F8F4,22 m=-
-  <bs>     c=0 b=2 n=2 e=2 w=- m=-
+  <bs>     c=0 b=0 n=0 e=2 w=- m=-
   <bs>     c=0 b=0 n=0 e=2 w=- m=-
   <bs>     c=0 b=0 n=0 e=2 w=- m=-
   <bs>     c=0 b=0 n=0 e=2 w=- m=-
@@ -3871,19 +3860,19 @@ cfg: input=0 table=2 lang=1 spell=1 modern=1 quick=0 restore=0 macro=0/0 autocap
 keys: ddaats nuwowcs 
   d        c=0 b=0 n=0 e=3 w=- m=-
   d        c=1 b=1 n=1 e=3 w=20000F1 m=-
-  a        c=0 b=1 n=1 e=3 w=- m=-
+  a        c=0 b=0 n=0 e=3 w=- m=-
   a        c=1 b=1 n=1 e=3 w=200E261 m=-
   t        c=0 b=0 n=0 e=3 w=- m=-
   s        c=1 b=2 n=2 e=3 w=200E161,11 m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
   n        c=0 b=0 n=0 e=3 w=- m=-
   u        c=0 b=0 n=0 e=3 w=- m=-
   w        c=1 b=1 n=1 e=3 w=20000F6 m=-
-  o        c=0 b=1 n=1 e=3 w=- m=-
+  o        c=0 b=0 n=0 e=3 w=- m=-
   w        c=1 b=2 n=2 e=3 w=20000F6,20000F4 m=-
   c        c=0 b=0 n=0 e=3 w=- m=-
   s        c=1 b=3 n=3 e=3 w=20000F6,200F9F4,8 m=-
-  <sp>     c=0 b=3 n=3 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => <F1>a<E1>t n<F6><F4><F9>c 
 
 ## table3/delete-mid
@@ -3895,7 +3884,7 @@ keys: vieetj<bs><bs>
   e        c=1 b=1 n=1 e=3 w=20000EA m=-
   t        c=0 b=0 n=0 e=3 w=- m=-
   j        c=1 b=3 n=3 e=3 w=22,200A0EA,11 m=-
-  <bs>     c=0 b=2 n=2 e=2 w=- m=-
+  <bs>     c=0 b=0 n=0 e=2 w=- m=-
   <bs>     c=0 b=0 n=0 e=2 w=- m=-
 => vi
 
@@ -3906,11 +3895,11 @@ keys: nguwowif<bs><bs><bs><bs><bs><bs>
   g        c=0 b=0 n=0 e=3 w=- m=-
   u        c=0 b=0 n=0 e=3 w=- m=-
   w        c=1 b=1 n=1 e=3 w=20001B0 m=-
-  o        c=0 b=1 n=1 e=3 w=- m=-
+  o        c=0 b=0 n=0 e=3 w=- m=-
   w        c=1 b=2 n=2 e=3 w=20001B0,20001A1 m=-
   i        c=0 b=0 n=0 e=3 w=- m=-
   f        c=1 b=3 n=3 e=3 w=20001B0,20041A1,22 m=-
-  <bs>     c=0 b=2 n=2 e=2 w=- m=-
+  <bs>     c=0 b=0 n=0 e=2 w=- m=-
   <bs>     c=0 b=0 n=0 e=2 w=- m=-
   <bs>     c=0 b=0 n=0 e=2 w=- m=-
   <bs>     c=0 b=0 n=0 e=2 w=- m=-
@@ -3923,19 +3912,19 @@ cfg: input=0 table=3 lang=1 spell=1 modern=1 quick=0 restore=0 macro=0/0 autocap
 keys: ddaats nuwowcs 
   d        c=0 b=0 n=0 e=3 w=- m=-
   d        c=1 b=1 n=1 e=3 w=2000111 m=-
-  a        c=0 b=1 n=1 e=3 w=- m=-
+  a        c=0 b=0 n=0 e=3 w=- m=-
   a        c=1 b=1 n=1 e=3 w=20000E2 m=-
   t        c=0 b=0 n=0 e=3 w=- m=-
   s        c=1 b=2 n=2 e=3 w=20020E2,11 m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
   n        c=0 b=0 n=0 e=3 w=- m=-
   u        c=0 b=0 n=0 e=3 w=- m=-
   w        c=1 b=1 n=1 e=3 w=20001B0 m=-
-  o        c=0 b=1 n=1 e=3 w=- m=-
+  o        c=0 b=0 n=0 e=3 w=- m=-
   w        c=1 b=2 n=2 e=3 w=20001B0,20001A1 m=-
   c        c=0 b=0 n=0 e=3 w=- m=-
   s        c=1 b=3 n=3 e=3 w=20001B0,20021A1,8 m=-
-  <sp>     c=0 b=3 n=3 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => đất nước 
 
 ## vni/vie6t5
@@ -3947,7 +3936,7 @@ keys: vie6t5
   6        c=1 b=1 n=1 e=3 w=20000EA m=-
   t        c=0 b=0 n=0 e=3 w=- m=-
   5        c=1 b=3 n=3 e=3 w=22,2001EC7,11 m=-
-  <sp>     c=0 b=3 n=3 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => việt 
 
 ## vni/Vie6t5
@@ -3959,7 +3948,7 @@ keys: Vie6t5
   6        c=1 b=1 n=1 e=3 w=20000EA m=-
   t        c=0 b=0 n=0 e=3 w=- m=-
   5        c=1 b=3 n=3 e=3 w=22,2001EC7,11 m=-
-  <sp>     c=0 b=3 n=3 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => Việt 
 
 ## vni/ngu7o7i2
@@ -3973,7 +3962,7 @@ keys: ngu7o7i2
   7        c=1 b=2 n=2 e=3 w=20001B0,20001A1 m=-
   i        c=0 b=0 n=0 e=3 w=- m=-
   2        c=1 b=3 n=3 e=3 w=20001B0,2001EDD,22 m=-
-  <sp>     c=0 b=3 n=3 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => người 
 
 ## vni/d9u7o7ng2
@@ -3988,7 +3977,7 @@ keys: d9u7o7ng2
   n        c=0 b=0 n=0 e=3 w=- m=-
   g        c=0 b=0 n=0 e=3 w=- m=-
   2        c=1 b=4 n=4 e=3 w=20001B0,2001EDD,2D,5 m=-
-  <sp>     c=0 b=4 n=4 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => đường 
 
 ## vni/d9a61t
@@ -3999,8 +3988,8 @@ keys: d9a61t
   a        c=0 b=0 n=0 e=3 w=- m=-
   6        c=1 b=1 n=1 e=3 w=20000E2 m=-
   1        c=1 b=1 n=1 e=3 w=2001EA5 m=-
-  t        c=0 b=2 n=2 e=3 w=- m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  t        c=0 b=0 n=0 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => đất 
 
 ## vni/d9a6t1
@@ -4012,7 +4001,7 @@ keys: d9a6t1
   6        c=1 b=1 n=1 e=3 w=20000E2 m=-
   t        c=0 b=0 n=0 e=3 w=- m=-
   1        c=1 b=2 n=2 e=3 w=2001EA5,11 m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => đất 
 
 ## vni/quo6c1
@@ -4024,7 +4013,7 @@ keys: quo6c1
   6        c=1 b=1 n=1 e=3 w=20000F4 m=-
   c        c=0 b=0 n=0 e=3 w=- m=-
   1        c=1 b=2 n=2 e=3 w=2001ED1,8 m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => quốc 
 
 ## vni/ho2a
@@ -4033,8 +4022,8 @@ keys: ho2a
   h        c=0 b=0 n=0 e=3 w=- m=-
   o        c=0 b=0 n=0 e=3 w=- m=-
   2        c=1 b=1 n=1 e=3 w=20000F2 m=-
-  a        c=0 b=2 n=2 e=3 w=- m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  a        c=0 b=0 n=0 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => hòa 
 
 ## vni/kho3e
@@ -4044,8 +4033,8 @@ keys: kho3e
   h        c=0 b=0 n=0 e=3 w=- m=-
   o        c=0 b=0 n=0 e=3 w=- m=-
   3        c=1 b=1 n=1 e=3 w=2001ECF m=-
-  e        c=0 b=2 n=2 e=3 w=- m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  e        c=0 b=0 n=0 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => khỏe 
 
 ## vni/thu3y
@@ -4055,8 +4044,8 @@ keys: thu3y
   h        c=0 b=0 n=0 e=3 w=- m=-
   u        c=0 b=0 n=0 e=3 w=- m=-
   3        c=1 b=1 n=1 e=3 w=2001EE7 m=-
-  y        c=0 b=2 n=2 e=3 w=- m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  y        c=0 b=0 n=0 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => thủy 
 
 ## vni/tuye6t5
@@ -4069,7 +4058,7 @@ keys: tuye6t5
   6        c=1 b=1 n=1 e=3 w=20000EA m=-
   t        c=0 b=0 n=0 e=3 w=- m=-
   5        c=1 b=4 n=4 e=3 w=20,10,2001EC7,11 m=-
-  <sp>     c=0 b=4 n=4 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => tuyệt 
 
 ## vni/quo7r3n
@@ -4105,7 +4094,7 @@ keys: toi1
   o        c=0 b=0 n=0 e=3 w=- m=-
   i        c=0 b=0 n=0 e=3 w=- m=-
   1        c=1 b=2 n=2 e=3 w=20000F3,22 m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => tói 
 
 ## vni/a1
@@ -4113,7 +4102,7 @@ cfg: input=1 table=0 lang=1 spell=1 modern=0 quick=0 restore=0 macro=0/0 autocap
 keys: a1 
   a        c=0 b=0 n=0 e=3 w=- m=-
   1        c=1 b=1 n=1 e=3 w=20000E1 m=-
-  <sp>     c=0 b=1 n=1 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => á 
 
 ## vni/a2
@@ -4121,7 +4110,7 @@ cfg: input=1 table=0 lang=1 spell=1 modern=0 quick=0 restore=0 macro=0/0 autocap
 keys: a2 
   a        c=0 b=0 n=0 e=3 w=- m=-
   2        c=1 b=1 n=1 e=3 w=20000E0 m=-
-  <sp>     c=0 b=1 n=1 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => à 
 
 ## vni/a3
@@ -4129,7 +4118,7 @@ cfg: input=1 table=0 lang=1 spell=1 modern=0 quick=0 restore=0 macro=0/0 autocap
 keys: a3 
   a        c=0 b=0 n=0 e=3 w=- m=-
   3        c=1 b=1 n=1 e=3 w=2001EA3 m=-
-  <sp>     c=0 b=1 n=1 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => ả 
 
 ## vni/a4
@@ -4137,7 +4126,7 @@ cfg: input=1 table=0 lang=1 spell=1 modern=0 quick=0 restore=0 macro=0/0 autocap
 keys: a4 
   a        c=0 b=0 n=0 e=3 w=- m=-
   4        c=1 b=1 n=1 e=3 w=20000E3 m=-
-  <sp>     c=0 b=1 n=1 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => ã 
 
 ## vni/a5
@@ -4145,7 +4134,7 @@ cfg: input=1 table=0 lang=1 spell=1 modern=0 quick=0 restore=0 macro=0/0 autocap
 keys: a5 
   a        c=0 b=0 n=0 e=3 w=- m=-
   5        c=1 b=1 n=1 e=3 w=2001EA1 m=-
-  <sp>     c=0 b=1 n=1 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => ạ 
 
 ## vni/a6
@@ -4153,7 +4142,7 @@ cfg: input=1 table=0 lang=1 spell=1 modern=0 quick=0 restore=0 macro=0/0 autocap
 keys: a6 
   a        c=0 b=0 n=0 e=3 w=- m=-
   6        c=1 b=1 n=1 e=3 w=20000E2 m=-
-  <sp>     c=0 b=1 n=1 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => â 
 
 ## vni/a8
@@ -4161,7 +4150,7 @@ cfg: input=1 table=0 lang=1 spell=1 modern=0 quick=0 restore=0 macro=0/0 autocap
 keys: a8 
   a        c=0 b=0 n=0 e=3 w=- m=-
   8        c=1 b=1 n=1 e=3 w=2000103 m=-
-  <sp>     c=0 b=1 n=1 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => ă 
 
 ## vni/o6
@@ -4169,7 +4158,7 @@ cfg: input=1 table=0 lang=1 spell=1 modern=0 quick=0 restore=0 macro=0/0 autocap
 keys: o6 
   o        c=0 b=0 n=0 e=3 w=- m=-
   6        c=1 b=1 n=1 e=3 w=20000F4 m=-
-  <sp>     c=0 b=1 n=1 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => ô 
 
 ## vni/o7
@@ -4177,7 +4166,7 @@ cfg: input=1 table=0 lang=1 spell=1 modern=0 quick=0 restore=0 macro=0/0 autocap
 keys: o7 
   o        c=0 b=0 n=0 e=3 w=- m=-
   7        c=1 b=1 n=1 e=3 w=20001A1 m=-
-  <sp>     c=0 b=1 n=1 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => ơ 
 
 ## vni/u7
@@ -4185,7 +4174,7 @@ cfg: input=1 table=0 lang=1 spell=1 modern=0 quick=0 restore=0 macro=0/0 autocap
 keys: u7 
   u        c=0 b=0 n=0 e=3 w=- m=-
   7        c=1 b=1 n=1 e=3 w=20001B0 m=-
-  <sp>     c=0 b=1 n=1 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => ư 
 
 ## vni/e6
@@ -4193,7 +4182,7 @@ cfg: input=1 table=0 lang=1 spell=1 modern=0 quick=0 restore=0 macro=0/0 autocap
 keys: e6 
   e        c=0 b=0 n=0 e=3 w=- m=-
   6        c=1 b=1 n=1 e=3 w=20000EA m=-
-  <sp>     c=0 b=1 n=1 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => ê 
 
 ## vni/d9
@@ -4201,7 +4190,7 @@ cfg: input=1 table=0 lang=1 spell=1 modern=0 quick=0 restore=0 macro=0/0 autocap
 keys: d9 
   d        c=0 b=0 n=0 e=3 w=- m=-
   9        c=1 b=1 n=1 e=3 w=2000111 m=-
-  <sp>     c=0 b=1 n=1 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => đ 
 
 ## vni/D9
@@ -4209,7 +4198,7 @@ cfg: input=1 table=0 lang=1 spell=1 modern=0 quick=0 restore=0 macro=0/0 autocap
 keys: D9 
   D        c=0 b=0 n=0 e=3 w=- m=-
   9        c=1 b=1 n=1 e=3 w=2000110 m=-
-  <sp>     c=0 b=1 n=1 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => Đ 
 
 ## vni/a61
@@ -4218,7 +4207,7 @@ keys: a61
   a        c=0 b=0 n=0 e=3 w=- m=-
   6        c=1 b=1 n=1 e=3 w=20000E2 m=-
   1        c=1 b=1 n=1 e=3 w=2001EA5 m=-
-  <sp>     c=0 b=1 n=1 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => ấ 
 
 ## vni/a81
@@ -4227,7 +4216,7 @@ keys: a81
   a        c=0 b=0 n=0 e=3 w=- m=-
   8        c=1 b=1 n=1 e=3 w=2000103 m=-
   1        c=1 b=1 n=1 e=3 w=2001EAF m=-
-  <sp>     c=0 b=1 n=1 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => ắ 
 
 ## vni/u7o7
@@ -4237,7 +4226,7 @@ keys: u7o7
   7        c=1 b=1 n=1 e=3 w=20001B0 m=-
   o        c=0 b=0 n=0 e=3 w=- m=-
   7        c=1 b=2 n=2 e=3 w=20001B0,20001A1 m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => ươ 
 
 ## vni/uo7
@@ -4246,7 +4235,7 @@ keys: uo7
   u        c=0 b=0 n=0 e=3 w=- m=-
   o        c=0 b=0 n=0 e=3 w=- m=-
   7        c=1 b=2 n=2 e=3 w=20001B0,20001A1 m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => ươ 
 
 ## vni/uo73
@@ -4256,7 +4245,7 @@ keys: uo73
   o        c=0 b=0 n=0 e=3 w=- m=-
   7        c=1 b=2 n=2 e=3 w=20001B0,20001A1 m=-
   3        c=1 b=2 n=2 e=3 w=20001B0,2001EDF m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => ưở 
 
 ## vni/tru7o7ng2
@@ -4271,7 +4260,7 @@ keys: tru7o7ng2
   n        c=0 b=0 n=0 e=3 w=- m=-
   g        c=0 b=0 n=0 e=3 w=- m=-
   2        c=1 b=4 n=4 e=3 w=20001B0,2001EDD,2D,5 m=-
-  <sp>     c=0 b=4 n=4 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => trường 
 
 ## vni/nghie6ng
@@ -4295,7 +4284,7 @@ keys: gia1
   i        c=0 b=0 n=0 e=3 w=- m=-
   a        c=0 b=0 n=0 e=3 w=- m=-
   1        c=1 b=1 n=1 e=3 w=20000E1 m=-
-  <sp>     c=0 b=1 n=1 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => giá 
 
 ## vni/gia2
@@ -4305,7 +4294,7 @@ keys: gia2
   i        c=0 b=0 n=0 e=3 w=- m=-
   a        c=0 b=0 n=0 e=3 w=- m=-
   2        c=1 b=1 n=1 e=3 w=20000E0 m=-
-  <sp>     c=0 b=1 n=1 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => già 
 
 ## vni/hoa1
@@ -4315,7 +4304,7 @@ keys: hoa1
   o        c=0 b=0 n=0 e=3 w=- m=-
   a        c=0 b=0 n=0 e=3 w=- m=-
   1        c=1 b=2 n=2 e=3 w=20000F3,0 m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => hóa 
 
 ## vni/khoe3
@@ -4326,7 +4315,7 @@ keys: khoe3
   o        c=0 b=0 n=0 e=3 w=- m=-
   e        c=0 b=0 n=0 e=3 w=- m=-
   3        c=1 b=2 n=2 e=3 w=2001ECF,E m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => khỏe 
 
 ## vni/thuy3
@@ -4337,7 +4326,7 @@ keys: thuy3
   u        c=0 b=0 n=0 e=3 w=- m=-
   y        c=0 b=0 n=0 e=3 w=- m=-
   3        c=1 b=2 n=2 e=3 w=2001EE7,10 m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => thủy 
 
 ## vni/quy2
@@ -4347,7 +4336,7 @@ keys: quy2
   u        c=0 b=0 n=0 e=3 w=- m=-
   y        c=0 b=0 n=0 e=3 w=- m=-
   2        c=1 b=1 n=1 e=3 w=2001EF3 m=-
-  <sp>     c=0 b=1 n=1 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => quỳ 
 
 ## vni/xin1
@@ -4357,7 +4346,7 @@ keys: xin1
   i        c=0 b=0 n=0 e=3 w=- m=-
   n        c=0 b=0 n=0 e=3 w=- m=-
   1        c=1 b=2 n=2 e=3 w=20000ED,2D m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => xín 
 
 ## vni/chao2
@@ -4368,7 +4357,7 @@ keys: chao2
   a        c=0 b=0 n=0 e=3 w=- m=-
   o        c=0 b=0 n=0 e=3 w=- m=-
   2        c=1 b=2 n=2 e=3 w=20000E0,1F m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => chào 
 
 ## vni/viet65
@@ -4380,7 +4369,7 @@ keys: viet65
   t        c=0 b=0 n=0 e=3 w=- m=-
   6        c=1 b=2 n=2 e=3 w=20000EA,11 m=-
   5        c=1 b=3 n=3 e=3 w=22,2001EC7,11 m=-
-  <sp>     c=0 b=3 n=3 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => việt 
 
 ## vni/9
@@ -4405,7 +4394,7 @@ keys: o66
   o        c=0 b=0 n=0 e=3 w=- m=-
   6        c=1 b=1 n=1 e=3 w=20000F4 m=-
   6        c=3 b=1 n=1 e=3 w=1F m=-
-  <sp>     c=0 b=1 n=1 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => o6 
 
 ## vni/a88
@@ -4414,7 +4403,7 @@ keys: a88
   a        c=0 b=0 n=0 e=3 w=- m=-
   8        c=1 b=1 n=1 e=3 w=2000103 m=-
   8        c=3 b=1 n=1 e=3 w=0 m=-
-  <sp>     c=0 b=1 n=1 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => a8 
 
 ## vni/e66
@@ -4423,7 +4412,7 @@ keys: e66
   e        c=0 b=0 n=0 e=3 w=- m=-
   6        c=1 b=1 n=1 e=3 w=20000EA m=-
   6        c=3 b=1 n=1 e=3 w=E m=-
-  <sp>     c=0 b=1 n=1 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => e6 
 
 ## vni/tu7o7i3
@@ -4436,7 +4425,7 @@ keys: tu7o7i3
   7        c=1 b=2 n=2 e=3 w=20001B0,20001A1 m=-
   i        c=0 b=0 n=0 e=3 w=- m=-
   3        c=1 b=3 n=3 e=3 w=20001B0,2001EDF,22 m=-
-  <sp>     c=0 b=3 n=3 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => tưởi 
 
 ## vni/ye6u
@@ -4456,7 +4445,7 @@ keys: ho2a
   o        c=0 b=0 n=0 e=3 w=- m=-
   2        c=1 b=1 n=1 e=3 w=20000F2 m=-
   a        c=1 b=1 n=2 e=4 w=1F,20000E0 m=-
-  <sp>     c=0 b=1 n=2 e=4 w=- m=-
+  <sp>     c=0 b=0 n=0 e=4 w=- m=-
 => hoà 
 
 ## vni-modern/kho3e
@@ -4467,7 +4456,7 @@ keys: kho3e
   o        c=0 b=0 n=0 e=3 w=- m=-
   3        c=1 b=1 n=1 e=3 w=2001ECF m=-
   e        c=1 b=1 n=2 e=4 w=1F,2001EBB m=-
-  <sp>     c=0 b=1 n=2 e=4 w=- m=-
+  <sp>     c=0 b=0 n=0 e=4 w=- m=-
 => khoẻ 
 
 ## vni-modern/thu3y
@@ -4478,7 +4467,7 @@ keys: thu3y
   u        c=0 b=0 n=0 e=3 w=- m=-
   3        c=1 b=1 n=1 e=3 w=2001EE7 m=-
   y        c=1 b=1 n=2 e=4 w=20,2001EF7 m=-
-  <sp>     c=0 b=1 n=2 e=4 w=- m=-
+  <sp>     c=0 b=0 n=0 e=4 w=- m=-
 => thuỷ 
 
 ## vni-modern/hoa2
@@ -4488,7 +4477,7 @@ keys: hoa2
   o        c=0 b=0 n=0 e=3 w=- m=-
   a        c=0 b=0 n=0 e=3 w=- m=-
   2        c=1 b=2 n=2 e=3 w=1F,20000E0 m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => hoà 
 
 ## vni-modern/khoe3
@@ -4499,7 +4488,7 @@ keys: khoe3
   o        c=0 b=0 n=0 e=3 w=- m=-
   e        c=0 b=0 n=0 e=3 w=- m=-
   3        c=1 b=2 n=2 e=3 w=1F,2001EBB m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => khoẻ 
 
 ## vni-modern/thuy3
@@ -4510,7 +4499,7 @@ keys: thuy3
   u        c=0 b=0 n=0 e=3 w=- m=-
   y        c=0 b=0 n=0 e=3 w=- m=-
   3        c=1 b=2 n=2 e=3 w=20,2001EF7 m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => thuỷ 
 
 ## vni/numbers
@@ -4522,7 +4511,7 @@ keys: 123 a1 456
   <sp>     c=0 b=0 n=0 e=3 w=- m=-
   a        c=0 b=0 n=0 e=3 w=- m=-
   1        c=1 b=1 n=1 e=3 w=20000E1 m=-
-  <sp>     c=0 b=1 n=1 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
   4        c=0 b=0 n=0 e=3 w=- m=-
   5        c=0 b=0 n=0 e=3 w=- m=-
   6        c=0 b=0 n=0 e=3 w=- m=-
@@ -4545,7 +4534,7 @@ keys: vie6t5
   6        c=1 b=1 n=1 e=3 w=20000AA m=-
   t        c=0 b=0 n=0 e=3 w=- m=-
   5        c=1 b=3 n=3 e=3 w=22,20000D6,11 m=-
-  <sp>     c=0 b=3 n=3 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => vi<D6>t 
 
 ## vni-table1/ngu7o7i2
@@ -4559,7 +4548,7 @@ keys: ngu7o7i2
   7        c=1 b=2 n=2 e=3 w=20000AD,20000AC m=-
   i        c=0 b=0 n=0 e=3 w=- m=-
   2        c=1 b=3 n=3 e=3 w=20000AD,20000EA,22 m=-
-  <sp>     c=0 b=3 n=3 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => ng<AD><EA>i 
 
 ## vni-table1/d9u7o7ng2
@@ -4574,7 +4563,7 @@ keys: d9u7o7ng2
   n        c=0 b=0 n=0 e=3 w=- m=-
   g        c=0 b=0 n=0 e=3 w=- m=-
   2        c=1 b=4 n=4 e=3 w=20000AD,20000EA,2D,5 m=-
-  <sp>     c=0 b=4 n=4 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => <AE><AD><EA>ng 
 
 ## vni-table1/tuye6t5
@@ -4587,7 +4576,7 @@ keys: tuye6t5
   6        c=1 b=1 n=1 e=3 w=20000AA m=-
   t        c=0 b=0 n=0 e=3 w=- m=-
   5        c=1 b=4 n=4 e=3 w=20,10,20000D6,11 m=-
-  <sp>     c=0 b=4 n=4 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => tuy<D6>t 
 
 ## vni-table1/quo6c1
@@ -4599,7 +4588,7 @@ keys: quo6c1
   6        c=1 b=1 n=1 e=3 w=20000AB m=-
   c        c=0 b=0 n=0 e=3 w=- m=-
   1        c=1 b=2 n=2 e=3 w=20000E8,8 m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => qu<E8>c 
 
 ## vni-table2/vie6t5
@@ -4611,7 +4600,7 @@ keys: vie6t5
   6        c=1 b=1 n=1 e=3 w=200E265 m=-
   t        c=0 b=0 n=0 e=3 w=- m=-
   5        c=1 b=3 n=3 e=3 w=22,200E465,11 m=-
-  <sp>     c=0 b=3 n=3 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => vie<E4>t 
 
 ## vni-table2/ngu7o7i2
@@ -4625,7 +4614,7 @@ keys: ngu7o7i2
   7        c=1 b=2 n=2 e=3 w=20000F6,20000F4 m=-
   i        c=0 b=0 n=0 e=3 w=- m=-
   2        c=1 b=3 n=3 e=3 w=20000F6,200F8F4,22 m=-
-  <sp>     c=0 b=3 n=3 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => ng<F6><F4><F8>i 
 
 ## vni-table2/d9u7o7ng2
@@ -4640,7 +4629,7 @@ keys: d9u7o7ng2
   n        c=0 b=0 n=0 e=3 w=- m=-
   g        c=0 b=0 n=0 e=3 w=- m=-
   2        c=1 b=4 n=4 e=3 w=20000F6,200F8F4,2D,5 m=-
-  <sp>     c=0 b=4 n=4 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => <F1><F6><F4><F8>ng 
 
 ## vni-table2/tuye6t5
@@ -4653,7 +4642,7 @@ keys: tuye6t5
   6        c=1 b=1 n=1 e=3 w=200E265 m=-
   t        c=0 b=0 n=0 e=3 w=- m=-
   5        c=1 b=4 n=4 e=3 w=20,10,200E465,11 m=-
-  <sp>     c=0 b=4 n=4 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => tuye<E4>t 
 
 ## vni-table2/quo6c1
@@ -4665,7 +4654,7 @@ keys: quo6c1
   6        c=1 b=1 n=1 e=3 w=200E26F m=-
   c        c=0 b=0 n=0 e=3 w=- m=-
   1        c=1 b=2 n=2 e=3 w=200E16F,8 m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => quo<E1>c 
 
 ## vni-table3/vie6t5
@@ -4677,7 +4666,7 @@ keys: vie6t5
   6        c=1 b=1 n=1 e=3 w=20000EA m=-
   t        c=0 b=0 n=0 e=3 w=- m=-
   5        c=1 b=3 n=3 e=3 w=22,200A0EA,11 m=-
-  <sp>     c=0 b=3 n=3 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => việt 
 
 ## vni-table3/ngu7o7i2
@@ -4691,7 +4680,7 @@ keys: ngu7o7i2
   7        c=1 b=2 n=2 e=3 w=20001B0,20001A1 m=-
   i        c=0 b=0 n=0 e=3 w=- m=-
   2        c=1 b=3 n=3 e=3 w=20001B0,20041A1,22 m=-
-  <sp>     c=0 b=3 n=3 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => người 
 
 ## vni-table3/d9u7o7ng2
@@ -4706,7 +4695,7 @@ keys: d9u7o7ng2
   n        c=0 b=0 n=0 e=3 w=- m=-
   g        c=0 b=0 n=0 e=3 w=- m=-
   2        c=1 b=4 n=4 e=3 w=20001B0,20041A1,2D,5 m=-
-  <sp>     c=0 b=4 n=4 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => đường 
 
 ## vni-table3/tuye6t5
@@ -4719,7 +4708,7 @@ keys: tuye6t5
   6        c=1 b=1 n=1 e=3 w=20000EA m=-
   t        c=0 b=0 n=0 e=3 w=- m=-
   5        c=1 b=4 n=4 e=3 w=20,10,200A0EA,11 m=-
-  <sp>     c=0 b=4 n=4 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => tuyệt 
 
 ## vni-table3/quo6c1
@@ -4731,7 +4720,7 @@ keys: quo6c1
   6        c=1 b=1 n=1 e=3 w=20000F4 m=-
   c        c=0 b=0 n=0 e=3 w=- m=-
   1        c=1 b=2 n=2 e=3 w=20020F4,8 m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => quốc 
 
 ## vni-table4/vie6t5
@@ -4743,7 +4732,7 @@ keys: vie6t5
   6        c=1 b=1 n=1 e=3 w=20000EA m=-
   t        c=0 b=0 n=0 e=3 w=- m=-
   5        c=1 b=3 n=3 e=3 w=22,200F2EA,11 m=-
-  <sp>     c=0 b=3 n=3 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => vi<EA><F2>t 
 
 ## vni-table4/ngu7o7i2
@@ -4757,7 +4746,7 @@ keys: ngu7o7i2
   7        c=1 b=2 n=2 e=3 w=20000FD,20000F5 m=-
   i        c=0 b=0 n=0 e=3 w=- m=-
   2        c=1 b=3 n=3 e=3 w=20000FD,200CCF5,22 m=-
-  <sp>     c=0 b=3 n=3 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => ng<FD><F5><CC>i 
 
 ## vni-table4/d9u7o7ng2
@@ -4772,7 +4761,7 @@ keys: d9u7o7ng2
   n        c=0 b=0 n=0 e=3 w=- m=-
   g        c=0 b=0 n=0 e=3 w=- m=-
   2        c=1 b=4 n=4 e=3 w=20000FD,200CCF5,2D,5 m=-
-  <sp>     c=0 b=4 n=4 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => <F0><FD><F5><CC>ng 
 
 ## vni-table4/tuye6t5
@@ -4785,7 +4774,7 @@ keys: tuye6t5
   6        c=1 b=1 n=1 e=3 w=20000EA m=-
   t        c=0 b=0 n=0 e=3 w=- m=-
   5        c=1 b=4 n=4 e=3 w=20,10,200F2EA,11 m=-
-  <sp>     c=0 b=4 n=4 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => tuy<EA><F2>t 
 
 ## vni-table4/quo6c1
@@ -4797,7 +4786,7 @@ keys: quo6c1
   6        c=1 b=1 n=1 e=3 w=20000F4 m=-
   c        c=0 b=0 n=0 e=3 w=- m=-
   1        c=1 b=2 n=2 e=3 w=200ECF4,8 m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => qu<F4><EC>c 
 
 ## simpletelex2/vieetj
@@ -4809,7 +4798,7 @@ keys: vieetj
   e        c=1 b=1 n=1 e=3 w=20000EA m=-
   t        c=0 b=0 n=0 e=3 w=- m=-
   j        c=1 b=3 n=3 e=3 w=22,2001EC7,11 m=-
-  <sp>     c=0 b=3 n=3 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => việt 
 
 ## simpletelex2/nguoiwf
@@ -4822,7 +4811,7 @@ keys: nguoiwf
   i        c=0 b=0 n=0 e=3 w=- m=-
   w        c=1 b=3 n=3 e=3 w=20001B0,20001A1,22 m=-
   f        c=1 b=3 n=3 e=3 w=20001B0,2001EDD,22 m=-
-  <sp>     c=0 b=3 n=3 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => người 
 
 ## simpletelex2/uow
@@ -4831,7 +4820,7 @@ keys: uow
   u        c=0 b=0 n=0 e=3 w=- m=-
   o        c=0 b=0 n=0 e=3 w=- m=-
   w        c=1 b=2 n=2 e=3 w=20001B0,20001A1 m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => ươ 
 
 ## simpletelex2/aw
@@ -4839,7 +4828,7 @@ cfg: input=2 table=0 lang=1 spell=1 modern=0 quick=0 restore=0 macro=0/0 autocap
 keys: aw 
   a        c=0 b=0 n=0 e=3 w=- m=-
   w        c=1 b=1 n=1 e=3 w=2000103 m=-
-  <sp>     c=0 b=1 n=1 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => ă 
 
 ## simpletelex2/ow
@@ -4847,7 +4836,7 @@ cfg: input=2 table=0 lang=1 spell=1 modern=0 quick=0 restore=0 macro=0/0 autocap
 keys: ow 
   o        c=0 b=0 n=0 e=3 w=- m=-
   w        c=1 b=1 n=1 e=3 w=20001A1 m=-
-  <sp>     c=0 b=1 n=1 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => ơ 
 
 ## simpletelex2/ddaats
@@ -4855,11 +4844,11 @@ cfg: input=2 table=0 lang=1 spell=1 modern=0 quick=0 restore=0 macro=0/0 autocap
 keys: ddaats 
   d        c=0 b=0 n=0 e=3 w=- m=-
   d        c=1 b=1 n=1 e=3 w=2000111 m=-
-  a        c=0 b=1 n=1 e=3 w=- m=-
+  a        c=0 b=0 n=0 e=3 w=- m=-
   a        c=1 b=1 n=1 e=3 w=20000E2 m=-
   t        c=0 b=0 n=0 e=3 w=- m=-
   s        c=1 b=2 n=2 e=3 w=2001EA5,11 m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => đất 
 
 ## simpletelex2/hoaf
@@ -4869,7 +4858,7 @@ keys: hoaf
   o        c=0 b=0 n=0 e=3 w=- m=-
   a        c=0 b=0 n=0 e=3 w=- m=-
   f        c=1 b=2 n=2 e=3 w=20000F2,0 m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => hòa 
 
 ## simpletelex2/tuwf
@@ -4879,7 +4868,7 @@ keys: tuwf
   u        c=0 b=0 n=0 e=3 w=- m=-
   w        c=1 b=1 n=1 e=3 w=20001B0 m=-
   f        c=1 b=1 n=1 e=3 w=2001EEB m=-
-  <sp>     c=0 b=1 n=1 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => từ 
 
 ## simpletelex2/w
@@ -4937,7 +4926,7 @@ keys: quoocs
   o        c=1 b=1 n=1 e=3 w=20000F4 m=-
   c        c=0 b=0 n=0 e=3 w=- m=-
   s        c=1 b=2 n=2 e=3 w=2001ED1,8 m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => quốc 
 
 ## simpletelex3/vieetj
@@ -4949,7 +4938,7 @@ keys: vieetj
   e        c=1 b=1 n=1 e=3 w=20000EA m=-
   t        c=0 b=0 n=0 e=3 w=- m=-
   j        c=1 b=3 n=3 e=3 w=22,2001EC7,11 m=-
-  <sp>     c=0 b=3 n=3 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => việt 
 
 ## simpletelex3/nguoiwf
@@ -4962,7 +4951,7 @@ keys: nguoiwf
   i        c=0 b=0 n=0 e=3 w=- m=-
   w        c=1 b=3 n=3 e=3 w=20001B0,20001A1,22 m=-
   f        c=1 b=3 n=3 e=3 w=20001B0,2001EDD,22 m=-
-  <sp>     c=0 b=3 n=3 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => người 
 
 ## simpletelex3/uow
@@ -4971,7 +4960,7 @@ keys: uow
   u        c=0 b=0 n=0 e=3 w=- m=-
   o        c=0 b=0 n=0 e=3 w=- m=-
   w        c=1 b=2 n=2 e=3 w=20001B0,20001A1 m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => ươ 
 
 ## simpletelex3/aw
@@ -4979,7 +4968,7 @@ cfg: input=3 table=0 lang=1 spell=1 modern=0 quick=0 restore=0 macro=0/0 autocap
 keys: aw 
   a        c=0 b=0 n=0 e=3 w=- m=-
   w        c=1 b=1 n=1 e=3 w=2000103 m=-
-  <sp>     c=0 b=1 n=1 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => ă 
 
 ## simpletelex3/ow
@@ -4987,7 +4976,7 @@ cfg: input=3 table=0 lang=1 spell=1 modern=0 quick=0 restore=0 macro=0/0 autocap
 keys: ow 
   o        c=0 b=0 n=0 e=3 w=- m=-
   w        c=1 b=1 n=1 e=3 w=20001A1 m=-
-  <sp>     c=0 b=1 n=1 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => ơ 
 
 ## simpletelex3/ddaats
@@ -4995,11 +4984,11 @@ cfg: input=3 table=0 lang=1 spell=1 modern=0 quick=0 restore=0 macro=0/0 autocap
 keys: ddaats 
   d        c=0 b=0 n=0 e=3 w=- m=-
   d        c=1 b=1 n=1 e=3 w=2000111 m=-
-  a        c=0 b=1 n=1 e=3 w=- m=-
+  a        c=0 b=0 n=0 e=3 w=- m=-
   a        c=1 b=1 n=1 e=3 w=20000E2 m=-
   t        c=0 b=0 n=0 e=3 w=- m=-
   s        c=1 b=2 n=2 e=3 w=2001EA5,11 m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => đất 
 
 ## simpletelex3/hoaf
@@ -5009,7 +4998,7 @@ keys: hoaf
   o        c=0 b=0 n=0 e=3 w=- m=-
   a        c=0 b=0 n=0 e=3 w=- m=-
   f        c=1 b=2 n=2 e=3 w=20000F2,0 m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => hòa 
 
 ## simpletelex3/tuwf
@@ -5019,14 +5008,14 @@ keys: tuwf
   u        c=0 b=0 n=0 e=3 w=- m=-
   w        c=1 b=1 n=1 e=3 w=20001B0 m=-
   f        c=1 b=1 n=1 e=3 w=2001EEB m=-
-  <sp>     c=0 b=1 n=1 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => từ 
 
 ## simpletelex3/w
 cfg: input=3 table=0 lang=1 spell=1 modern=0 quick=0 restore=0 macro=0/0 autocaps=0 upper1=0 zfwj=0 qstart=0 qend=0 free=0
 keys: w 
   w        c=1 b=0 n=1 e=4 w=20001B0 m=-
-  <sp>     c=0 b=0 n=1 e=4 w=- m=-
+  <sp>     c=0 b=0 n=0 e=4 w=- m=-
 => ư 
 
 ## simpletelex3/[
@@ -5077,7 +5066,7 @@ keys: quoocs
   o        c=1 b=1 n=1 e=3 w=20000F4 m=-
   c        c=0 b=0 n=0 e=3 w=- m=-
   s        c=1 b=2 n=2 e=3 w=2001ED1,8 m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => quốc 
 
 ## edit/vieetj<bs>
@@ -5089,7 +5078,7 @@ keys: vieetj<bs>
   e        c=1 b=1 n=1 e=3 w=20000EA m=-
   t        c=0 b=0 n=0 e=3 w=- m=-
   j        c=1 b=3 n=3 e=3 w=22,2001EC7,11 m=-
-  <bs>     c=0 b=2 n=2 e=2 w=- m=-
+  <bs>     c=0 b=0 n=0 e=2 w=- m=-
 => việ
 
 ## edit/vieetj<bs><bs>
@@ -5101,7 +5090,7 @@ keys: vieetj<bs><bs>
   e        c=1 b=1 n=1 e=3 w=20000EA m=-
   t        c=0 b=0 n=0 e=3 w=- m=-
   j        c=1 b=3 n=3 e=3 w=22,2001EC7,11 m=-
-  <bs>     c=0 b=2 n=2 e=2 w=- m=-
+  <bs>     c=0 b=0 n=0 e=2 w=- m=-
   <bs>     c=0 b=0 n=0 e=2 w=- m=-
 => vi
 
@@ -5114,7 +5103,7 @@ keys: vieetj<bs><bs><bs>
   e        c=1 b=1 n=1 e=3 w=20000EA m=-
   t        c=0 b=0 n=0 e=3 w=- m=-
   j        c=1 b=3 n=3 e=3 w=22,2001EC7,11 m=-
-  <bs>     c=0 b=2 n=2 e=2 w=- m=-
+  <bs>     c=0 b=0 n=0 e=2 w=- m=-
   <bs>     c=0 b=0 n=0 e=2 w=- m=-
   <bs>     c=0 b=0 n=0 e=2 w=- m=-
 => v
@@ -5128,7 +5117,7 @@ keys: vieetj<bs><bs><bs><bs><bs>
   e        c=1 b=1 n=1 e=3 w=20000EA m=-
   t        c=0 b=0 n=0 e=3 w=- m=-
   j        c=1 b=3 n=3 e=3 w=22,2001EC7,11 m=-
-  <bs>     c=0 b=2 n=2 e=2 w=- m=-
+  <bs>     c=0 b=0 n=0 e=2 w=- m=-
   <bs>     c=0 b=0 n=0 e=2 w=- m=-
   <bs>     c=0 b=0 n=0 e=2 w=- m=-
   <bs>     c=0 b=0 n=0 e=2 w=- m=-
@@ -5214,8 +5203,8 @@ keys: chaof<bs>o
   a        c=0 b=0 n=0 e=3 w=- m=-
   o        c=0 b=0 n=0 e=3 w=- m=-
   f        c=1 b=2 n=2 e=3 w=20000E0,1F m=-
-  <bs>     c=0 b=1 n=1 e=2 w=- m=-
-  o        c=0 b=2 n=2 e=3 w=- m=-
+  <bs>     c=0 b=0 n=0 e=2 w=- m=-
+  o        c=0 b=0 n=0 e=3 w=- m=-
 => chào
 
 ## edit/chaof<bs>s
@@ -5226,7 +5215,7 @@ keys: chaof<bs>s
   a        c=0 b=0 n=0 e=3 w=- m=-
   o        c=0 b=0 n=0 e=3 w=- m=-
   f        c=1 b=2 n=2 e=3 w=20000E0,1F m=-
-  <bs>     c=0 b=1 n=1 e=2 w=- m=-
+  <bs>     c=0 b=0 n=0 e=2 w=- m=-
   s        c=1 b=1 n=1 e=3 w=20000E1 m=-
 => chá
 
@@ -5242,7 +5231,7 @@ keys: xin chaof<bs><bs><bs>
   a        c=0 b=0 n=0 e=3 w=- m=-
   o        c=0 b=0 n=0 e=3 w=- m=-
   f        c=1 b=2 n=2 e=3 w=20000E0,1F m=-
-  <bs>     c=0 b=1 n=1 e=2 w=- m=-
+  <bs>     c=0 b=0 n=0 e=2 w=- m=-
   <bs>     c=0 b=0 n=0 e=2 w=- m=-
   <bs>     c=0 b=0 n=0 e=2 w=- m=-
 => xin c
@@ -5360,7 +5349,7 @@ keys: nghieeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeng
   e        c=0 b=0 n=0 e=3 w=- m=-
   e        c=1 b=1 n=1 e=3 w=20000EA m=-
   e        c=3 b=1 n=1 e=3 w=E m=-
-  e        c=0 b=1 n=1 e=3 w=- m=-
+  e        c=0 b=0 n=0 e=3 w=- m=-
   e        c=0 b=0 n=0 e=3 w=- m=-
   e        c=0 b=0 n=0 e=3 w=- m=-
   e        c=0 b=0 n=0 e=3 w=- m=-
@@ -5555,7 +5544,7 @@ keys: <tempspell>vieetj
   e        c=1 b=1 n=1 e=3 w=20000EA m=-
   t        c=0 b=0 n=0 e=3 w=- m=-
   j        c=1 b=3 n=3 e=3 w=22,2001EC7,11 m=-
-  <sp>     c=0 b=3 n=3 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => việt 
 
 ## temp/engine-off
@@ -5588,7 +5577,7 @@ keys: <tempoff>vieetj vieetj
   e        c=1 b=1 n=1 e=3 w=20000EA m=-
   t        c=0 b=0 n=0 e=3 w=- m=-
   j        c=1 b=3 n=3 e=3 w=22,2001EC7,11 m=-
-  <sp>     c=0 b=3 n=3 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => vieetj việt 
 
 ## upper1/after-dot
@@ -5606,7 +5595,7 @@ keys: xin chaof. toi la minh.
   .        c=0 b=0 n=0 e=3 w=- m=-
   <sp>     c=0 b=0 n=0 e=3 w=- m=-
   t        c=1 b=0 n=1 e=3 w=10011 m=-
-  o        c=0 b=0 n=1 e=3 w=- m=-
+  o        c=0 b=0 n=0 e=3 w=- m=-
   i        c=0 b=0 n=0 e=3 w=- m=-
   <sp>     c=0 b=0 n=0 e=3 w=- m=-
   l        c=0 b=0 n=0 e=3 w=- m=-
@@ -5634,7 +5623,7 @@ keys: xin chaof<enter>toi
   f        c=1 b=2 n=2 e=3 w=20000E0,1F m=-
   <enter>  c=0 b=0 n=0 e=1 w=- m=-
   t        c=1 b=0 n=1 e=3 w=10011 m=-
-  o        c=0 b=0 n=1 e=3 w=- m=-
+  o        c=0 b=0 n=0 e=3 w=- m=-
   i        c=0 b=0 n=0 e=3 w=- m=-
   <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => xin chào\nToi 
@@ -5654,7 +5643,7 @@ keys: ok. dduowngf
   n        c=0 b=0 n=0 e=3 w=- m=-
   g        c=0 b=0 n=0 e=3 w=- m=-
   f        c=1 b=4 n=4 e=3 w=20001B0,2001EDD,2D,5 m=-
-  <sp>     c=0 b=4 n=4 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => ok. Đường 
 
 ## upper1/mid
@@ -5678,7 +5667,7 @@ keys: vieetj
   e        c=1 b=1 n=1 e=3 w=20000EA m=-
   t        c=0 b=0 n=0 e=3 w=- m=-
   j        c=1 b=3 n=3 e=3 w=22,2001EC7,11 m=-
-  <sp>     c=0 b=3 n=3 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => việt 
 
 ## freemark/tuyeetj
@@ -5691,7 +5680,7 @@ keys: tuyeetj
   e        c=1 b=1 n=1 e=3 w=20000EA m=-
   t        c=0 b=0 n=0 e=3 w=- m=-
   j        c=1 b=4 n=4 e=3 w=20,10,2001EC7,11 m=-
-  <sp>     c=0 b=4 n=4 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => tuyệt 
 
 ## freemark/tesst
@@ -5720,7 +5709,7 @@ keys: oaf
   o        c=0 b=0 n=0 e=3 w=- m=-
   a        c=0 b=0 n=0 e=3 w=- m=-
   f        c=1 b=2 n=2 e=3 w=20000F2,0 m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => òa 
 
 ## freemark/ddd
@@ -5729,7 +5718,7 @@ keys: ddd
   d        c=0 b=0 n=0 e=3 w=- m=-
   d        c=1 b=1 n=1 e=3 w=2000111 m=-
   d        c=3 b=1 n=1 e=3 w=2 m=-
-  <sp>     c=0 b=1 n=1 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => dd 
 
 ## freemark/zzs
@@ -5750,7 +5739,7 @@ keys: vieetj
   e        c=1 b=1 n=1 e=3 w=20000EA m=-
   t        c=0 b=0 n=0 e=3 w=- m=-
   j        c=1 b=3 n=3 e=3 w=22,2001EC7,11 m=-
-  <sp>     c=0 b=3 n=3 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => việt 
 
 ## nospell-vn/tuyeetj
@@ -5763,7 +5752,7 @@ keys: tuyeetj
   e        c=1 b=1 n=1 e=3 w=20000EA m=-
   t        c=0 b=0 n=0 e=3 w=- m=-
   j        c=1 b=4 n=4 e=3 w=20,10,2001EC7,11 m=-
-  <sp>     c=0 b=4 n=4 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => tuyệt 
 
 ## nospell-vn/tesst
@@ -5792,7 +5781,7 @@ keys: oaf
   o        c=0 b=0 n=0 e=3 w=- m=-
   a        c=0 b=0 n=0 e=3 w=- m=-
   f        c=1 b=2 n=2 e=3 w=20000F2,0 m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => òa 
 
 ## nospell-vn/dd
@@ -5800,7 +5789,7 @@ cfg: input=0 table=0 lang=1 spell=0 modern=0 quick=0 restore=0 macro=0/0 autocap
 keys: dd 
   d        c=0 b=0 n=0 e=3 w=- m=-
   d        c=1 b=1 n=1 e=3 w=2000111 m=-
-  <sp>     c=0 b=1 n=1 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => đ 
 
 ## nospell-vn/zzs
@@ -5850,7 +5839,7 @@ keys: btw
   b        c=0 b=0 n=0 e=3 w=- m=-
   t        c=0 b=0 n=0 e=3 w=- m=-
   w        c=0 b=0 n=0 e=3 w=- m=-
-  <sp>     c=4 b=3 n=0 e=3 w=- m=B,10,31,11,4,E,31,D,0,10
+  <sp>     c=4 b=3 n=10 e=3 w=- m=B,10,31,11,4,E,31,D,0,10
 => by the way 
 
 ## macro/comma
@@ -5859,7 +5848,7 @@ keys: btw,
   b        c=0 b=0 n=0 e=3 w=- m=-
   t        c=0 b=0 n=0 e=3 w=- m=-
   w        c=0 b=0 n=0 e=3 w=- m=-
-  ,        c=4 b=3 n=0 e=3 w=- m=B,10,31,11,4,E,31,D,0,10
+  ,        c=4 b=3 n=10 e=3 w=- m=B,10,31,11,4,E,31,D,0,10
 => by the way,
 
 ## macro/no-match
@@ -5876,7 +5865,7 @@ cfg: input=0 table=0 lang=1 spell=1 modern=0 quick=0 restore=0 macro=1/0 autocap
 keys: tp 
   t        c=0 b=0 n=0 e=3 w=- m=-
   p        c=0 b=0 n=0 e=3 w=- m=-
-  <sp>     c=4 b=2 n=0 e=3 w=- m=11,4,20000E0,2D,4,31,23,4,2001ED1,31,10004,2001ED3,31,10008,4,20000ED,31,1002E,22,2D,4
+  <sp>     c=4 b=2 n=21 e=3 w=- m=11,4,20000E0,2D,4,31,23,4,2001ED1,31,10004,2001ED3,31,10008,4,20000ED,31,1002E,22,2D,4
 => thành phố Hồ Chí Minh 
 
 ## macro/vn-key
@@ -5890,7 +5879,7 @@ keys: dduowngf
   n        c=0 b=0 n=0 e=3 w=- m=-
   g        c=0 b=0 n=0 e=3 w=- m=-
   f        c=1 b=4 n=4 e=3 w=20001B0,2001EDD,2D,5 m=-
-  <sp>     c=4 b=5 n=4 e=3 w=- m=2000111,20001B0,2001EDD,2D,5,31,23,4,2001ED1
+  <sp>     c=4 b=5 n=9 e=3 w=- m=2000111,20001B0,2001EDD,2D,5,31,23,4,2001ED1
 => đường phố 
 
 ## macro/two
@@ -5899,10 +5888,10 @@ keys: btw tp
   b        c=0 b=0 n=0 e=3 w=- m=-
   t        c=0 b=0 n=0 e=3 w=- m=-
   w        c=0 b=0 n=0 e=3 w=- m=-
-  <sp>     c=4 b=3 n=0 e=3 w=- m=B,10,31,11,4,E,31,D,0,10
+  <sp>     c=4 b=3 n=10 e=3 w=- m=B,10,31,11,4,E,31,D,0,10
   t        c=0 b=0 n=0 e=3 w=- m=-
   p        c=0 b=0 n=0 e=3 w=- m=-
-  <sp>     c=4 b=2 n=0 e=3 w=- m=11,4,20000E0,2D,4,31,23,4,2001ED1
+  <sp>     c=4 b=2 n=9 e=3 w=- m=11,4,20000E0,2D,4,31,23,4,2001ED1
 => by the way thành phố 
 
 ## macro/200-chars
@@ -5912,7 +5901,7 @@ keys: long
   o        c=0 b=0 n=0 e=3 w=- m=-
   n        c=0 b=0 n=0 e=3 w=- m=-
   g        c=0 b=0 n=0 e=3 w=- m=-
-  <sp>     c=4 b=4 n=0 e=3 w=- m=1D,12,13,14,15,17,16,1A,1C,19,1D,12,13,14,15,17,16,1A,1C,19,1D,12,13,14,15,17,16,1A,1C,19,1D,12,13,14,15,17,16,1A,1C,19,1D,12,13,14,15,17,16,1A,1C,19,1D,12,13,14,15,17,16,1A,1C,19,1D,12,13,14,15,17,16,1A,1C,19,1D,12,13,14,15,17,16,1A,1C,19,1D,12,13,14,15,17,16,1A,1C,19,1D,12,13,14,15,17,16,1A,1C,19,1D,12,13,14,15,17,16,1A,1C,19,1D,12,13,14,15,17,16,1A,1C,19,1D,12,13,14,15,17,16,1A,1C,19,1D,12,13,14,15,17,16,1A,1C,19,1D,12,13,14,15,17,16,1A,1C,19,1D,12,13,14,15,17,16,1A,1C,19,1D,12,13,14,15,17,16,1A,1C,19,1D,12,13,14,15,17,16,1A,1C,19,1D,12,13,14,15,17,16,1A,1C,19,1D,12,13,14,15,17,16,1A,1C,19
+  <sp>     c=4 b=4 n=200 e=3 w=- m=1D,12,13,14,15,17,16,1A,1C,19,1D,12,13,14,15,17,16,1A,1C,19,1D,12,13,14,15,17,16,1A,1C,19,1D,12,13,14,15,17,16,1A,1C,19,1D,12,13,14,15,17,16,1A,1C,19,1D,12,13,14,15,17,16,1A,1C,19,1D,12,13,14,15,17,16,1A,1C,19,1D,12,13,14,15,17,16,1A,1C,19,1D,12,13,14,15,17,16,1A,1C,19,1D,12,13,14,15,17,16,1A,1C,19,1D,12,13,14,15,17,16,1A,1C,19,1D,12,13,14,15,17,16,1A,1C,19,1D,12,13,14,15,17,16,1A,1C,19,1D,12,13,14,15,17,16,1A,1C,19,1D,12,13,14,15,17,16,1A,1C,19,1D,12,13,14,15,17,16,1A,1C,19,1D,12,13,14,15,17,16,1A,1C,19,1D,12,13,14,15,17,16,1A,1C,19,1D,12,13,14,15,17,16,1A,1C,19,1D,12,13,14,15,17,16,1A,1C,19
 => 01234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789 
 
 ## macro/long-vn
@@ -5920,7 +5909,7 @@ cfg: input=0 table=0 lang=1 spell=1 modern=0 quick=0 restore=0 macro=1/0 autocap
 keys: tv 
   t        c=0 b=0 n=0 e=3 w=- m=-
   v        c=0 b=0 n=0 e=3 w=- m=-
-  <sp>     c=4 b=2 n=0 e=3 w=- m=11,22,2001EBF,2D,5,31,10009,22,2001EC7,11,31,2000111,2001EB9,23,31,11,22,2001EBF,2D,5,31,10009,22,2001EC7,11,31,2000111,2001EB9,23,31,11,22,2001EBF,2D,5,31,10009,22,2001EC7,11,31,2000111,2001EB9,23,31,11,22,2001EBF,2D,5,31,10009,22,2001EC7,11,31,2000111,2001EB9,23,31,11,22,2001EBF,2D,5,31,10009,22,2001EC7,11,31,2000111,2001EB9,23,31,11,22,2001EBF,2D,5,31,10009,22,2001EC7,11,31,2000111,2001EB9,23,31,11,22,2001EBF,2D,5,31,10009,22,2001EC7,11,31,2000111,2001EB9,23,31,11,22,2001EBF,2D,5,31,10009,22,2001EC7,11,31,2000111,2001EB9,23,31,11,22,2001EBF,2D,5,31,10009,22,2001EC7,11,31,2000111,2001EB9,23,31,11,22,2001EBF,2D,5,31,10009,22,2001EC7,11,31,2000111,2001EB9,23,31
+  <sp>     c=4 b=2 n=150 e=3 w=- m=11,22,2001EBF,2D,5,31,10009,22,2001EC7,11,31,2000111,2001EB9,23,31,11,22,2001EBF,2D,5,31,10009,22,2001EC7,11,31,2000111,2001EB9,23,31,11,22,2001EBF,2D,5,31,10009,22,2001EC7,11,31,2000111,2001EB9,23,31,11,22,2001EBF,2D,5,31,10009,22,2001EC7,11,31,2000111,2001EB9,23,31,11,22,2001EBF,2D,5,31,10009,22,2001EC7,11,31,2000111,2001EB9,23,31,11,22,2001EBF,2D,5,31,10009,22,2001EC7,11,31,2000111,2001EB9,23,31,11,22,2001EBF,2D,5,31,10009,22,2001EC7,11,31,2000111,2001EB9,23,31,11,22,2001EBF,2D,5,31,10009,22,2001EC7,11,31,2000111,2001EB9,23,31,11,22,2001EBF,2D,5,31,10009,22,2001EC7,11,31,2000111,2001EB9,23,31,11,22,2001EBF,2D,5,31,10009,22,2001EC7,11,31,2000111,2001EB9,23,31
 => tiếng Việt đẹp tiếng Việt đẹp tiếng Việt đẹp tiếng Việt đẹp tiếng Việt đẹp tiếng Việt đẹp tiếng Việt đẹp tiếng Việt đẹp tiếng Việt đẹp tiếng Việt đẹp  
 
 ## macro/autocaps-title
@@ -5929,7 +5918,7 @@ keys: Btw
   B        c=0 b=0 n=0 e=3 w=- m=-
   t        c=0 b=0 n=0 e=3 w=- m=-
   w        c=0 b=0 n=0 e=3 w=- m=-
-  <sp>     c=4 b=3 n=0 e=3 w=- m=1000B,10,31,11,4,E,31,D,0,10
+  <sp>     c=4 b=3 n=10 e=3 w=- m=1000B,10,31,11,4,E,31,D,0,10
 => By the way 
 
 ## macro/autocaps-upper
@@ -5938,7 +5927,7 @@ keys: BTW
   B        c=0 b=0 n=0 e=3 w=- m=-
   T        c=0 b=0 n=0 e=3 w=- m=-
   W        c=0 b=0 n=0 e=3 w=- m=-
-  <sp>     c=4 b=3 n=0 e=3 w=- m=1000B,10010,31,10011,10004,1000E,31,1000D,10000,10010
+  <sp>     c=4 b=3 n=10 e=3 w=- m=1000B,10010,31,10011,10004,1000E,31,1000D,10000,10010
 => BY THE WAY 
 
 ## macro/off
@@ -5955,7 +5944,7 @@ cfg: input=0 table=1 lang=1 spell=1 modern=0 quick=0 restore=0 macro=1/0 autocap
 keys: tp 
   t        c=0 b=0 n=0 e=3 w=- m=-
   p        c=0 b=0 n=0 e=3 w=- m=-
-  <sp>     c=4 b=2 n=0 e=3 w=- m=11,4,20000B5,2D,4,31,23,4,20000E8
+  <sp>     c=4 b=2 n=9 e=3 w=- m=11,4,20000B5,2D,4,31,23,4,20000E8
 => th<B5>nh ph<E8> 
 
 ## macro/table2
@@ -5963,7 +5952,7 @@ cfg: input=0 table=2 lang=1 spell=1 modern=0 quick=0 restore=0 macro=1/0 autocap
 keys: tp 
   t        c=0 b=0 n=0 e=3 w=- m=-
   p        c=0 b=0 n=0 e=3 w=- m=-
-  <sp>     c=4 b=2 n=0 e=3 w=- m=11,4,200F861,2D,4,31,23,4,200E16F
+  <sp>     c=4 b=2 n=9 e=3 w=- m=11,4,200F861,2D,4,31,23,4,200E16F
 => tha<F8>nh pho<E1> 
 
 ## macro/table3
@@ -5971,7 +5960,7 @@ cfg: input=0 table=3 lang=1 spell=1 modern=0 quick=0 restore=0 macro=1/0 autocap
 keys: tp 
   t        c=0 b=0 n=0 e=3 w=- m=-
   p        c=0 b=0 n=0 e=3 w=- m=-
-  <sp>     c=4 b=2 n=0 e=3 w=- m=11,4,2004061,2D,4,31,23,4,20020F4
+  <sp>     c=4 b=2 n=9 e=3 w=- m=11,4,2004061,2D,4,31,23,4,20020F4
 => thành phố 
 
 ## macro/table4
@@ -5979,7 +5968,7 @@ cfg: input=0 table=4 lang=1 spell=1 modern=0 quick=0 restore=0 macro=1/0 autocap
 keys: tp 
   t        c=0 b=0 n=0 e=3 w=- m=-
   p        c=0 b=0 n=0 e=3 w=- m=-
-  <sp>     c=4 b=2 n=0 e=3 w=- m=11,4,200CC61,2D,4,31,23,4,200ECF4
+  <sp>     c=4 b=2 n=9 e=3 w=- m=11,4,200CC61,2D,4,31,23,4,200ECF4
 => tha<CC>nh ph<F4><EC> 
 
 ## macro-en/basic
@@ -5988,7 +5977,7 @@ keys: btw
   b        c=0 b=0 n=0 e=0 w=- m=-
   t        c=0 b=0 n=0 e=0 w=- m=-
   w        c=0 b=0 n=0 e=0 w=- m=-
-  <sp>     c=4 b=3 n=0 e=0 w=- m=B,10,31,11,4,E,31,D,0,10
+  <sp>     c=4 b=3 n=10 e=0 w=- m=B,10,31,11,4,E,31,D,0,10
 => by the way 
 
 ## macro-en/after-word
@@ -6000,7 +5989,7 @@ keys: ok btw
   b        c=0 b=0 n=0 e=0 w=- m=-
   t        c=0 b=0 n=0 e=0 w=- m=-
   w        c=0 b=0 n=0 e=0 w=- m=-
-  <sp>     c=4 b=3 n=0 e=0 w=- m=B,10,31,11,4,E,31,D,0,10
+  <sp>     c=4 b=3 n=10 e=0 w=- m=B,10,31,11,4,E,31,D,0,10
 => ok by the way 
 
 ## macro-en/bs
@@ -6011,7 +6000,7 @@ keys: btx<bs>w
   x        c=0 b=0 n=0 e=0 w=- m=-
   <bs>     c=0 b=0 n=0 e=0 w=- m=-
   w        c=0 b=0 n=0 e=0 w=- m=-
-  <sp>     c=4 b=3 n=0 e=0 w=- m=B,10,31,11,4,E,31,D,0,10
+  <sp>     c=4 b=3 n=10 e=0 w=- m=B,10,31,11,4,E,31,D,0,10
 => by the way 
 
 ## macro-en/mouse
@@ -6021,7 +6010,7 @@ keys: bt<mouse>w
   t        c=0 b=0 n=0 e=0 w=- m=-
   <mouse> mouse
   w        c=0 b=0 n=0 e=0 w=- m=-
-  <sp>     c=4 b=3 n=0 e=0 w=- m=B,10,31,11,4,E,31,D,0,10
+  <sp>     c=4 b=3 n=10 e=0 w=- m=B,10,31,11,4,E,31,D,0,10
 => by the way 
 
 ## macro-en/200
@@ -6031,7 +6020,7 @@ keys: long
   o        c=0 b=0 n=0 e=0 w=- m=-
   n        c=0 b=0 n=0 e=0 w=- m=-
   g        c=0 b=0 n=0 e=0 w=- m=-
-  <sp>     c=4 b=4 n=0 e=0 w=- m=1D,12,13,14,15,17,16,1A,1C,19,1D,12,13,14,15,17,16,1A,1C,19,1D,12,13,14,15,17,16,1A,1C,19,1D,12,13,14,15,17,16,1A,1C,19,1D,12,13,14,15,17,16,1A,1C,19,1D,12,13,14,15,17,16,1A,1C,19,1D,12,13,14,15,17,16,1A,1C,19,1D,12,13,14,15,17,16,1A,1C,19,1D,12,13,14,15,17,16,1A,1C,19,1D,12,13,14,15,17,16,1A,1C,19,1D,12,13,14,15,17,16,1A,1C,19,1D,12,13,14,15,17,16,1A,1C,19,1D,12,13,14,15,17,16,1A,1C,19,1D,12,13,14,15,17,16,1A,1C,19,1D,12,13,14,15,17,16,1A,1C,19,1D,12,13,14,15,17,16,1A,1C,19,1D,12,13,14,15,17,16,1A,1C,19,1D,12,13,14,15,17,16,1A,1C,19,1D,12,13,14,15,17,16,1A,1C,19,1D,12,13,14,15,17,16,1A,1C,19
+  <sp>     c=4 b=4 n=200 e=0 w=- m=1D,12,13,14,15,17,16,1A,1C,19,1D,12,13,14,15,17,16,1A,1C,19,1D,12,13,14,15,17,16,1A,1C,19,1D,12,13,14,15,17,16,1A,1C,19,1D,12,13,14,15,17,16,1A,1C,19,1D,12,13,14,15,17,16,1A,1C,19,1D,12,13,14,15,17,16,1A,1C,19,1D,12,13,14,15,17,16,1A,1C,19,1D,12,13,14,15,17,16,1A,1C,19,1D,12,13,14,15,17,16,1A,1C,19,1D,12,13,14,15,17,16,1A,1C,19,1D,12,13,14,15,17,16,1A,1C,19,1D,12,13,14,15,17,16,1A,1C,19,1D,12,13,14,15,17,16,1A,1C,19,1D,12,13,14,15,17,16,1A,1C,19,1D,12,13,14,15,17,16,1A,1C,19,1D,12,13,14,15,17,16,1A,1C,19,1D,12,13,14,15,17,16,1A,1C,19,1D,12,13,14,15,17,16,1A,1C,19,1D,12,13,14,15,17,16,1A,1C,19
 => 01234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789 
 
 ## macro-en/off
@@ -6040,8 +6029,8 @@ keys: btw
   b        c=0 b=0 n=0 e=0 w=- m=-
   t        c=0 b=0 n=0 e=0 w=- m=-
   w        c=0 b=0 n=0 e=0 w=- m=-
-  <sp>     c=4 b=3 n=0 e=0 w=- m=B,10,31,11,4,E,31,D,0,10
-=> by the way 
+  <sp>     c=0 b=0 n=0 e=0 w=- m=-
+=> btw 
 
 ## sentence/Xin chaof cacs banj, tooi laf Minh. 
 cfg: input=0 table=0 lang=1 spell=1 modern=0 quick=0 restore=0 macro=0/0 autocaps=0 upper1=0 zfwj=0 qstart=0 qend=0 free=0
@@ -6055,12 +6044,12 @@ keys: Xin chaof cacs banj, tooi laf Minh.
   a        c=0 b=0 n=0 e=3 w=- m=-
   o        c=0 b=0 n=0 e=3 w=- m=-
   f        c=1 b=2 n=2 e=3 w=20000E0,1F m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
   c        c=0 b=0 n=0 e=3 w=- m=-
   a        c=0 b=0 n=0 e=3 w=- m=-
   c        c=0 b=0 n=0 e=3 w=- m=-
   s        c=1 b=2 n=2 e=3 w=20000E1,8 m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
   b        c=0 b=0 n=0 e=3 w=- m=-
   a        c=0 b=0 n=0 e=3 w=- m=-
   n        c=0 b=0 n=0 e=3 w=- m=-
@@ -6075,7 +6064,7 @@ keys: Xin chaof cacs banj, tooi laf Minh.
   l        c=0 b=0 n=0 e=3 w=- m=-
   a        c=0 b=0 n=0 e=3 w=- m=-
   f        c=1 b=1 n=1 e=3 w=20000E0 m=-
-  <sp>     c=0 b=1 n=1 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
   M        c=0 b=0 n=0 e=3 w=- m=-
   i        c=0 b=0 n=0 e=3 w=- m=-
   n        c=0 b=0 n=0 e=3 w=- m=-
@@ -6096,12 +6085,12 @@ keys: Xin chaof cacs banj, tooi laf Minh.
   a        c=0 b=0 n=0 e=3 w=- m=-
   o        c=0 b=0 n=0 e=3 w=- m=-
   f        c=1 b=2 n=2 e=3 w=20000E0,1F m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
   c        c=0 b=0 n=0 e=3 w=- m=-
   a        c=0 b=0 n=0 e=3 w=- m=-
   c        c=0 b=0 n=0 e=3 w=- m=-
   s        c=1 b=2 n=2 e=3 w=20000E1,8 m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
   b        c=0 b=0 n=0 e=3 w=- m=-
   a        c=0 b=0 n=0 e=3 w=- m=-
   n        c=0 b=0 n=0 e=3 w=- m=-
@@ -6116,7 +6105,7 @@ keys: Xin chaof cacs banj, tooi laf Minh.
   l        c=0 b=0 n=0 e=3 w=- m=-
   a        c=0 b=0 n=0 e=3 w=- m=-
   f        c=1 b=1 n=1 e=3 w=20000E0 m=-
-  <sp>     c=0 b=1 n=1 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
   M        c=0 b=0 n=0 e=3 w=- m=-
   i        c=0 b=0 n=0 e=3 w=- m=-
   n        c=0 b=0 n=0 e=3 w=- m=-
@@ -6143,13 +6132,13 @@ keys: Hoom nay trowif ddepj quas!
   w        c=1 b=1 n=1 e=3 w=20001A1 m=-
   i        c=0 b=0 n=0 e=3 w=- m=-
   f        c=1 b=2 n=2 e=3 w=2001EDD,22 m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
   d        c=0 b=0 n=0 e=3 w=- m=-
   d        c=1 b=1 n=1 e=3 w=2000111 m=-
-  e        c=0 b=1 n=1 e=3 w=- m=-
+  e        c=0 b=0 n=0 e=3 w=- m=-
   p        c=0 b=0 n=0 e=3 w=- m=-
   j        c=1 b=2 n=2 e=3 w=2001EB9,23 m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
   q        c=0 b=0 n=0 e=3 w=- m=-
   u        c=0 b=0 n=0 e=3 w=- m=-
   a        c=0 b=0 n=0 e=3 w=- m=-
@@ -6176,13 +6165,13 @@ keys: Hoom nay trowif ddepj quas!
   w        c=1 b=1 n=1 e=3 w=20001A1 m=-
   i        c=0 b=0 n=0 e=3 w=- m=-
   f        c=1 b=2 n=2 e=3 w=2001EDD,22 m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
   d        c=0 b=0 n=0 e=3 w=- m=-
   d        c=1 b=1 n=1 e=3 w=2000111 m=-
-  e        c=0 b=1 n=1 e=3 w=- m=-
+  e        c=0 b=0 n=0 e=3 w=- m=-
   p        c=0 b=0 n=0 e=3 w=- m=-
   j        c=1 b=2 n=2 e=3 w=2001EB9,23 m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
   q        c=0 b=0 n=0 e=3 w=- m=-
   u        c=0 b=0 n=0 e=3 w=- m=-
   a        c=0 b=0 n=0 e=3 w=- m=-
@@ -6200,7 +6189,7 @@ keys: Vieetj Nam laf mootj ddaats nuwowcs xinh ddepj.
   e        c=1 b=1 n=1 e=3 w=20000EA m=-
   t        c=0 b=0 n=0 e=3 w=- m=-
   j        c=1 b=3 n=3 e=3 w=22,2001EC7,11 m=-
-  <sp>     c=0 b=3 n=3 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
   N        c=0 b=0 n=0 e=3 w=- m=-
   a        c=0 b=0 n=0 e=3 w=- m=-
   m        c=0 b=0 n=0 e=3 w=- m=-
@@ -6208,28 +6197,28 @@ keys: Vieetj Nam laf mootj ddaats nuwowcs xinh ddepj.
   l        c=0 b=0 n=0 e=3 w=- m=-
   a        c=0 b=0 n=0 e=3 w=- m=-
   f        c=1 b=1 n=1 e=3 w=20000E0 m=-
-  <sp>     c=0 b=1 n=1 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
   m        c=0 b=0 n=0 e=3 w=- m=-
   o        c=0 b=0 n=0 e=3 w=- m=-
   o        c=1 b=1 n=1 e=3 w=20000F4 m=-
   t        c=0 b=0 n=0 e=3 w=- m=-
   j        c=1 b=2 n=2 e=3 w=2001ED9,11 m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
   d        c=0 b=0 n=0 e=3 w=- m=-
   d        c=1 b=1 n=1 e=3 w=2000111 m=-
-  a        c=0 b=1 n=1 e=3 w=- m=-
+  a        c=0 b=0 n=0 e=3 w=- m=-
   a        c=1 b=1 n=1 e=3 w=20000E2 m=-
   t        c=0 b=0 n=0 e=3 w=- m=-
   s        c=1 b=2 n=2 e=3 w=2001EA5,11 m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
   n        c=0 b=0 n=0 e=3 w=- m=-
   u        c=0 b=0 n=0 e=3 w=- m=-
   w        c=1 b=1 n=1 e=3 w=20001B0 m=-
-  o        c=0 b=1 n=1 e=3 w=- m=-
+  o        c=0 b=0 n=0 e=3 w=- m=-
   w        c=1 b=2 n=2 e=3 w=20001B0,20001A1 m=-
   c        c=0 b=0 n=0 e=3 w=- m=-
   s        c=1 b=3 n=3 e=3 w=20001B0,2001EDB,8 m=-
-  <sp>     c=0 b=3 n=3 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
   x        c=0 b=0 n=0 e=3 w=- m=-
   i        c=0 b=0 n=0 e=3 w=- m=-
   n        c=0 b=0 n=0 e=3 w=- m=-
@@ -6237,7 +6226,7 @@ keys: Vieetj Nam laf mootj ddaats nuwowcs xinh ddepj.
   <sp>     c=0 b=0 n=0 e=3 w=- m=-
   d        c=0 b=0 n=0 e=3 w=- m=-
   d        c=1 b=1 n=1 e=3 w=2000111 m=-
-  e        c=0 b=1 n=1 e=3 w=- m=-
+  e        c=0 b=0 n=0 e=3 w=- m=-
   p        c=0 b=0 n=0 e=3 w=- m=-
   j        c=1 b=2 n=2 e=3 w=2001EB9,23 m=-
   .        c=0 b=0 n=0 e=3 w=- m=-
@@ -6253,7 +6242,7 @@ keys: Vieetj Nam laf mootj ddaats nuwowcs xinh ddepj.
   e        c=1 b=1 n=1 e=3 w=20000EA m=-
   t        c=0 b=0 n=0 e=3 w=- m=-
   j        c=1 b=3 n=3 e=3 w=22,2001EC7,11 m=-
-  <sp>     c=0 b=3 n=3 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
   N        c=0 b=0 n=0 e=3 w=- m=-
   a        c=0 b=0 n=0 e=3 w=- m=-
   m        c=0 b=0 n=0 e=3 w=- m=-
@@ -6261,28 +6250,28 @@ keys: Vieetj Nam laf mootj ddaats nuwowcs xinh ddepj.
   l        c=0 b=0 n=0 e=3 w=- m=-
   a        c=0 b=0 n=0 e=3 w=- m=-
   f        c=1 b=1 n=1 e=3 w=20000E0 m=-
-  <sp>     c=0 b=1 n=1 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
   m        c=0 b=0 n=0 e=3 w=- m=-
   o        c=0 b=0 n=0 e=3 w=- m=-
   o        c=1 b=1 n=1 e=3 w=20000F4 m=-
   t        c=0 b=0 n=0 e=3 w=- m=-
   j        c=1 b=2 n=2 e=3 w=2001ED9,11 m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
   d        c=0 b=0 n=0 e=3 w=- m=-
   d        c=1 b=1 n=1 e=3 w=2000111 m=-
-  a        c=0 b=1 n=1 e=3 w=- m=-
+  a        c=0 b=0 n=0 e=3 w=- m=-
   a        c=1 b=1 n=1 e=3 w=20000E2 m=-
   t        c=0 b=0 n=0 e=3 w=- m=-
   s        c=1 b=2 n=2 e=3 w=2001EA5,11 m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
   n        c=0 b=0 n=0 e=3 w=- m=-
   u        c=0 b=0 n=0 e=3 w=- m=-
   w        c=1 b=1 n=1 e=3 w=20001B0 m=-
-  o        c=0 b=1 n=1 e=3 w=- m=-
+  o        c=0 b=0 n=0 e=3 w=- m=-
   w        c=1 b=2 n=2 e=3 w=20001B0,20001A1 m=-
   c        c=0 b=0 n=0 e=3 w=- m=-
   s        c=1 b=3 n=3 e=3 w=20001B0,2001EDB,8 m=-
-  <sp>     c=0 b=3 n=3 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
   x        c=0 b=0 n=0 e=3 w=- m=-
   i        c=0 b=0 n=0 e=3 w=- m=-
   n        c=0 b=0 n=0 e=3 w=- m=-
@@ -6290,7 +6279,7 @@ keys: Vieetj Nam laf mootj ddaats nuwowcs xinh ddepj.
   <sp>     c=0 b=0 n=0 e=3 w=- m=-
   d        c=0 b=0 n=0 e=3 w=- m=-
   d        c=1 b=1 n=1 e=3 w=2000111 m=-
-  e        c=0 b=1 n=1 e=3 w=- m=-
+  e        c=0 b=0 n=0 e=3 w=- m=-
   p        c=0 b=0 n=0 e=3 w=- m=-
   j        c=1 b=2 n=2 e=3 w=2001EB9,23 m=-
   .        c=0 b=0 n=0 e=3 w=- m=-
@@ -6304,7 +6293,7 @@ keys: Chuwowng trinhf hojc tieengs Vieetj
   h        c=0 b=0 n=0 e=3 w=- m=-
   u        c=0 b=0 n=0 e=3 w=- m=-
   w        c=1 b=1 n=1 e=3 w=20001B0 m=-
-  o        c=0 b=1 n=1 e=3 w=- m=-
+  o        c=0 b=0 n=0 e=3 w=- m=-
   w        c=1 b=2 n=2 e=3 w=20001B0,20001A1 m=-
   n        c=0 b=0 n=0 e=3 w=- m=-
   g        c=0 b=0 n=0 e=3 w=- m=-
@@ -6315,12 +6304,12 @@ keys: Chuwowng trinhf hojc tieengs Vieetj
   n        c=0 b=0 n=0 e=3 w=- m=-
   h        c=0 b=0 n=0 e=3 w=- m=-
   f        c=1 b=3 n=3 e=3 w=20000EC,2D,4 m=-
-  <sp>     c=0 b=3 n=3 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
   h        c=0 b=0 n=0 e=3 w=- m=-
   o        c=0 b=0 n=0 e=3 w=- m=-
   j        c=1 b=1 n=1 e=3 w=2001ECD m=-
-  c        c=0 b=2 n=2 e=3 w=- m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  c        c=0 b=0 n=0 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
   t        c=0 b=0 n=0 e=3 w=- m=-
   i        c=0 b=0 n=0 e=3 w=- m=-
   e        c=0 b=0 n=0 e=3 w=- m=-
@@ -6328,14 +6317,14 @@ keys: Chuwowng trinhf hojc tieengs Vieetj
   n        c=0 b=0 n=0 e=3 w=- m=-
   g        c=0 b=0 n=0 e=3 w=- m=-
   s        c=1 b=4 n=4 e=3 w=22,2001EBF,2D,5 m=-
-  <sp>     c=0 b=4 n=4 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
   V        c=0 b=0 n=0 e=3 w=- m=-
   i        c=0 b=0 n=0 e=3 w=- m=-
   e        c=0 b=0 n=0 e=3 w=- m=-
   e        c=1 b=1 n=1 e=3 w=20000EA m=-
   t        c=0 b=0 n=0 e=3 w=- m=-
   j        c=1 b=3 n=3 e=3 w=22,2001EC7,11 m=-
-  <sp>     c=0 b=3 n=3 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => Chương trình học tiếng Việt 
 
 ## sentence-modern-restore/Chuwowng trinhf hojc tieengs Vieetj 
@@ -6345,7 +6334,7 @@ keys: Chuwowng trinhf hojc tieengs Vieetj
   h        c=0 b=0 n=0 e=3 w=- m=-
   u        c=0 b=0 n=0 e=3 w=- m=-
   w        c=1 b=1 n=1 e=3 w=20001B0 m=-
-  o        c=0 b=1 n=1 e=3 w=- m=-
+  o        c=0 b=0 n=0 e=3 w=- m=-
   w        c=1 b=2 n=2 e=3 w=20001B0,20001A1 m=-
   n        c=0 b=0 n=0 e=3 w=- m=-
   g        c=0 b=0 n=0 e=3 w=- m=-
@@ -6356,12 +6345,12 @@ keys: Chuwowng trinhf hojc tieengs Vieetj
   n        c=0 b=0 n=0 e=3 w=- m=-
   h        c=0 b=0 n=0 e=3 w=- m=-
   f        c=1 b=3 n=3 e=3 w=20000EC,2D,4 m=-
-  <sp>     c=0 b=3 n=3 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
   h        c=0 b=0 n=0 e=3 w=- m=-
   o        c=0 b=0 n=0 e=3 w=- m=-
   j        c=1 b=1 n=1 e=3 w=2001ECD m=-
-  c        c=0 b=2 n=2 e=3 w=- m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  c        c=0 b=0 n=0 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
   t        c=0 b=0 n=0 e=3 w=- m=-
   i        c=0 b=0 n=0 e=3 w=- m=-
   e        c=0 b=0 n=0 e=3 w=- m=-
@@ -6369,14 +6358,14 @@ keys: Chuwowng trinhf hojc tieengs Vieetj
   n        c=0 b=0 n=0 e=3 w=- m=-
   g        c=0 b=0 n=0 e=3 w=- m=-
   s        c=1 b=4 n=4 e=3 w=22,2001EBF,2D,5 m=-
-  <sp>     c=0 b=4 n=4 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
   V        c=0 b=0 n=0 e=3 w=- m=-
   i        c=0 b=0 n=0 e=3 w=- m=-
   e        c=0 b=0 n=0 e=3 w=- m=-
   e        c=1 b=1 n=1 e=3 w=20000EA m=-
   t        c=0 b=0 n=0 e=3 w=- m=-
   j        c=1 b=3 n=3 e=3 w=22,2001EC7,11 m=-
-  <sp>     c=0 b=3 n=3 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => Chương trình học tiếng Việt 
 
 ## sentence/Anh ddi ddaau theex? 
@@ -6392,7 +6381,7 @@ keys: Anh ddi ddaau theex?
   <sp>     c=0 b=0 n=0 e=3 w=- m=-
   d        c=0 b=0 n=0 e=3 w=- m=-
   d        c=1 b=1 n=1 e=3 w=2000111 m=-
-  a        c=0 b=1 n=1 e=3 w=- m=-
+  a        c=0 b=0 n=0 e=3 w=- m=-
   a        c=1 b=1 n=1 e=3 w=20000E2 m=-
   u        c=0 b=0 n=0 e=3 w=- m=-
   <sp>     c=0 b=0 n=0 e=3 w=- m=-
@@ -6418,7 +6407,7 @@ keys: Anh ddi ddaau theex?
   <sp>     c=0 b=0 n=0 e=3 w=- m=-
   d        c=0 b=0 n=0 e=3 w=- m=-
   d        c=1 b=1 n=1 e=3 w=2000111 m=-
-  a        c=0 b=1 n=1 e=3 w=- m=-
+  a        c=0 b=0 n=0 e=3 w=- m=-
   a        c=1 b=1 n=1 e=3 w=20000E2 m=-
   u        c=0 b=0 n=0 e=3 w=- m=-
   <sp>     c=0 b=0 n=0 e=3 w=- m=-
@@ -6439,35 +6428,35 @@ keys: Thuyr thuyr khoer khoer hoaf hoaf
   u        c=0 b=0 n=0 e=3 w=- m=-
   y        c=0 b=0 n=0 e=3 w=- m=-
   r        c=1 b=2 n=2 e=3 w=2001EE7,10 m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
   t        c=0 b=0 n=0 e=3 w=- m=-
   h        c=0 b=0 n=0 e=3 w=- m=-
   u        c=0 b=0 n=0 e=3 w=- m=-
   y        c=0 b=0 n=0 e=3 w=- m=-
   r        c=1 b=2 n=2 e=3 w=2001EE7,10 m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
   k        c=0 b=0 n=0 e=3 w=- m=-
   h        c=0 b=0 n=0 e=3 w=- m=-
   o        c=0 b=0 n=0 e=3 w=- m=-
   e        c=0 b=0 n=0 e=3 w=- m=-
   r        c=1 b=2 n=2 e=3 w=2001ECF,E m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
   k        c=0 b=0 n=0 e=3 w=- m=-
   h        c=0 b=0 n=0 e=3 w=- m=-
   o        c=0 b=0 n=0 e=3 w=- m=-
   e        c=0 b=0 n=0 e=3 w=- m=-
   r        c=1 b=2 n=2 e=3 w=2001ECF,E m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
   h        c=0 b=0 n=0 e=3 w=- m=-
   o        c=0 b=0 n=0 e=3 w=- m=-
   a        c=0 b=0 n=0 e=3 w=- m=-
   f        c=1 b=2 n=2 e=3 w=20000F2,0 m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
   h        c=0 b=0 n=0 e=3 w=- m=-
   o        c=0 b=0 n=0 e=3 w=- m=-
   a        c=0 b=0 n=0 e=3 w=- m=-
   f        c=1 b=2 n=2 e=3 w=20000F2,0 m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => Thủy thủy khỏe khỏe hòa hòa 
 
 ## sentence-modern-restore/Thuyr thuyr khoer khoer hoaf hoaf 
@@ -6478,35 +6467,35 @@ keys: Thuyr thuyr khoer khoer hoaf hoaf
   u        c=0 b=0 n=0 e=3 w=- m=-
   y        c=0 b=0 n=0 e=3 w=- m=-
   r        c=1 b=2 n=2 e=3 w=20,2001EF7 m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
   t        c=0 b=0 n=0 e=3 w=- m=-
   h        c=0 b=0 n=0 e=3 w=- m=-
   u        c=0 b=0 n=0 e=3 w=- m=-
   y        c=0 b=0 n=0 e=3 w=- m=-
   r        c=1 b=2 n=2 e=3 w=20,2001EF7 m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
   k        c=0 b=0 n=0 e=3 w=- m=-
   h        c=0 b=0 n=0 e=3 w=- m=-
   o        c=0 b=0 n=0 e=3 w=- m=-
   e        c=0 b=0 n=0 e=3 w=- m=-
   r        c=1 b=2 n=2 e=3 w=1F,2001EBB m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
   k        c=0 b=0 n=0 e=3 w=- m=-
   h        c=0 b=0 n=0 e=3 w=- m=-
   o        c=0 b=0 n=0 e=3 w=- m=-
   e        c=0 b=0 n=0 e=3 w=- m=-
   r        c=1 b=2 n=2 e=3 w=1F,2001EBB m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
   h        c=0 b=0 n=0 e=3 w=- m=-
   o        c=0 b=0 n=0 e=3 w=- m=-
   a        c=0 b=0 n=0 e=3 w=- m=-
   f        c=1 b=2 n=2 e=3 w=1F,20000E0 m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
   h        c=0 b=0 n=0 e=3 w=- m=-
   o        c=0 b=0 n=0 e=3 w=- m=-
   a        c=0 b=0 n=0 e=3 w=- m=-
   f        c=1 b=2 n=2 e=3 w=1F,20000E0 m=-
-  <sp>     c=0 b=2 n=2 e=3 w=- m=-
+  <sp>     c=0 b=0 n=0 e=3 w=- m=-
 => Thuỷ thuỷ khoẻ khoẻ hoà hoà 
 
 ## convert/0-uni-to-0

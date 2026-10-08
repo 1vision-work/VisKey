@@ -30,15 +30,19 @@ int vTempOffOpenKey = 0;
 
 namespace vktest {
 
+// backspace/newChars are only meaningful for the codes that process text; the engine leaves stale
+// values for the others, which are not part of the contract (and not exposed by the C API).
 static Step toStep(const vKeyHookState* h) {
     Step s;
     s.code = h->code;
-    s.backspace = h->backspaceCount;
-    s.newChars = h->newCharCount;
     s.ext = h->extCode;
     if (h->code == vWillProcess || h->code == vRestore || h->code == vRestoreAndStartNewSession) {
+        s.backspace = h->backspaceCount;
+        s.newChars = h->newCharCount;
         for (int i = h->newCharCount - 1; i >= 0; i--) s.words.push_back(h->charData[i]);
     } else if (h->code == vReplaceMaro) {
+        s.backspace = h->backspaceCount;
+        s.newChars = (int)h->macroData.size();
         s.macro.assign(h->macroData.begin(), h->macroData.end());
     }
     return s;
@@ -70,7 +74,9 @@ Step OriginalDriver::key(uint16_t keycode, int caps, bool other) {
     return toStep(hook_);
 }
 
+// Like OpenKey.mm: in English mode only macros are handled, and only when enabled.
 Step OriginalDriver::englishKey(uint16_t keycode, int caps, bool other) {
+    if (!(vUseMacro && vUseMacroInEnglishMode)) return Step();
     vEnglishMode(vKeyEventState::KeyDown, keycode, caps != 0, other);
     return toStep(hook_);
 }
@@ -85,7 +91,7 @@ void OriginalDriver::decodeWord(uint32_t word, std::vector<uint16_t>& units) {
     if (word & PURE_CHARACTER_MASK) {
         units.push_back((uint16_t)word);
     } else if (!(word & CHAR_CODE_MASK)) {
-        units.push_back(keyCodeToCharacter(word));
+        { uint16_t ch = keyCodeToCharacter(word); if (ch) units.push_back(ch); }
     } else {
         uint16_t ch = (uint16_t)word;
         if (vCodeTable == 0) {

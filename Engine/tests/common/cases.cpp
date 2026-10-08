@@ -278,7 +278,7 @@ std::vector<Case> build() {
         v.push_back(mk(std::string("telex-modern/") + w, std::string(w) + " ", modern));
     // mark placement keys typed late / early
     for (const char* w : {"vietj", "vieetj", "vieejt", "tojan", "toaanj", "huyeenf", "huyfeen", "soos", "sooos", "ddaaats",
-                          "chuwa", "chuaw", "chua" "w", "nguoiwf", "nguowif", "dduowcj", "dduocwj"})
+                          "chuwa", "chuaw", "nguoiwf", "nguowif", "dduowcj", "dduocwj"})
         v.push_back(mk(std::string("telex-order/") + w, std::string(w) + " ", telex));
 
     // 6. Telex words across the four other code tables -------------------------
