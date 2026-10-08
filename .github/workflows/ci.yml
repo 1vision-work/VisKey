@@ -1,0 +1,61 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  engine-ubuntu:
+    name: Engine tests (ubuntu, gcc)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure
+        run: cmake -S Engine -B build/engine -DCMAKE_BUILD_TYPE=Release
+      - name: Build
+        run: cmake --build build/engine -j
+      - name: Test (snapshot G1 + API)
+        run: ctest --test-dir build/engine --output-on-failure
+
+  engine-sanitizers:
+    name: Engine tests (ubuntu, ASan + UBSan)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure
+        run: >
+          cmake -S Engine -B build/asan -DCMAKE_BUILD_TYPE=Debug
+          -DCMAKE_CXX_FLAGS="-fsanitize=address,undefined -fno-sanitize-recover=undefined -g"
+      - name: Build
+        run: cmake --build build/asan -j --target viskey_engine_tests
+      - name: Test
+        run: ./build/asan/tests/viskey_engine_tests
+
+  engine-macos:
+    name: Engine tests (macos, Apple clang)
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure
+        run: cmake -S Engine -B build/engine -DCMAKE_BUILD_TYPE=Release
+      - name: Build
+        run: cmake --build build/engine -j
+      - name: Test
+        run: ctest --test-dir build/engine --output-on-failure
+
+  # Enabled once the Swift app exists (M0 step 6 onward, done on a Mac).
+  app-macos:
+    name: App build + XCTest (macos-15)
+    if: false
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Generate Xcode project
+        run: |
+          brew install xcodegen
+          xcodegen generate
+      - name: Build and test (Debug)
+        run: >
+          xcodebuild test -project VisKey.xcodeproj -scheme VisKey -configuration Debug
+          -destination 'platform=macOS' CODE_SIGNING_ALLOWED=NO
