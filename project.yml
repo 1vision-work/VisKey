@@ -10,6 +10,12 @@ options:
   createIntermediateGroups: true
   groupSortPosition: top
 
+# Signing lives in an xcconfig so a local, git-ignored override can switch to an Apple Development
+# certificate (ADR-016). Settings below must not set CODE_SIGN_* or they would win over the xcconfig.
+configFiles:
+  Debug: Config/Signing.xcconfig
+  Release: Config/Signing.xcconfig
+
 settings:
   base:
     MARKETING_VERSION: 0.1.0
@@ -18,10 +24,6 @@ settings:
     MACOSX_DEPLOYMENT_TARGET: "13.0"
     CLANG_CXX_LANGUAGE_STANDARD: c++17
     CLANG_CXX_LIBRARY: libc++
-    # Ad-hoc signing for M0; Developer ID arrives with Scripts/build-release.sh (M3).
-    CODE_SIGN_IDENTITY: "-"
-    CODE_SIGN_STYLE: Manual
-    DEVELOPMENT_TEAM: ""
     ENABLE_HARDENED_RUNTIME: YES
     ENABLE_APP_SANDBOX: NO
     ENABLE_USER_SCRIPT_SANDBOXING: YES
