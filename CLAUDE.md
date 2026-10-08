@@ -1,5 +1,7 @@
 # VisKey — Project spec cho Claude Code
 
+Khi CLAUDE.md và docs/decisions.md mâu thuẫn, ADR mới hơn thắng.
+
 ## 0. Tóm tắt
 VisKey là bộ gõ tiếng Việt native cho macOS, menu bar app, fork từ OpenKey (github.com/tuyenvm/OpenKey).
 Giữ nguyên engine C++ của OpenKey, viết lại toàn bộ lớp platform macOS bằng Swift/SwiftUI.
@@ -8,7 +10,7 @@ Mục tiêu số 1: gõ đúng trên Spotlight, Terminal + TUI (Claude Code, Cod
 - License: **GPL-3.0** (bắt buộc, kế thừa OpenKey). Mọi file nguồn có header SPDX `GPL-3.0-or-later`. File engine giữ copyright gốc + dòng "Modified by VisKey contributors".
 - Ghi công: README, About, LICENSE/NOTICE ghi "Based on OpenKey by Mai Vũ Tuyên".
 - Thương hiệu: VisKey, by 1VISION. Bundle ID: `work.1vision.viskey`.
-- Thiết kế UI + brand: `design/` (nguồn sự thật cho giao diện; spec này là nguồn sự thật cho hành vi).
+- Thiết kế UI + brand: `design/` (xem §2). `design/ui/` là nguồn sự thật cho giao diện; CLAUDE.md §6 là nguồn sự thật cho hành vi.
 
 ## 1. Ràng buộc kỹ thuật
 - macOS 13 Ventura+, universal binary (arm64 + x86_64).
@@ -35,9 +37,15 @@ viskey/
 │  └─ Resources/  Assets.xcassets Localizable.xcstrings
 ├─ VisKeyTests/               # XCTest cho Planner, Policy, Bridge
 ├─ Tools/axdump/              # CLI in AX role/subrole của ô đang focus
+├─ Tools/gen-colors.py gen-icons.py   # sinh colorset từ design/tokens.json; sinh design/icons/*.svg
 ├─ Scripts/                   # build-release.sh notarize.sh make-dmg.sh
 ├─ .github/workflows/         # ci.yml (test mỗi push), release.yml (tag v*)
-├─ design/                    # export từ Claude Design
+├─ design/                    # nguồn sự thật cho giao diện + brand (README.md trong đó tóm tắt)
+│  ├─ source/                 # PDF gốc từ Claude Design
+│  ├─ pages/                  # mọi trang PDF render PNG 200 dpi (tham chiếu)
+│  ├─ ui/                     # 21 frame × light/dark, INDEX.md, spec.md, strings.md, notes.md
+│  ├─ icons/                  # SVG vector dựng lại (symbol, appicon, menubar) + compare.png
+│  ├─ brand.md  tokens.json   # brand + token màu (Tools/gen-colors.py → Assets.xcassets)
 └─ docs/                      # decisions.md, app-compat.md, CONTRIBUTING.md
 ```
 Dùng Xcode project được sinh bằng XcodeGen (`project.yml`) để diff được trong git. Nếu XcodeGen không có, dùng `.xcodeproj` thường và ghi ADR.
@@ -47,24 +55,32 @@ Nguồn: `Sources/OpenKey/engine/` của OpenKey (Engine.cpp ~1558 dòng, Vietna
 Engine hiện dùng biến global (`vLanguage`, `vCodeTable`, `pData`...). Refactor CƠ HỌC để gói state vào `struct vk_engine`, KHÔNG đổi logic.
 
 ### C API (`viskey_engine.h`)
+Đây là phần chính của header thực tế (`Engine/include/viskey_engine.h` là nguồn sự thật; chi tiết lý do lệch so với bản nháp ban đầu: docs/decisions.md ADR-007..012).
 ```c
 typedef struct vk_engine vk_engine;
 typedef struct {
-    uint8_t  code;            // DoNothing / WillProcess / Restore / RestoreAndStartNewSession / ReplaceMacro
+    uint8_t  code;            // VK_DO_NOTHING / VK_WILL_PROCESS / VK_BREAK_WORD / VK_RESTORE / VK_REPLACE_MACRO / VK_RESTORE_AND_START_NEW_SESSION
     uint8_t  backspace_count;
     uint8_t  char_count;
-    uint32_t chars[64];       // UTF-32, đúng thứ tự hiển thị (OpenKey trả ngược, bridge đảo lại)
+    uint32_t chars[VK_MAX_RESULT_CHARS];  // 64 "engine word", đúng thứ tự hiển thị (engine đã đảo lại so với OpenKey)
     uint8_t  ext_code;
+    uint16_t macro_total;     // chỉ khác 0 với VK_REPLACE_MACRO: độ dài đầy đủ của macro
 } vk_result;
 
 vk_engine* vk_create(void);
 void       vk_destroy(vk_engine*);
-void       vk_set_option(vk_engine*, vk_option key, int32_t value);
+void       vk_set_option(vk_engine*, vk_option key, int32_t value);   // vk_get_option đọc lại
 vk_result  vk_handle_key(vk_engine*, uint16_t keycode, uint32_t modifiers, vk_event_kind kind);
 void       vk_new_session(vk_engine*);
-void       vk_macro_load(vk_engine*, const uint8_t* blob, size_t len);
-size_t     vk_convert(vk_engine*, const char* utf8, size_t len, vk_code_table from, vk_code_table to, char* out, size_t cap);
+size_t     vk_word_decode(const vk_engine*, uint32_t word, uint16_t out[2]);        // engine word -> 1–2 UTF-16 unit theo bảng mã hiện tại
+size_t     vk_last_macro_words(const vk_engine*, size_t offset, uint32_t* out, size_t cap); // phần macro vượt 64 word
+void       vk_macro_load(vk_engine*, const uint8_t* blob, size_t len);              // + vk_macro_save/add/delete/reload
+size_t     vk_convert_ex(vk_engine*, const char* utf8, size_t len, vk_code_table from, vk_code_table to,
+                         uint32_t flags, char* out, size_t cap);                    // flags VK_CONVERT_* (HOA/thường/…/bỏ dấu); vk_convert = flags 0
 ```
+Lưu ý cho bridge Swift: `chars[]` là *engine word* (key code + cờ, hoặc mã ký tự của bảng mã hiện tại), KHÔNG phải UTF-32; mỗi word phải qua `vk_word_decode` để ra ký tự gửi đi. Ngoài ra header còn có `vk_temp_off_spelling` / `vk_restore_spelling` / `vk_temp_off_engine`, `vk_smart_switch_get/set`, `vk_keycode_to_char`.
+
+Chi tiết: docs/decisions.md ADR-007..012.
 
 ### Test engine (gate G1)
 - Trước khi refactor: viết harness chạy trên engine OpenKey GỐC, ghi snapshot (chuỗi phím → backspace_count, chars) cho ≥ 300 ca.
@@ -106,6 +122,7 @@ KeyTap → ContextResolver → EngineBridge → ReplacementPlanner → EventSend
 | selection | (Shift+←)×N → unicode(string) | 0 ms | 16 |
 | paced | BS, sleep, BS, sleep… → unicode(ký tự 1), sleep, unicode(ký tự 2)… | 3 ms (terminal), 8 ms (terminal trong IDE), user chỉnh 0–30 ms | 1 |
 
+- Tên strategy trong UI (đã chốt): **Tự động** (`auto`: để VisKey chọn theo policy) · **Backspace** (`backspace`) · **Chọn rồi thay** (`selection`) · **Gửi chậm** (`paced`). Trong code, JSON policy và log dùng tên tiếng Anh; chỉ UI dùng tên tiếng Việt.
 - Giữ logic `_syncKey` của OpenKey cho VNI/Unicode tổ hợp (một ký tự có thể là 2 code point → số backspace thật khác nhau).
 - Giữ các case macro, restore, restoreAndStartNewSession, gửi phím gốc sau restore.
 
@@ -138,9 +155,11 @@ Kế thừa OpenKey: Telex, VNI, Simple Telex; bảng mã Unicode, TCVN3, VNI Wi
 Mới ở M4 (P1): VIQR (kiểu gõ + bảng mã), VISCII, NCR decimal/hex; bỏ dấu tự do; ESC khôi phục từ vừa gõ; loại trừ app thủ công; công cụ clipboard (HOA/thường, bỏ dấu); import macro từ file Unikey (`.txt` dạng `tắt:nội dung`), EVKey, OpenKey.
 
 ## 6. UI (theo design/)
+`design/ui/` là nguồn sự thật cho giao diện (frame, kích thước, màu, chuỗi: xem `design/ui/INDEX.md`, `spec.md`, `strings.md`, `design/tokens.json`); CLAUDE.md §6 là nguồn sự thật cho hành vi. Khác nhau về hình thức thì theo design; khác nhau về hành vi thì theo mục này.
+
 - Menu bar: `NSStatusItem` với template image VI / EN / tạm tắt-thiếu quyền. Menu dropdown theo design.
 - Settings (SwiftUI `Settings` scene hoặc `NavigationSplitView` sidebar, ~720×520 pt): Chung · Gõ tiếng Việt · Gõ tắt · Ứng dụng · Chuyển mã · Nâng cao · Giới thiệu.
-  - Tab **Ứng dụng** là quan trọng nhất: bảng app (icon, tên, Tiếng Việt, Chiến lược [Tự động/Backspace/Selection/Paced], Độ trễ slider 0–30 ms, Bảng mã), badge "Tối ưu sẵn" cho app có rule built-in, phần nâng cao ẩn sau disclosure, nút "Báo lỗi app này" copy vào clipboard: bundle ID, version app, AX role/subrole, strategy đang dùng, macOS version, VisKey version.
+  - Tab **Ứng dụng** là quan trọng nhất: bảng app (icon, tên, Tiếng Việt, Cách gửi — strategy [Tự động/Backspace/Chọn rồi thay/Gửi chậm], Độ trễ slider 0–30 ms, Bảng mã), badge "Tối ưu sẵn" cho app có rule built-in, phần nâng cao ẩn sau disclosure, nút "Báo lỗi app này" copy vào clipboard: bundle ID, version app, AX role/subrole, strategy đang dùng, macOS version, VisKey version.
 - Onboarding: chào mừng → quyền Accessibility (nút mở `x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility`, poll `AXIsProcessTrusted()` mỗi 1 s, tự khởi động tap khi được cấp, không bắt restart) → chọn kiểu gõ + hotkey → cảnh báo nếu phát hiện OpenKey/EVKey/Gõ Nhanh đang chạy → ô thử gõ.
 - Mất quyền khi đang chạy → icon chuyển trạng thái thiếu quyền, thông báo, không crash, tự phục hồi khi cấp lại.
 - Light + dark mode, control native theo HIG, Dynamic Type không bắt buộc. Mọi chuỗi tiếng Việt đúng chính tả.
