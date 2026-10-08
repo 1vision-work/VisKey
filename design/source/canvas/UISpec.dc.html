@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>UI spec — Lưới, kích thước, màu, quy tắc</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+.card{background:#FFFFFF;border-radius:16px;padding:24px;display:flex;flex-direction:column;gap:12px;box-sizing:border-box}
+.card h2{margin:0;font-size:18px;font-weight:700;letter-spacing:-0.01em}
+.card p{margin:0;font-size:13px;line-height:1.6;color:#4B515C}
+.mono{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:12px}
+.kv{display:grid;grid-template-columns:200px minmax(0,1fr);gap:4px 12px;font-size:13px;line-height:1.5;padding:7px 0;border-top:1px solid #ECEEF2}
+.kv b{font-weight:600}
+.kv span{color:#343841}
+.sw{width:18px;height:18px;border-radius:5px;box-shadow:inset 0 0 0 1px rgba(0,0,0,.14);flex:none;display:inline-block}
+.tr{display:grid;grid-template-columns:200px 150px 150px 120px minmax(0,1fr);gap:12px;align-items:center;padding:7px 0;border-top:1px solid #ECEEF2;font-size:13px}
+.th{font-size:11px;font-weight:600;color:#666D7A;border-top:none}
+.cl{display:flex;align-items:center;gap:8px}
+.lab{font-family:'JetBrains Mono',monospace;font-size:12px;color:#4B515C}
+</style>
+</helmet>
+<div style="width: 1600px; height: 1700px; box-sizing: border-box; padding: 48px; background: #E9EBF0; font-family: 'Be Vietnam Pro', sans-serif; color: #16181C; display: flex; flex-direction: column; gap: 20px">
+  <div style="display: flex; flex-direction: column; gap: 4px">
+    <div class="lab">UI-spec · đơn vị: pt (1 pt = 1 CSS px trong mockup, vẽ ở @2x)</div>
+    <h1 style="margin: 0; font-size: 40px; font-weight: 700; letter-spacing: -0.02em">UI spec cho SwiftUI</h1>
+    <p style="margin: 0; font-size: 15px; line-height: 1.6; color: #4B515C; max-width: 900px">Mọi frame trong trang này dựng từ các giá trị dưới đây. Nếu SwiftUI có control chuẩn cho một mục, dùng control chuẩn; chỉ tuỳ biến màu nhấn và icon.</p>
+  </div>
+
+  <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px">
+    <div class="card">
+      <h2>Lưới &amp; khoảng cách</h2>
+      <p>Lưới nền 4 pt; khoảng cách dùng bậc 4 · 8 · 12 · 16 · 20 · 24 · 32. Căn mọi cạnh theo bội của 4, ngoại trừ chiều cao control do AppKit quyết định (22, 24, 28).</p>
+      <div style="display: flex; flex-direction: column; gap: 6px; margin-top: 4px">
+        <sc-for list="{{steps}}" as="s" hint-placeholder-count="7">
+          <div style="display: flex; align-items: center; gap: 12px"><span class="mono" style="width: 44px; color: #4B515C">{{s.n}} pt</span><span style="height: 12px; width: {{s.w}}; background: #3044D6; border-radius: 3px"></span><span style="font-size: 12px; color: #666D7A">{{s.u}}</span></div>
+        </sc-for>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Cửa sổ</h2>
+      <div class="kv" style="border-top: none"><b>Cài đặt</b><span>720 × 520, tối thiểu 640 × 480, co giãn được. Sidebar 200. Tab Gõ tiếng Việt và Ứng dụng cuộn khi thấp hơn nội dung.</span></div>
+      <div class="kv"><b>Thanh tiêu đề</b><span>Cao 52, chữ 15 semibold, đường kẻ 0,5 dưới.</span></div>
+      <div class="kv"><b>Nội dung</b><span>Padding 20 mọi cạnh · khoảng cách giữa nhóm 20 (B2: 16) · nhãn nhóm 11 semibold cách nhóm 6, thụt vào 12.</span></div>
+      <div class="kv"><b>Nhóm (Form section)</b><span>Bo 10, viền 0,5, nền nhóm; hàng có đường kẻ 0,5 giữa các hàng.</span></div>
+      <div class="kv"><b>Cửa sổ khác</b><span>Onboarding 560 × 440 cố định · Công cụ chuyển mã 600 × 400 · Cập nhật 620 × 440 · Sheet chẩn đoán rộng 440.</span></div>
+      <div class="kv"><b>Bo góc</b><span>Cửa sổ 14 · nhóm 10 · control 6 · nút chính onboarding 8 · pill 999.</span></div>
+    </div>
+
+    <div class="card">
+      <h2>Kích thước control</h2>
+      <div class="kv" style="border-top: none"><b>Hàng Form</b><span>Cao tối thiểu 36, padding 6 / 12, giữa nhãn và control cách tối thiểu 16. Dòng phụ 11 secondary cách nhãn 2.</span></div>
+      <div class="kv"><b>Toggle</b><span>38 × 22, núm 18 trắng, lề núm 2. Bật: nền primary fill. Tắt: nền xám “off”.</span></div>
+      <div class="kv"><b>Popup / Picker</b><span>Cao 24, rộng tối thiểu 168 (trong bảng: không viền, 12 pt).</span></div>
+      <div class="kv"><b>Nút</b><span>Thường cao 24, padding 12 · onboarding 28 · nút chính onboarding 32, padding 20.</span></div>
+      <div class="kv"><b>Segmented</b><span>Nền thụt 2, mỗi đoạn padding 3 / 12, chữ 12, đoạn chọn có nổi bóng nhẹ.</span></div>
+      <div class="kv"><b>Ô ghi phím</b><span>Cao 24, rộng tối thiểu 104; đang ghi: viền primary 2; có nút ⊗ để xoá.</span></div>
+      <div class="kv"><b>Bảng</b><span>Header 24 · hàng 28 (Gõ tắt) / 30 (Ứng dụng) · sọc xen kẽ bằng nền surface · hàng chọn nền primary fill, chữ trắng.</span></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Màu trong control</h2>
+    <p>Primary và accent đúng token thương hiệu. Riêng chế độ tối: nền tô có chữ trắng (nút chính, toggle bật, hàng được chọn) dùng primary 500 #4C60F5, vì #8193FF với chữ trắng chỉ đạt 2,9:1; #8193FF dùng cho chữ, liên kết, viền chọn, viền focus.</p>
+    <div class="tr th"><span>Vai trò</span><span>Light</span><span>Dark</span><span>Tương phản L / D</span><span>Dùng ở</span></div>
+    <sc-for list="{{colors}}" as="c" hint-placeholder-count="14">
+      <div class="tr"><span style="font-weight: 600">{{c.role}}</span><span class="cl"><span class="sw" style="background: {{c.l}}"></span><span class="mono">{{c.l}}</span></span><span class="cl"><span class="sw" style="background: {{c.d}}"></span><span class="mono">{{c.d}}</span></span><span class="mono" style="color: #4B515C">{{c.cr}}</span><span style="color: #343841">{{c.use}}</span></div>
+    </sc-for>
+  </div>
+
+  <div style="display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 20px">
+    <div class="card">
+      <h2>Quy tắc badge “Tối ưu sẵn”</h2>
+      <div style="display: flex; gap: 20px; align-items: center; flex-wrap: wrap; padding: 6px 0">
+        <div style="background: #FFFFFF; box-shadow: inset 0 0 0 1px #E3E5EA; border-radius: 8px; padding: 10px 14px; display: flex; gap: 10px; align-items: center; font: 13px -apple-system, system-ui, sans-serif"><span>Spotlight</span><span style="font-size: 10px; font-weight: 600; line-height: 14px; padding: 0 6px; border-radius: 999px; background: #E6FAF5; color: #0B7F6D; box-shadow: inset 0 0 0 .5px rgba(11,127,109,.28)">Tối ưu sẵn</span></div>
+        <div style="background: #1F2226; border-radius: 8px; padding: 10px 14px; display: flex; gap: 10px; align-items: center; color: #ECEEF2; font: 13px -apple-system, system-ui, sans-serif"><span>Spotlight</span><span style="font-size: 10px; font-weight: 600; line-height: 14px; padding: 0 6px; border-radius: 999px; background: rgba(63,224,192,.14); color: #3FE0C0; box-shadow: inset 0 0 0 .5px rgba(63,224,192,.3)">Tối ưu sẵn</span></div>
+        <div style="background: #3044D6; border-radius: 8px; padding: 10px 14px; display: flex; gap: 10px; align-items: center; color: #fff; font: 600 13px -apple-system, system-ui, sans-serif"><span>Terminal</span><span style="font-size: 10px; font-weight: 600; line-height: 14px; padding: 0 6px; border-radius: 999px; background: rgba(255,255,255,.22); color: #fff">Tối ưu sẵn</span></div>
+      </div>
+      <div class="kv" style="border-top: none"><b>Khi nào hiện</b><span>Chỉ khi ứng dụng khớp một quy tắc có sẵn trong AppPolicyStore (built-in). Người dùng tự chỉnh không làm hiện badge.</span></div>
+      <div class="kv"><b>Hình dạng</b><span>Pill, chữ 10 semibold, cao 14, padding ngang 6, viền trong 0,5. Đặt ngay sau tên ứng dụng, cách 8.</span></div>
+      <div class="kv"><b>Màu</b><span>Chữ accent text; nền accent 12–14%. Hàng đang chọn: nền trắng 22%, chữ trắng. Không có màu khác.</span></div>
+      <div class="kv"><b>Giới hạn</b><span>Tối đa một badge mỗi hàng. Không dùng ngọc cho nút, toggle hay tiêu đề. Ngọc chỉ có ở: badge này, trạng thái thành công (✓ Đã cấp), dấu mũ trong logo.</span></div>
+      <div class="kv"><b>Trợ năng</b><span><span class="mono">accessibilityLabel</span> “Đã tối ưu sẵn cho ứng dụng này”.</span></div>
+    </div>
+
+    <div class="card">
+      <h2>Chữ &amp; trạng thái</h2>
+      <div class="kv" style="border-top: none"><b>Font</b><span>SF Pro (<span class="mono">.system</span>). Onboarding: tiêu đề Be Vietnam Pro 24 semibold, còn lại SF Pro.</span></div>
+      <div class="kv"><b>Thang chữ</b><span>Header menu 20 bold · Title 1 22 · Title 3 15 semibold · Body 13 · bảng 12 · Subheadline / dòng phụ 11 · mã 11–12 monospace.</span></div>
+      <div class="kv"><b>Focus</b><span>Viền 2 pt primary (#3044D6 / #8193FF) bo theo control, cách mép 0.</span></div>
+      <div class="kv"><b>Disabled</b><span>Toàn bộ control mờ 40%, giữ nguyên bố cục.</span></div>
+      <div class="kv"><b>Giá trị đã chỉnh</b><span>Trong bảng Ứng dụng: chữ primary + semibold; mặc định in màu chữ thường.</span></div>
+      <div class="kv"><b>Văn bản UI</b><span>Ngắn, rõ, trung tính, không chấm than. Mục mở hộp thoại kết thúc bằng “…”. Phím tắt viết bằng ký hiệu ⌃ ⇧ ⌥ ⌘. Dấu kiểu mới: hoà, khoẻ, thuỷ, tuỳ.</span></div>
+      <div class="kv"><b>Thuật ngữ macOS</b><span>Cài đặt hệ thống · Trợ năng · Theo dõi đầu vào · Quyền riêng tư &amp; Bảo mật.</span></div>
+      <div class="kv"><b>Menu bar</b><span>Template image 18 × 18; ba trạng thái VI (khối đặc) / EN (khung rỗng) / tạm dừng (khung rỗng, V gạch chéo).</span></div>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1600,"height":1700}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const steps = [[4, 'gap trong cụm icon + chữ'], [8, 'gap giữa control cùng hàng'], [12, 'padding ngang hàng Form, gap thẻ'], [16, 'khoảng cách tối thiểu nhãn ↔ control'], [20, 'padding cửa sổ, gap giữa nhóm'], [24, 'padding thẻ lớn, lề cửa sổ cập nhật'], [32, 'khoảng cách khối trong onboarding']];
+    const C = (role, l, d, cr, use) => ({ role, l, d, cr, use });
+    return {
+      steps: steps.map((s) => ({ n: s[0], u: s[1], w: (s[0] * 5) + 'px' })),
+      colors: [
+        C('Nền cửa sổ Cài đặt', '#F6F7F9', '#16181C', '—', 'Settings, Công cụ chuyển mã, Cập nhật'),
+        C('Nền nhóm / thẻ', '#FFFFFF', '#1F2226', '—', 'Form section, bảng, khối mã; onboarding đảo lại: cửa sổ #FFFFFF / #16181C, thẻ #F6F7F9 / #1F2226'),
+        C('Chữ', '#16181C', '#ECEEF2', '17,8 / 15,3', 'Nhãn, giá trị, nội dung bảng'),
+        C('Chữ phụ', '#666D7A', '#A3A9B5', '5,2 / 6,8', 'Dòng phụ 11, tiêu đề cột, gợi ý'),
+        C('Đường kẻ', '#E3E5EA', '#2E3238', '—', 'Giữa hàng, dưới thanh tiêu đề (0,5 pt)'),
+        C('Nền control', '#FFFFFF', '#343841', '—', 'Popup, nút, ô ghi phím (viền #C9CCD4 / #4B515C)'),
+        C('Toggle tắt', '#D3D6DD', '#4B515C', '—', 'Nền toggle khi tắt'),
+        C('Primary — chữ, viền', '#3044D6', '#8193FF', '6,6 / 5,7', 'Liên kết, viền chọn và focus, giá trị đã chỉnh, chữ mục sidebar đang chọn'),
+        C('Primary — nền tô', '#3044D6', '#4C60F5', '7,2 / 4,9 với chữ trắng', 'Nút chính, toggle bật, hàng bảng đang chọn'),
+        C('Primary — nền nhạt', '#E6E9FF', '#262D6B', '—', 'Thẻ chọn, mục sidebar đang chọn (#DDE2FF / #262D6B)'),
+        C('Accent ngọc — chữ', '#0B7F6D', '#3FE0C0', '4,9 / 10,7', 'Chữ badge “Tối ưu sẵn”, “Đã cấp”'),
+        C('Accent ngọc — đồ hoạ', '#14B89A', '#3FE0C0', 'chỉ cho hình', 'Dấu ✓ thành công, dấu mũ trong logo'),
+        C('Cảnh báo', '#B45309', '#F5A65B', '5,0 / 8,9', 'Chấm “chưa có quyền”, xung đột bộ gõ; chế độ tối sáng hơn một bậc để đạt AA'),
+        C('Lỗi / huỷ', '#C2302A', '#FF8A80', '5,6 / 7,8', 'Nút “Khôi phục toàn bộ cài đặt…”')
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

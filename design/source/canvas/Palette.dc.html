@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>VisKey — Màu và typography</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#3044D6}a:hover{color:#2534B8}
+.sw{height:84px;border-radius:12px;display:flex;flex-direction:column;justify-content:flex-end;padding:10px;box-sizing:border-box;font-family:'JetBrains Mono',monospace;font-size:11px;line-height:1.35}
+.mono{font-family:'JetBrains Mono',monospace}
+.tr{display:grid;grid-template-columns:150px 110px 110px 1fr;gap:8px;align-items:center;font-size:13px;padding:7px 0;border-bottom:1px solid #ECEEF2}
+.chip{display:inline-flex;align-items:center;gap:6px;font-family:'JetBrains Mono',monospace;font-size:12px}
+.dot{width:14px;height:14px;border-radius:4px;border:1px solid rgba(0,0,0,.12)}
+</style>
+</helmet>
+<div style="width: 1600px; height: 1080px; box-sizing: border-box; padding: 64px; background: #F6F7F9; color: #16181C; font-family: 'Be Vietnam Pro', sans-serif; display: flex; flex-direction: column; gap: 28px">
+  <div style="display: flex; flex-direction: column; gap: 8px">
+    <div class="mono" style="font-size: 13px; letter-spacing: 0.08em; color: #666D7A">VISKEY · BRAND · 04</div>
+    <h1 style="margin: 0; font-size: 48px; font-weight: 700; letter-spacing: -0.02em">Màu &amp; typography</h1>
+  </div>
+
+  <div style="display: grid; grid-template-columns: minmax(0, 1fr) 560px; gap: 24px">
+    <div style="display: flex; flex-direction: column; gap: 18px">
+      <div style="display: flex; flex-direction: column; gap: 8px">
+        <div style="display: flex; gap: 10px; align-items: baseline"><span style="font-size: 16px; font-weight: 700">Lam mực</span><span style="font-size: 13px; color: #666D7A">màu chính — nút, link, trạng thái bật, thương hiệu</span></div>
+        <div style="display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 8px">
+          <div class="sw" style="background: #F2F4FF; color: #2534B8">50<br>#F2F4FF</div>
+          <div class="sw" style="background: #E6E9FF; color: #2534B8">100<br>#E6E9FF</div>
+          <div class="sw" style="background: #C9D0FF; color: #1C2790">200<br>#C9D0FF</div>
+          <div class="sw" style="background: #8193FF; color: #141C66">400 ◐<br>#8193FF</div>
+          <div class="sw" style="background: #4C60F5; color: #FFFFFF">500<br>#4C60F5</div>
+          <div class="sw" style="background: #3044D6; color: #FFFFFF; outline: 3px solid #16181C; outline-offset: 2px">600 ★<br>#3044D6</div>
+          <div class="sw" style="background: #2534B8; color: #FFFFFF">700<br>#2534B8</div>
+          <div class="sw" style="background: #141C66; color: #FFFFFF">900<br>#141C66</div>
+        </div>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 8px">
+        <div style="display: flex; gap: 10px; align-items: baseline"><span style="font-size: 16px; font-weight: 700">Ngọc</span><span style="font-size: 13px; color: #666D7A">màu nhấn — dấu mũ, trạng thái “Tối ưu sẵn”, thành công. Dùng ít.</span></div>
+        <div style="display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 8px">
+          <div class="sw" style="background: #D5F8F0; color: #064A40">100<br>#D5F8F0</div>
+          <div class="sw" style="background: #7BEDD5; color: #064A40">300<br>#7BEDD5</div>
+          <div class="sw" style="background: #3FE0C0; color: #064A40; outline: 3px solid #16181C; outline-offset: 2px">400 ★◐<br>#3FE0C0</div>
+          <div class="sw" style="background: #14B89A; color: #FFFFFF">500<br>#14B89A</div>
+          <div class="sw" style="background: #0B7F6D; color: #FFFFFF">700<br>#0B7F6D</div>
+          <div class="sw" style="background: #064A40; color: #FFFFFF">900<br>#064A40</div>
+          <div class="sw" style="background: #B45309; color: #FFFFFF">cảnh báo<br>#B45309</div>
+          <div class="sw" style="background: #C2302A; color: #FFFFFF">lỗi<br>#C2302A</div>
+        </div>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 8px">
+        <div style="display: flex; gap: 10px; align-items: baseline"><span style="font-size: 16px; font-weight: 700">Xám than</span><span style="font-size: 13px; color: #666D7A">neutral ánh lạnh nhẹ, ăn ý với chrome của macOS</span></div>
+        <div style="display: grid; grid-template-columns: repeat(10, minmax(0, 1fr)); gap: 8px">
+          <div class="sw" style="background: #FFFFFF; color: #4B515C; border: 1px solid #DADDE4">0<br>#FFFFFF</div>
+          <div class="sw" style="background: #F6F7F9; color: #4B515C; border: 1px solid #DADDE4">50<br>#F6F7F9</div>
+          <div class="sw" style="background: #ECEEF2; color: #4B515C">100<br>#ECEEF2</div>
+          <div class="sw" style="background: #DADDE4; color: #343841">200<br>#DADDE4</div>
+          <div class="sw" style="background: #A3A9B5; color: #16181C">400<br>#A3A9B5</div>
+          <div class="sw" style="background: #666D7A; color: #FFFFFF">500<br>#666D7A</div>
+          <div class="sw" style="background: #4B515C; color: #FFFFFF">600<br>#4B515C</div>
+          <div class="sw" style="background: #343841; color: #FFFFFF">700<br>#343841</div>
+          <div class="sw" style="background: #1F2226; color: #FFFFFF">850<br>#1F2226</div>
+          <div class="sw" style="background: #16181C; color: #FFFFFF">900<br>#16181C</div>
+        </div>
+      </div>
+      <div style="font-size: 12px; color: #666D7A">★ màu gốc · ◐ bản dùng trong dark mode</div>
+    </div>
+
+    <!-- tokens table -->
+    <div style="background: #FFFFFF; border: 1px solid #DADDE4; border-radius: 20px; padding: 20px 24px; display: flex; flex-direction: column">
+      <div style="font-size: 16px; font-weight: 700; margin-bottom: 6px">Token · light / dark · tương phản WCAG</div>
+      <div class="tr" style="color: #666D7A; font-weight: 600; font-size: 12px"><span>Token</span><span>Light</span><span>Dark</span><span>Tỉ lệ (L / D)</span></div>
+      <div class="tr"><span>bg</span><span class="chip"><span class="dot" style="background: #FFFFFF"></span>#FFFFFF</span><span class="chip"><span class="dot" style="background: #16181C"></span>#16181C</span><span>—</span></div>
+      <div class="tr"><span>surface</span><span class="chip"><span class="dot" style="background: #F6F7F9"></span>#F6F7F9</span><span class="chip"><span class="dot" style="background: #1F2226"></span>#1F2226</span><span>—</span></div>
+      <div class="tr"><span>text</span><span class="chip"><span class="dot" style="background: #16181C"></span>#16181C</span><span class="chip"><span class="dot" style="background: #ECEEF2"></span>#ECEEF2</span><span>17.8 / 15.3 · AAA</span></div>
+      <div class="tr"><span>text-secondary</span><span class="chip"><span class="dot" style="background: #666D7A"></span>#666D7A</span><span class="chip"><span class="dot" style="background: #A3A9B5"></span>#A3A9B5</span><span>5.2 / 7.5 · AA</span></div>
+      <div class="tr"><span>primary (text/link)</span><span class="chip"><span class="dot" style="background: #3044D6"></span>#3044D6</span><span class="chip"><span class="dot" style="background: #8193FF"></span>#8193FF</span><span>7.2 / 6.4 · AA</span></div>
+      <div class="tr"><span>on-primary</span><span class="chip"><span class="dot" style="background: #FFFFFF"></span>#FFFFFF</span><span class="chip"><span class="dot" style="background: #FFFFFF"></span>#FFFFFF</span><span>7.2 trên #3044D6</span></div>
+      <div class="tr"><span>accent (text)</span><span class="chip"><span class="dot" style="background: #0B7F6D"></span>#0B7F6D</span><span class="chip"><span class="dot" style="background: #3FE0C0"></span>#3FE0C0</span><span>4.9 / 10.7 · AA</span></div>
+      <div class="tr" style="border-bottom: none"><span>accent (đồ hoạ)</span><span class="chip"><span class="dot" style="background: #14B89A"></span>#14B89A</span><span class="chip"><span class="dot" style="background: #3FE0C0"></span>#3FE0C0</span><span style="color: #B45309">2.5 — chỉ cho hình, không cho chữ</span></div>
+    </div>
+  </div>
+
+  <!-- TYPE -->
+  <div style="display: grid; grid-template-columns: minmax(0, 1fr) 560px; gap: 24px; flex-grow: 1">
+    <div style="background: #FFFFFF; border: 1px solid #DADDE4; border-radius: 20px; padding: 24px 28px; display: flex; flex-direction: column; gap: 12px">
+      <div style="display: flex; justify-content: space-between; align-items: baseline"><span style="font-size: 16px; font-weight: 700">Font thương hiệu · Be Vietnam Pro</span><span style="font-size: 13px; color: #666D7A">logo, website, social, banner</span></div>
+      <div style="display: flex; align-items: baseline; gap: 24px"><span style="font-size: 64px; font-weight: 700; letter-spacing: -0.03em; line-height: 1.15">Gõ đúng ở mọi nơi.</span><span class="mono" style="font-size: 12px; color: #666D7A">Display 64 / 700 / −3%</span></div>
+      <div style="display: flex; align-items: baseline; gap: 24px"><span style="font-size: 32px; font-weight: 600; letter-spacing: -0.02em">Thuỷ, khoẻ, hoà — dấu đặt đúng chỗ</span><span class="mono" style="font-size: 12px; color: #666D7A">H2 32 / 600</span></div>
+      <div style="display: flex; align-items: baseline; gap: 24px"><span style="font-size: 18px; line-height: 1.6; max-width: 640px">Bộ gõ tiếng Việt mã nguồn mở cho macOS. Miễn phí, không quảng cáo, không thu thập dữ liệu và chạy hoàn toàn offline.</span><span class="mono" style="font-size: 12px; color: #666D7A">Body 18 / 400 / 1.6</span></div>
+      <div style="display: flex; gap: 32px; align-items: center; margin-top: auto; padding-top: 12px; border-top: 1px solid #ECEEF2">
+        <span style="font-size: 40px; font-weight: 600; letter-spacing: 0.02em">Ẩ Ẫ Ặ Ể Ỗ Ở Ữ Ỹ</span>
+        <span style="font-size: 13px; line-height: 1.5; color: #4B515C; max-width: 360px">Dấu xếp chồng trên chữ hoa được thiết kế riêng, không đè lên nhau — lý do chọn Be Vietnam Pro hơn Inter (chữ hoa có dấu hơi chật) và Lexend (rộng, kém gọn ở UI dày).</span>
+      </div>
+    </div>
+    <div style="background: #16181C; color: #ECEEF2; border-radius: 20px; padding: 24px 28px; display: flex; flex-direction: column; gap: 10px">
+      <div style="display: flex; justify-content: space-between; align-items: baseline"><span style="font-size: 16px; font-weight: 700">Trong app · SF Pro (hệ thống)</span><span style="font-size: 13px; color: #A3A9B5">theo HIG macOS</span></div>
+      <div style="font-family: -apple-system, 'SF Pro Text', 'Be Vietnam Pro', sans-serif; display: flex; flex-direction: column; gap: 9px">
+        <div style="display: flex; justify-content: space-between; align-items: baseline"><span style="font-size: 26px; font-weight: 700">Tiếng Việt</span><span class="mono" style="font-size: 11px; color: #A3A9B5">Large Title 26 · trạng thái menu</span></div>
+        <div style="display: flex; justify-content: space-between; align-items: baseline"><span style="font-size: 22px; font-weight: 600">Chào mừng đến VisKey</span><span class="mono" style="font-size: 11px; color: #A3A9B5">Title 1 · 22</span></div>
+        <div style="display: flex; justify-content: space-between; align-items: baseline"><span style="font-size: 15px; font-weight: 600">Chiến lược gửi phím</span><span class="mono" style="font-size: 11px; color: #A3A9B5">Title 3 · 15</span></div>
+        <div style="display: flex; justify-content: space-between; align-items: baseline"><span style="font-size: 13px">Khôi phục từ sai khi nhấn Esc</span><span class="mono" style="font-size: 11px; color: #A3A9B5">Body · 13</span></div>
+        <div style="display: flex; justify-content: space-between; align-items: baseline"><span style="font-size: 11px; color: #A3A9B5">Áp dụng cho ô tìm kiếm có tự hoàn thành.</span><span class="mono" style="font-size: 11px; color: #A3A9B5">Subheadline · 11</span></div>
+      </div>
+      <div style="margin-top: auto; padding-top: 12px; border-top: 1px solid #343841; display: flex; justify-content: space-between; align-items: baseline">
+        <span class="mono" style="font-size: 15px; color: #3FE0C0">brew install --cask viskey</span><span class="mono" style="font-size: 11px; color: #A3A9B5">JetBrains Mono · code</span>
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1600,"height":1080}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

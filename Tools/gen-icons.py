@@ -1,80 +1,113 @@
 #!/usr/bin/env python3
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Generate VisKey vector icons into design/icons/ from the geometry in design/brand.md.
+"""Generate VisKey vector icons into design/icons/.
 
-Usage: python3 Tools/gen-icons.py
+Every number below is copied from the Claude Design canvas (Logo, Icons, Assets boards);
+see design/brand.md. Nothing is measured from raster images.
+
+Usage: python3 Tools/gen-icons.py        (needs: pip install shapely)
 """
-import math
 from pathlib import Path
+
+from shapely.geometry import LineString, box
+from shapely.ops import unary_union
 
 OUT = Path(__file__).resolve().parent.parent / "design" / "icons"
 
-INK_500, INK_600, INK_700, INK_400 = "#4C60F5", "#3044D6", "#2534B8", "#8193FF"
+INK_400, INK_600 = "#8193FF", "#3044D6"
 JADE_400, JADE_500 = "#3FE0C0", "#14B89A"
 
-# --- Symbol on a 64 u grid (measured from design/pages/brand-v1-02.png) -----------------
-# V: stroke 8.5 u, 68 deg between arms (half angle 34 deg). Caret: stroke 6 u, 20 u wide
-# (centreline end to end). Round caps and joins.
-HALF = math.radians(34)
+# --- Symbol, 64 u grid ------------------------------------------------------------------
+# V: stroke 8.5 u, 68 deg between arms. Caret: stroke 6 u, 20 u wide. Round caps and joins.
+V = "M15 28L32 53L49 28"
+CARET = "M22 21L32 12L42 21"
+# Hinted (<= 32 px): V 11 u, caret 8.5 u, drawn larger so it fills the cell.
+V_HINT = "M14 30L32 54L50 30"
+CARET_HINT = "M21 22L32 11L43 22"
 
 
-def symbol_paths(v_w=8.5, c_w=6.0, zoom=1.0):
-    cx, cy = 32.0, 32.0
-    def z(x, y):
-        return (cx + (x - cx) * zoom, cy + (y - cy) * zoom)
-    apex = z(32, 52.0)
-    ve_l, ve_r = z(32 - 17.1, 26.6), z(32 + 17.1, 26.6)
-    cap = z(32, 10.5)
-    ce_l, ce_r = z(32 - 10, 19.5), z(32 + 10, 19.5)
-    v = f"M{ve_l[0]:.2f} {ve_l[1]:.2f} L{apex[0]:.2f} {apex[1]:.2f} L{ve_r[0]:.2f} {ve_r[1]:.2f}"
-    c = f"M{ce_l[0]:.2f} {ce_l[1]:.2f} L{cap[0]:.2f} {cap[1]:.2f} L{ce_r[0]:.2f} {ce_r[1]:.2f}"
-    return v, c, v_w, c_w
-
-
-def symbol_svg(v_color, c_color, v_w=8.5, c_w=6.0, zoom=1.0, size=64):
-    v, c, vw, cw = symbol_paths(v_w, c_w, zoom)
+def symbol(v_color, c_color, v=V, c=CARET, vw=8.5, cw=6, size=64):
     return (f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="{size}" height="{size}">\n'
             f'  <g fill="none" stroke-linecap="round" stroke-linejoin="round">\n'
-            f'    <path d="{v}" stroke="{v_color}" stroke-width="{vw}"/>\n'
-            f'    <path d="{c}" stroke="{c_color}" stroke-width="{cw}"/>\n  </g>\n</svg>\n')
+            f'    <path d="{c}" stroke="{c_color}" stroke-width="{cw}"/>\n'
+            f'    <path d="{v}" stroke="{v_color}" stroke-width="{vw}"/>\n  </g>\n</svg>\n')
 
 
-# --- App icon: 1024 canvas, 824 pt squircle, radius 185 pt -----------------------------
-def appicon_svg():
-    s = 9.7  # pt per grid unit (V stroke 8.5 u -> 82 pt)
-    dy = 6   # optical offset measured on the reference
-    v, c, _, _ = symbol_paths()
-    t = f'translate({512 - 32 * s:.2f} {512 - 32 * s + dy:.2f}) scale({s})'
-    return f'''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+# --- App icon: 100 u canvas = 1024 px; squircle 80.4 u (= 824 pt), radius 18 u (= 185 pt) ---
+GLYPH = 'transform="translate(19.6 19.1) scale(0.95)" fill="none" stroke-linecap="round" stroke-linejoin="round"'
+
+
+def appicon():
+    return f'''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="1024" height="1024">
   <defs>
     <linearGradient id="body" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="{INK_500}"/>
-      <stop offset="1" stop-color="{INK_700}"/>
+      <stop offset="0" stop-color="#5266F7"/>
+      <stop offset="1" stop-color="#2433B5"/>
     </linearGradient>
     <linearGradient id="rim" x1="0" y1="0" x2="0" y2="1">
       <stop offset="0" stop-color="#FFFFFF" stop-opacity="0.35"/>
-      <stop offset="0.18" stop-color="#FFFFFF" stop-opacity="0"/>
+      <stop offset="0.5" stop-color="#FFFFFF" stop-opacity="0"/>
     </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="1.6" stdDeviation="1.8" flood-color="#0E0F12" flood-opacity="0.3"/>
+    </filter>
   </defs>
-  <rect x="100" y="100" width="824" height="824" rx="185" ry="185" fill="url(#body)"/>
-  <rect x="100.75" y="100.75" width="822.5" height="822.5" rx="184.25" ry="184.25" fill="none" stroke="url(#rim)" stroke-width="1.5"/>
-  <!-- key face -->
-  <rect x="215" y="215" width="594" height="594" rx="128" ry="128" fill="#FFFFFF" fill-opacity="0.08"/>
-  <g transform="{t}" fill="none" stroke-linecap="round" stroke-linejoin="round">
-    <path d="{v}" stroke="#FFFFFF" stroke-width="8.5"/>
-    <path d="{c}" stroke="{JADE_400}" stroke-width="6"/>
+  <rect x="9.8" y="9.8" width="80.4" height="80.4" rx="18" fill="url(#body)" filter="url(#shadow)"/>
+  <rect x="19" y="18" width="62" height="62" rx="13" fill="#FFFFFF" fill-opacity="0.07"/>
+  <rect x="10.3" y="10.3" width="79.4" height="79.4" rx="17.6" fill="none" stroke="url(#rim)" stroke-width="0.8"/>
+  <g {GLYPH}>
+    <path d="{CARET}" stroke="{JADE_400}" stroke-width="6"/>
+    <path d="{V}" stroke="#FFFFFF" stroke-width="8.5"/>
   </g>
 </svg>
 '''
 
 
-# --- Menu bar templates: 18 x 18 pt, black + alpha only --------------------------------
-# Measured from design/pages/brand-v1-03.png (17.9 px/pt). Shapes are outlined with shapely
-# so the files are plain filled paths: the "cut-outs" are real holes (alpha 0), not masks.
-from shapely.geometry import LineString, box
-from shapely.ops import unary_union
+def appicon_small():
+    """32 px and below: no key face, no rim, no shadow; strokes 6.5 / 9."""
+    return f'''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="32" height="32">
+  <defs>
+    <linearGradient id="body" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#5266F7"/>
+      <stop offset="1" stop-color="#2433B5"/>
+    </linearGradient>
+  </defs>
+  <rect x="9.8" y="9.8" width="80.4" height="80.4" rx="18" fill="url(#body)"/>
+  <g {GLYPH}>
+    <path d="{CARET}" stroke="{JADE_400}" stroke-width="6.5"/>
+    <path d="{V}" stroke="#FFFFFF" stroke-width="9"/>
+  </g>
+</svg>
+'''
 
-Q = 24  # segments per quarter circle
+
+def appicon_hinted():
+    """16 px: flat ink-600 tile, larger glyph, V 11 u / caret 8.5 u."""
+    return f'''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="16" height="16">
+  <rect x="6" y="6" width="88" height="88" rx="20" fill="{INK_600}"/>
+  <g transform="translate(16.4 16) scale(1.05)" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <path d="{CARET_HINT}" stroke="{JADE_400}" stroke-width="8.5"/>
+    <path d="{V_HINT}" stroke="#FFFFFF" stroke-width="11"/>
+  </g>
+</svg>
+'''
+
+
+def favicon():
+    """Favicon: no squircle padding, tile fills the cell (Assets board)."""
+    return f'''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="32" height="32">
+  <rect x="0" y="0" width="100" height="100" rx="22" fill="{INK_600}"/>
+  <g transform="translate(12 12) scale(1.18)" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <path d="{CARET_HINT}" stroke="{JADE_400}" stroke-width="8.5"/>
+    <path d="{V_HINT}" stroke="#FFFFFF" stroke-width="11"/>
+  </g>
+</svg>
+'''
+
+
+# --- Menu bar templates: 18 x 18 pt, black + alpha only ---------------------------------
+# Outlined with shapely so the files are plain filled paths: cut-outs are real holes (alpha 0).
+Q = 24
 
 
 def line(pts, w):
@@ -85,14 +118,9 @@ def rrect(x, y, w, h, r):
     return box(x + r, y + r, x + w - r, y + h - r).buffer(r, quad_segs=Q)
 
 
-def outline_rect():  # stroke 1.5 pt ring, outer 15 x 14 pt
-    return rrect(1.5, 2, 15, 14, 4.2).difference(rrect(3, 3.5, 12, 11, 2.7))
-
-
-def glyph_shapes():
-    v = line([(5.5, 8.5), (9, 13.7), (12.5, 8.5)], 1.7)
-    c = line([(6.65, 6.85), (9, 4.5), (11.35, 6.85)], 1.4)
-    return unary_union([v, c])
+def frame():  # outline 13.5 x 12.5, stroke 1.5, radius 3 on the centre line
+    return rrect(2.25 - .75, 2.75 - .75, 13.5 + 1.5, 12.5 + 1.5, 3.75).difference(
+        rrect(2.25 + .75, 2.75 + .75, 13.5 - 1.5, 12.5 - 1.5, 2.25))
 
 
 def to_path(geom):
@@ -105,38 +133,47 @@ def to_path(geom):
     return " ".join(d)
 
 
-def mb_svg(geom):
-    return (f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 18" width="18" height="18">\n'
+def mb(geom):
+    return ('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 18" width="18" height="18">\n'
             f'  <path fill="#000" fill-rule="evenodd" d="{to_path(geom)}"/>\n</svg>\n')
 
 
 def menubar_vi():
-    return mb_svg(rrect(1.5, 2, 15, 14, 4.2).difference(glyph_shapes()))
+    solid = rrect(1.5, 2, 15, 14, 3.5)
+    cut = unary_union([line([(6.6, 6.3), (9, 4.4), (11.4, 6.3)], 1.5),
+                       line([(5.6, 8.2), (9, 13.6), (12.4, 8.2)], 2)])
+    return mb(solid.difference(cut))
 
 
 def menubar_en():
-    e = unary_union([line([(11.25, 5.87), (7.1, 5.87), (7.1, 12.07), (11.25, 12.07)], 1.7),
-                     line([(7.1, 8.94), (9.8, 8.94)], 1.7)])
-    return mb_svg(unary_union([outline_rect(), e]))
+    e = unary_union([line([(11.2, 5.9), (7, 5.9), (7, 12.1), (11.2, 12.1)], 1.6),
+                     line([(7, 9), (10.5, 9)], 1.6)])
+    return mb(unary_union([frame(), e]))
 
 
 def menubar_off():
-    slash = [(2.1, 16.3), (16.2, 2.0)]
-    body = unary_union([outline_rect(), glyph_shapes()]).difference(line(slash, 4.4))
-    return mb_svg(unary_union([body, line(slash, 1.5)]))
+    slash = [(2, 16), (16, 2)]
+    glyph = unary_union([line([(7.2, 6.6), (9, 5.2), (10.8, 6.6)], 1.4),
+                         line([(6.4, 8.2), (9, 12.4), (11.6, 8.2)], 1.4)])
+    # design: a 3.4 pt gap (line from (1.6,16.4) to (16.4,1.6)) in the background colour, then the 1.4 pt slash
+    gap = line([(1.6, 16.4), (16.4, 1.6)], 3.4)
+    return mb(unary_union([unary_union([frame(), glyph]).difference(gap), line(slash, 1.4)]))
 
 
 def main():
     OUT.mkdir(parents=True, exist_ok=True)
     files = {
-        "symbol.svg": symbol_svg(INK_600, JADE_500),
-        "symbol-dark.svg": symbol_svg(INK_400, JADE_400),
-        "symbol-mono.svg": symbol_svg("#000000", "#000000"),
-        "symbol-hinted.svg": symbol_svg(INK_600, JADE_500, v_w=11, c_w=8.5, zoom=1.12),
+        "symbol.svg": symbol(INK_600, JADE_500),
+        "symbol-dark.svg": symbol(INK_400, JADE_400),
+        "symbol-mono.svg": symbol("#000000", "#000000"),
+        "symbol-hinted.svg": symbol(INK_600, JADE_500, V_HINT, CARET_HINT, 11, 8.5, 16),
         "menubar-vi.svg": menubar_vi(),
         "menubar-en.svg": menubar_en(),
         "menubar-off.svg": menubar_off(),
-        "appicon-1024.svg": appicon_svg(),
+        "appicon-1024.svg": appicon(),
+        "appicon-small.svg": appicon_small(),
+        "appicon-hinted-16.svg": appicon_hinted(),
+        "favicon.svg": favicon(),
     }
     for name, body in files.items():
         (OUT / name).write_text(body, encoding="utf-8")

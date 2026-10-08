@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>A2 — Menu dropdown, đang ở Tiếng Việt</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+.lt{--bar:rgba(255,255,255,.58);--tx:#16181C;--cut:#E3E9F6;--pill:rgba(20,22,28,.14);--mbg:rgba(248,249,251,.94);--sec:#666D7A;--sep:rgba(20,22,28,.12);--hl:#3044D6;--pr:#3044D6;--ac:#14B89A;--sel:#E6E9FF}
+.dk{--bar:rgba(22,24,30,.58);--tx:#F5F6F8;--cut:#171C2D;--pill:rgba(255,255,255,.2);--mbg:rgba(40,43,50,.95);--sec:#A3A9B5;--sep:rgba(255,255,255,.14);--hl:#4C60F5;--pr:#8193FF;--ac:#3FE0C0;--sel:#262D6B}
+.scene{position:relative;width:760px;height:420px;border-radius:14px;overflow:hidden;font:13px/1.3 -apple-system,BlinkMacSystemFont,'SF Pro Text','Be Vietnam Pro',system-ui,sans-serif;color:var(--tx)}
+.mb{position:absolute;left:0;right:0;top:0;height:24px;box-sizing:border-box;display:flex;align-items:center;gap:14px;padding:0 12px 0 14px;background:var(--bar);font-weight:500;white-space:nowrap}
+.mb .l{display:flex;gap:16px;margin-right:auto}
+.ic{display:inline-flex;align-items:center;justify-content:center;width:28px;height:20px;border-radius:5px}
+.ic.p{background:var(--pill)}
+.menu{position:absolute;box-sizing:border-box;padding:6px;border-radius:12px;background:var(--mbg);box-shadow:0 0 0 .5px rgba(0,0,0,.3),0 12px 36px rgba(0,0,0,.3);display:flex;flex-direction:column}
+.mi{display:flex;align-items:center;height:24px;padding:0 10px 0 6px;border-radius:6px;white-space:nowrap}
+.mi .ck{width:18px;flex:none;font-size:12px;text-align:center}
+.mi .sc{margin-left:auto;color:var(--sec);letter-spacing:.08em}
+.mi.hl{background:var(--hl);color:#fff}.mi.hl .sc{color:rgba(255,255,255,.85)}
+.sp{height:1px;background:var(--sep);margin:4px 8px}
+.lab{font-family:'JetBrains Mono',monospace;font-size:12px;color:#4B515C}
+.dn{background:#FFFFFF;border-radius:10px;padding:12px 16px;font-size:13px;line-height:1.6;color:#343841;max-width:1560px}
+</style>
+</helmet>
+<div style="width: 1700px; height: 800px; box-sizing: border-box; padding: 40px 48px; background: #E9EBF0; font-family: 'Be Vietnam Pro', sans-serif; color: #16181C; display: flex; flex-direction: column; gap: 18px">
+  <div style="display: flex; flex-direction: column; gap: 4px">
+    <div class="lab">A2-menu-vi · menu rộng 268 pt, hàng 24 pt, bo 12 pt</div>
+    <h1 style="margin: 0; font-size: 32px; font-weight: 700; letter-spacing: -0.02em">Menu dropdown — Tiếng Việt, đang dùng Safari</h1>
+  </div>
+  <div class="dn"><b>AppKit:</b> <span class="lab">NSMenu</span> gồm một <span class="lab">NSMenuItem.view</span> tuỳ biến ở đầu (cao 58 pt: ô biểu tượng 40 × 40, “Tiếng Việt” 20 pt bold, dòng phụ 11 pt) và các mục chuẩn · dấu ✓ là <span class="lab">state = .on</span> · “Kiểu gõ” và “Bảng mã” là submenu, giá trị hiện tại hiện bên phải · mục “Tắt cho …” lấy tên từ <span class="lab">NSWorkspace.shared.frontmostApplication</span>, đổi thành “Bật lại cho …” khi đã tắt · phím tắt ⌃⇧F6 cho công cụ chuyển mã, ⌘, cho Cài đặt, ⌘Q thoát. Submenu mở sang trái vì menu sát mép phải màn hình.</div>
+  <div style="display: flex; gap: 48px; align-items: flex-start">
+    <sc-for list="{{modes}}" as="m" hint-placeholder-count="2">
+      <div style="display: flex; flex-direction: column; gap: 10px">
+        <span class="lab">{{m.lab}}</span>
+        <div class="scene {{m.cls}}" style="background: {{m.wall}}">
+          <div class="mb">
+            <div class="l"><b>Safari</b><span>Tệp</span><span>Chỉnh sửa</span><span>Hiển thị</span><span>Lịch sử</span></div>
+            <span class="ic p"><svg width="18" height="18" viewBox="0 0 18 18"><rect x="1.5" y="2" width="15" height="14" rx="3.5" fill="currentColor"></rect><path d="M6.6 6.3L9 4.4L11.4 6.3" stroke="var(--cut)" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"></path><path d="M5.6 8.2L9 13.6L12.4 8.2" stroke="var(--cut)" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"></path></svg></span>
+            <svg width="17" height="17" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M1.8 6a9.2 9.2 0 0112.4 0M4 8.6a6 6 0 018 0M6.2 11.1a2.8 2.8 0 013.6 0"></path><circle cx="8" cy="13.2" r=".8" fill="currentColor" stroke="none"></circle></svg>
+            <svg width="26" height="14" viewBox="0 0 26 14" fill="none"><rect x=".75" y=".75" width="21.5" height="12.5" rx="3.5" stroke="currentColor" stroke-opacity=".55" stroke-width="1.2"></rect><rect x="2.5" y="2.5" width="14" height="9" rx="2" fill="currentColor"></rect><path d="M23.6 5v4" stroke="currentColor" stroke-opacity=".55" stroke-width="1.6" stroke-linecap="round"></path></svg>
+            <span>T5 14:32</span>
+          </div>
+
+          <div class="menu" style="right: 56px; top: 28px; width: 268px">
+            <div style="display: flex; align-items: center; gap: 12px; padding: 8px 10px 10px; height: 58px; box-sizing: border-box">
+              <span style="width: 40px; height: 40px; border-radius: 10px; background: var(--sel); display: flex; align-items: center; justify-content: center; flex: none"><svg width="26" height="26" viewBox="0 0 64 64" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M22 21L32 12L42 21" stroke="var(--ac)" stroke-width="7"></path><path d="M15 28L32 53L49 28" stroke="var(--pr)" stroke-width="9.5"></path></svg></span>
+              <div style="display: flex; flex-direction: column; gap: 1px"><span style="font-size: 20px; font-weight: 700; letter-spacing: -0.01em; line-height: 1.15">Tiếng Việt</span><span style="font-size: 11px; color: var(--sec)">⌃⇧ để chuyển</span></div>
+            </div>
+            <div class="sp"></div>
+            <div class="mi hl"><span class="ck"></span>Kiểu gõ<span class="sc" style="letter-spacing: 0">Telex  ›</span></div>
+            <div class="mi"><span class="ck"></span>Bảng mã<span class="sc" style="letter-spacing: 0">Unicode  ›</span></div>
+            <div class="sp"></div>
+            <div class="mi"><span class="ck">✓</span>Kiểm tra chính tả</div>
+            <div class="mi"><span class="ck">✓</span>Gõ tắt</div>
+            <div class="mi"><span class="ck">✓</span>Tự chuyển theo ứng dụng</div>
+            <div class="sp"></div>
+            <div class="mi"><span class="ck"></span>Tắt cho Safari</div>
+            <div class="sp"></div>
+            <div class="mi"><span class="ck"></span>Công cụ chuyển mã…<span class="sc">⌃⇧F6</span></div>
+            <div class="mi"><span class="ck"></span>Cài đặt…<span class="sc">⌘,</span></div>
+            <div class="mi"><span class="ck"></span>Kiểm tra cập nhật…</div>
+            <div class="sp"></div>
+            <div class="mi"><span class="ck"></span>Thoát VisKey<span class="sc">⌘Q</span></div>
+          </div>
+
+          <div class="menu" style="right: 328px; top: 95px; width: 190px">
+            <div class="mi"><span class="ck">✓</span>Telex</div>
+            <div class="mi"><span class="ck"></span>VNI</div>
+            <div class="mi"><span class="ck"></span>Simple Telex</div>
+          </div>
+
+          <div style="position: absolute; right: 328px; top: 190px; width: 190px; display: flex; flex-direction: column; gap: 6px">
+            <span style="font-size: 11px; font-weight: 600; color: var(--tx)">Khi rê chuột vào “Bảng mã”</span>
+            <div class="menu" style="position: static; box-shadow: 0 0 0 1px var(--pr), 0 12px 36px rgba(0,0,0,.25)">
+              <div class="mi"><span class="ck">✓</span>Unicode</div>
+              <div class="mi"><span class="ck"></span>TCVN3 (ABC)</div>
+              <div class="mi"><span class="ck"></span>VNI Windows</div>
+              <div class="mi"><span class="ck"></span>Unicode tổ hợp</div>
+              <div class="mi"><span class="ck"></span>CP1258</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </sc-for>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1700,"height":800}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return { modes: [
+      { cls: 'lt', wall: 'linear-gradient(120deg,#C7D3FF 0%,#E1F3EE 55%,#F1EEFF 100%)', lab: 'A2-menu-vi-light' },
+      { cls: 'dk', wall: 'linear-gradient(120deg,#1B2150 0%,#10302F 60%,#1A1B2E 100%)', lab: 'A2-menu-vi-dark' }
+    ] };
+  }
+}
+</script>
+</body>
+</html>
