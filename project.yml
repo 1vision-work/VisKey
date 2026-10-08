@@ -1,0 +1,107 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# XcodeGen spec. Generate the project with `xcodegen generate`; VisKey.xcodeproj is not committed.
+name: VisKey
+
+options:
+  bundleIdPrefix: work.1vision
+  deploymentTarget:
+    macOS: "13.0"
+  developmentLanguage: vi
+  createIntermediateGroups: true
+  groupSortPosition: top
+
+# Signing lives in an xcconfig so a local, git-ignored override can switch to an Apple Development
+# certificate (ADR-016). Settings below must not set CODE_SIGN_* or they would win over the xcconfig.
+configFiles:
+  Debug: Config/Signing.xcconfig
+  Release: Config/Signing.xcconfig
+
+settings:
+  base:
+    MARKETING_VERSION: 0.1.0
+    CURRENT_PROJECT_VERSION: 1
+    SWIFT_VERSION: "5.0"
+    MACOSX_DEPLOYMENT_TARGET: "13.0"
+    CLANG_CXX_LANGUAGE_STANDARD: c++17
+    CLANG_CXX_LIBRARY: libc++
+    ENABLE_HARDENED_RUNTIME: YES
+    ENABLE_APP_SANDBOX: NO
+    ENABLE_USER_SCRIPT_SANDBOXING: YES
+    SWIFT_INCLUDE_PATHS: $(SRCROOT)/VisKey/Bridge
+    HEADER_SEARCH_PATHS: $(SRCROOT)/Engine/include $(SRCROOT)/Engine/src
+    LOCALIZATION_PREFERS_STRING_CATALOGS: YES
+    SWIFT_EMIT_LOC_STRINGS: YES
+  configs:
+    Release:
+      ONLY_ACTIVE_ARCH: NO
+      ARCHS: $(ARCHS_STANDARD)
+
+targets:
+  VisKey:
+    type: application
+    platform: macOS
+    sources:
+      - path: VisKey
+        excludes:
+          - "Bridge/module.modulemap"
+      # ADR-012: the app compiles the engine sources directly; Engine/CMakeLists.txt is for engine tests only.
+      - path: Engine/src
+        includes:
+          - "*.cpp"
+          - "*.h"
+        compilerFlags: ["-w"]
+        group: Engine
+      - path: Engine/include
+        group: Engine
+    settings:
+      base:
+        PRODUCT_NAME: VisKey
+        PRODUCT_BUNDLE_IDENTIFIER: work.1vision.viskey
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        COMBINE_HIDPI_IMAGES: YES
+        INFOPLIST_KEY_LSApplicationCategoryType: public.app-category.utilities
+    info:
+      path: VisKey/App/Info.plist
+      properties:
+        CFBundleDisplayName: VisKey
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        CFBundleDevelopmentRegion: vi
+        CFBundleLocalizations: [vi, en]
+        LSMinimumSystemVersion: $(MACOSX_DEPLOYMENT_TARGET)
+        LSUIElement: true
+        NSHumanReadableCopyright: "© 1VISION. GPL-3.0-or-later. Based on OpenKey by Mai Vũ Tuyên."
+
+  VisKeyTests:
+    type: bundle.unit-test
+    platform: macOS
+    sources:
+      - path: VisKeyTests
+      # The G1 snapshot is replayed through the Swift bridge.
+      - path: Engine/tests/snapshots/engine.snap
+        buildPhase: resources
+        group: VisKeyTests/Resources
+    dependencies:
+      - target: VisKey
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: work.1vision.viskey.tests
+        MACOSX_DEPLOYMENT_TARGET: "14.0" # XCTest itself requires macOS 14; the app still targets 13
+        TEST_HOST: $(BUILT_PRODUCTS_DIR)/VisKey.app/Contents/MacOS/VisKey
+        BUNDLE_LOADER: $(TEST_HOST)
+        GENERATE_INFOPLIST_FILE: YES
+
+schemes:
+  VisKey:
+    build:
+      targets:
+        VisKey: all
+        VisKeyTests: [test]
+    run:
+      config: Debug
+    test:
+      config: Debug
+      targets:
+        - VisKeyTests
+    archive:
+      config: Release

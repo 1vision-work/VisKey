@@ -1,0 +1,6 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Exposes the engine C API (ADR-008, ADR-012) to Swift as `import VisKeyEngine`.
+module VisKeyEngine {
+    header "../../Engine/include/viskey_engine.h"
+    export *
+}

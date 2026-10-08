@@ -44,10 +44,8 @@ jobs:
       - name: Test
         run: ctest --test-dir build/engine --output-on-failure
 
-  # Enabled once the Swift app exists (M0 step 6 onward, done on a Mac).
   app-macos:
     name: App build + XCTest (macos-15)
-    if: false
     runs-on: macos-15
     steps:
       - uses: actions/checkout@v4
@@ -58,4 +56,8 @@ jobs:
       - name: Build and test (Debug)
         run: >
           xcodebuild test -project VisKey.xcodeproj -scheme VisKey -configuration Debug
-          -destination 'platform=macOS' CODE_SIGNING_ALLOWED=NO
+          -destination 'platform=macOS,arch=arm64' CODE_SIGNING_ALLOWED=NO
+      - name: Build Release (universal)
+        run: >
+          xcodebuild build -project VisKey.xcodeproj -scheme VisKey -configuration Release
+          -destination 'generic/platform=macOS' CODE_SIGNING_ALLOWED=NO
