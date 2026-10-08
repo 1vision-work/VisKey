@@ -31,6 +31,8 @@ final class StatusItemController: NSObject {
         item.menu = makeMenu(state)
     }
 
+    func showMenu() { item.button?.performClick(nil) }
+
     // MARK: Private
 
     private func makeMenu(_ state: State) -> NSMenu {

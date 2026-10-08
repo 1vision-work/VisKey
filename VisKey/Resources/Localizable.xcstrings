@@ -1,12 +1,42 @@
 {
   "sourceLanguage": "vi",
   "strings": {
+    "Cài đặt hệ thống › Quyền riêng tư & Bảo mật › Trợ năng": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "System Settings › Privacy & Security › Accessibility"
+          }
+        }
+      }
+    },
+    "Cần quyền Trợ năng để nhận phím bạn gõ. VisKey không lưu hay gửi nội dung này đi đâu.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Accessibility permission lets VisKey receive the keys you type. VisKey never stores or sends them anywhere."
+          }
+        }
+      }
+    },
     "Kiểu gõ": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Input method"
+          }
+        }
+      }
+    },
+    "Mở Cài đặt hệ thống": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open System Settings"
           }
         }
       }
@@ -57,6 +87,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "VisKey doesn’t have Accessibility permission"
+          }
+        }
+      }
+    },
+    "VisKey cần quyền Trợ năng": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "VisKey needs Accessibility permission"
+          }
+        }
+      }
+    },
+    "Đóng": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Close"
           }
         }
       }

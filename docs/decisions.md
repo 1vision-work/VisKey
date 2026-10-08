@@ -108,3 +108,11 @@ permission after each rebuild. `Config/Signing.xcconfig` keeps ad-hoc as the def
 certificate) and includes an optional, git-ignored `Config/Signing.local.xcconfig` where a developer sets
 `CODE_SIGN_IDENTITY = Apple Development` and `DEVELOPMENT_TEAM`; the permission then survives rebuilds.
 `project.yml` must not set `CODE_SIGN_*` itself, because target/project settings override xcconfig values.
+
+## ADR-017 — Missing permission is announced with a dialog that opens the pane
+Status: accepted (M0; onboarding replaces it in M2). VisKey is a menu bar app without a window, and on a Mac with
+a notch its icon can be hidden among other menu bar items, so a launch without the Accessibility permission looked
+like nothing happened. VisKey now shows a dialog (strings of design/ui C2 and E2) whose "Mở Cài đặt hệ thống" button
+opens the Accessibility pane; it closes by itself once the permission is granted. The pane is no longer opened
+automatically at the same time, because System Settings then covers the dialog. Opening VisKey again while it runs
+shows this dialog, or the menu once the permission is granted.
