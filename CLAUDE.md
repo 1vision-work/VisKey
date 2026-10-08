@@ -41,9 +41,9 @@ viskey/
 ├─ Scripts/                   # build-release.sh notarize.sh make-dmg.sh
 ├─ .github/workflows/         # ci.yml (test mỗi push), release.yml (tag v*)
 ├─ design/                    # nguồn sự thật cho giao diện + brand (README.md trong đó tóm tắt)
-│  ├─ source/                 # PDF gốc từ Claude Design
+│  ├─ source/                 # PDF gốc + nguồn HTML canvas (source/canvas/) từ Claude Design
 │  ├─ pages/                  # mọi trang PDF render PNG 200 dpi (tham chiếu)
-│  ├─ ui/                     # 21 frame × light/dark, INDEX.md, spec.md, strings.md, notes.md
+│  ├─ ui/                     # 21 frame × light/dark @2x, INDEX.md, spec.md, strings.md, notes.md
 │  ├─ icons/                  # SVG vector dựng lại (symbol, appicon, menubar) + compare.png
 │  ├─ brand.md  tokens.json   # brand + token màu (Tools/gen-colors.py → Assets.xcassets)
 └─ docs/                      # decisions.md, app-compat.md, CONTRIBUTING.md
