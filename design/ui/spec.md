@@ -2,7 +2,7 @@
 
 Chép từ trang 1 của `design/source/VisKey — Brand & UI.pdf` (ảnh: `design/pages/page-01.png`). Đơn vị: pt (1 pt = 1 CSS px trong mockup, vẽ ở @2x). Mọi frame dựng từ các giá trị dưới đây. Nếu SwiftUI có control chuẩn cho một mục, dùng control chuẩn; chỉ tuỳ biến màu nhấn và icon.
 
-> **Thiếu trong nguồn:** trang 1 của PDF bị cắt ở đáy. Dưới bảng "Màu trong control" còn **hai thẻ nữa** (ảnh chỉ lộ phần đầu thẻ, không có chữ, không có text layer). Nhiều khả năng đó là phần badge "Tối ưu sẵn" và/hoặc ví dụ dùng màu mà yêu cầu nhắc tới; **chưa có số đo badge**. Cần xuất lại trang này từ Claude Design. Trong lúc chờ, chỉ có các dữ kiện rải rác: chữ badge dùng *Accent ngọc – chữ* (`#0B7F6D` / `#3FE0C0`) và nhãn "Tối ưu sẵn" (frame B4); xem `design/ui/notes.md` mục B4.
+> Trang 1 của PDF bị cắt ở đáy (hai thẻ cuối không có trong PDF). Hai thẻ đó được bổ sung ở cuối file này từ nguồn canvas (`design/source/canvas/UISpec.dc.html`).
 
 ## Lưới & khoảng cách
 
@@ -61,3 +61,34 @@ Primary và accent đúng token thương hiệu (`design/tokens.json`). Riêng c
 | Accent ngọc — đồ hoạ | #14B89A | #3FE0C0 | chỉ cho hình | Dấu ✓ thành công, dấu mũ trong logo |
 | Cảnh báo | #B45309 | #F5A65B | 5,0 / 8,9 | Chấm "chưa có quyền", xung đột bộ gõ; chế độ tối sáng hơn một bậc để đạt AA |
 | Lỗi / huỷ | #C2302A | #FF8A80 | 5,6 / 7,8 | Nút "Khôi phục toàn bộ cài đặt…" |
+
+## Quy tắc badge "Tối ưu sẵn"
+
+(Thẻ bị cắt khỏi PDF; chép từ `design/source/canvas/UISpec.dc.html`.)
+
+| Mục | Quy tắc |
+|---|---|
+| Khi nào hiện | Chỉ khi ứng dụng khớp một quy tắc có sẵn trong AppPolicyStore (built-in). Người dùng tự chỉnh không làm hiện badge. |
+| Hình dạng | Pill, chữ **10 semibold**, cao **14**, padding ngang **6**, viền trong **0,5**. Đặt ngay sau tên ứng dụng, cách **8**. |
+| Màu | Chữ accent text; nền accent 12–14 %. Hàng đang chọn: nền trắng 22 %, chữ trắng. Không có màu khác. |
+| Giới hạn | Tối đa một badge mỗi hàng. Không dùng ngọc cho nút, toggle hay tiêu đề. Ngọc chỉ có ở: badge này, trạng thái thành công (✓ Đã cấp), dấu mũ trong logo. |
+| Trợ năng | `accessibilityLabel` "Đã tối ưu sẵn cho ứng dụng này". |
+
+Giá trị cụ thể trong mockup: light — nền `#E6FAF5`, chữ `#0B7F6D`, viền trong `rgba(11,127,109,.28)`; dark — nền `rgba(63,224,192,.14)`, chữ `#3FE0C0`, viền trong `rgba(63,224,192,.3)`; hàng chọn — nền `rgba(255,255,255,.22)`, chữ `#FFFFFF`, không viền.
+
+## Chữ & trạng thái
+
+| Mục | Quy tắc |
+|---|---|
+| Font | SF Pro (`.system`). Onboarding: tiêu đề Be Vietnam Pro 24 semibold, còn lại SF Pro. |
+| Thang chữ | Header menu 20 bold · Title 1 22 · Title 3 15 semibold · Body 13 · bảng 12 · Subheadline / dòng phụ 11 · mã 11–12 monospace. |
+| Focus | Viền 2 pt primary (#3044D6 / #8193FF) bo theo control, cách mép 0. |
+| Disabled | Toàn bộ control mờ 40 %, giữ nguyên bố cục. |
+| Giá trị đã chỉnh | Trong bảng Ứng dụng: chữ primary + semibold; mặc định in màu chữ thường. |
+| Văn bản UI | Ngắn, rõ, trung tính, không chấm than. Mục mở hộp thoại kết thúc bằng "…". Phím tắt viết bằng ký hiệu ⌃ ⇧ ⌥ ⌘. Dấu kiểu mới: hoà, khoẻ, thuỷ, tuỳ. |
+| Thuật ngữ macOS | Cài đặt hệ thống · Trợ năng · Theo dõi đầu vào · Quyền riêng tư & Bảo mật. |
+| Menu bar | Template image 18 × 18; ba trạng thái VI (khối đặc) / EN (khung rỗng) / tạm dừng (khung rỗng, V gạch chéo). |
+
+## Kích thước mockup (đo từ nguồn canvas)
+
+Mockup vẽ 1 pt = 1 CSS px. Cảnh menu/thông báo: A1 1304 × 246 · A2 760 × 420 (menu 268 rộng, bo 12, hàng 24, đầu menu 58) · A3 760 × 412* · E1 520 × 230 · E2 520 × 250* (banner 344 rộng). *A3, E2 đo từ ảnh PDF vì chưa đọc file nguồn của hai frame này. Cửa sổ: xem bảng "Cửa sổ" ở trên và `INDEX.md`.
