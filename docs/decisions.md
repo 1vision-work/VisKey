@@ -101,3 +101,10 @@ image sets as vectors (`preserves-vector-representation`), and renders `AppIcon.
 (`qlmanage`, WebKit's SVG renderer, which supports the icon's gradient and drop shadow) plus `sips`: 16 pt @1x from
 `appicon-hinted-16.svg`, 16 @2x and 32 @1x from `appicon-small.svg`, larger sizes from `appicon-1024.svg`
 (brand.md §3). No new dependency. Generated PNGs are committed.
+
+## ADR-016 — Local signing through an xcconfig with an optional override
+Status: accepted. Ad-hoc signing changes the code hash on every build, so macOS drops the Accessibility
+permission after each rebuild. `Config/Signing.xcconfig` keeps ad-hoc as the default (CI and machines without a
+certificate) and includes an optional, git-ignored `Config/Signing.local.xcconfig` where a developer sets
+`CODE_SIGN_IDENTITY = Apple Development` and `DEVELOPMENT_TEAM`; the permission then survives rebuilds.
+`project.yml` must not set `CODE_SIGN_*` itself, because target/project settings override xcconfig values.
