@@ -1,0 +1,13 @@
+VisKey — by 1VISION
+Copyright (C) VisKey contributors
+
+VisKey is licensed under the GNU General Public License v3.0 or later
+(SPDX: GPL-3.0-or-later). See LICENSE.
+
+Based on OpenKey by Mai Vũ Tuyên
+  https://github.com/tuyenvm/OpenKey
+  Copyright (C) Mai Vũ Tuyên, licensed under GPL-3.0.
+
+The input engine in Engine/ is derived from OpenKey's engine
+(Sources/OpenKey/engine). Files there retain their original copyright and
+are marked "Modified by VisKey contributors" where changed.

@@ -1,0 +1,13 @@
+# Build outputs
+build/
+Engine/build/
+*.o
+*.a
+DerivedData/
+*.xcodeproj/xcuserdata/
+.DS_Store
+# Secrets — never commit
+*.p12
+*.cer
+*.pem
+*.key
