@@ -3,6 +3,8 @@
 // Created by Tuyen Mai on 8/21/19.
 // Copyright (c) 2019 Tuyen Mai. All rights reserved.
 //
+//  SPDX-License-Identifier: GPL-3.0-or-later
+//
 
 
 #ifndef OPENKEY_LINUX_H

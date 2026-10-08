@@ -5,6 +5,8 @@
 //  Created by Tuyen on 1/18/19.
 //  Copyright © 2019 Tuyen Mai. All rights reserved.
 //
+//  SPDX-License-Identifier: GPL-3.0-or-later
+//
 
 #ifndef DataType_h
 #define DataType_h

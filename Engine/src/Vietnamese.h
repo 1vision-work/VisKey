@@ -5,6 +5,8 @@
 //  Created by Tuyen on 1/19/19.
 //  Copyright © 2019 Tuyen Mai. All rights reserved.
 //
+//  SPDX-License-Identifier: GPL-3.0-or-later
+//
 
 #ifndef Vietnamese_h
 #define Vietnamese_h

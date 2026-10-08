@@ -5,6 +5,9 @@
 //  Created by Tuyen on 9/4/19.
 //  Copyright © 2019 Tuyen Mai. All rights reserved.
 //
+//  Modified by VisKey contributors.
+//  SPDX-License-Identifier: GPL-3.0-or-later
+//
 
 #ifndef ConvertTool_h
 #define ConvertTool_h
@@ -13,16 +16,16 @@
 #include <string>
 using namespace std;
 
-extern bool convertToolDontAlertWhenCompleted;
-extern bool convertToolToAllCaps;
-extern bool convertToolToAllNonCaps;
-extern bool convertToolToCapsFirstLetter;
-extern bool convertToolToCapsEachWord;
-extern bool convertToolRemoveMark;
-extern Uint8 convertToolFromCode;
-extern Uint8 convertToolToCode;
-extern int convertToolHotKey;
+struct vk_convert_options {
+    bool toAllCaps = false;
+    bool toAllNonCaps = false;
+    bool toCapsFirstLetter = false;
+    bool toCapsEachWord = false;
+    bool removeMark = false;
+    Uint8 fromCode = 0; //code table of the source text
+    Uint8 toCode = 0; //code table of the result
+};
 
-string convertUtil(const string& sourceString);
+string convertUtil(const vk_convert_options& opt, const string& sourceString);
 
 #endif /* ConvertTool_h */

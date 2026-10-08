@@ -5,6 +5,9 @@
 //  Created by Tuyen on 8/4/19.
 //  Copyright © 2019 Tuyen Mai. All rights reserved.
 //
+//  Modified by VisKey contributors.
+//  SPDX-License-Identifier: GPL-3.0-or-later
+//
 
 #include "Macro.h"
 #include "Vietnamese.h"
@@ -15,18 +18,7 @@
 
 using namespace std;
 
-//main data
-map<vector<Uint32>, MacroData> macroMap;
-
-extern int vCodeTable;
-//local variable
-static int c = 0;
-static bool _macroFlag = false;
-static Uint16 _kChar = 0;
-static Uint32 _charBuff;
-static int _kMacro;
-
-static void convert(const string& str, vector<Uint32>& outData) {
+void vk_engine::convert(const string& str, vector<Uint32>& outData) {
     outData.clear();
     wstring data = utf8ToWideString(str);
     Uint32 t = 0;
@@ -77,8 +69,8 @@ static void convert(const string& str, vector<Uint32>& outData) {
  * ...
  * next macro
  */
-void initMacroMap(const Byte* pData, const int& size) {
-    macroMap.clear();
+void vk_engine::initMacroMap(const Byte* pData, const int& size) {
+    _macroMap.clear();
     Uint16 macroCount = 0;
     Uint32 cursor = 0;
     if (size >= 2) {
@@ -105,16 +97,16 @@ void initMacroMap(const Byte* pData, const int& size) {
         convert(macroText, key);
         convert(macroContent, data.macroContentCode);
         
-        macroMap[key] = data;
+        _macroMap[key] = data;
     }
 }
 
-void getMacroSaveData(vector<Byte>& outData) {
-    Uint16 totalMacro = (Uint16)macroMap.size();
+void vk_engine::getMacroSaveData(vector<Byte>& outData) const {
+    Uint16 totalMacro = (Uint16)_macroMap.size();
     outData.push_back((Byte)totalMacro);
     outData.push_back((Byte)(totalMacro>>8));
     
-    for (std::map<vector<Uint32>, MacroData>::iterator it = macroMap.begin(); it != macroMap.end(); ++it) {
+    for (std::map<vector<Uint32>, MacroData>::const_iterator it = _macroMap.begin(); it != _macroMap.end(); ++it) {
         outData.push_back((Byte)it->second.macroText.size());
         for (int j = 0; j < it->second.macroText.size(); j++) {
             outData.push_back(it->second.macroText[j]);
@@ -129,7 +121,9 @@ void getMacroSaveData(vector<Byte>& outData) {
     }
 }
 
-static bool modifyCaseUnicode(Uint32& code, const bool& isUpperCase=true) {
+bool vk_engine::modifyCaseUnicode(Uint32& code, const bool& isUpperCase) {
+    Uint32 _charBuff;
+    int _kMacro;
     _charBuff = code;
     if (!(code & CHAR_CODE_MASK)) { //for normal char
         code &= isUpperCase ? CAPS_MASK :  ~CAPS_MASK;
@@ -152,13 +146,16 @@ static bool modifyCaseUnicode(Uint32& code, const bool& isUpperCase=true) {
     return false;
 }
 
-bool findMacro(vector<Uint32>& key, vector<Uint32>& macroContentCode) {
+bool vk_engine::findMacro(vector<Uint32>& key, vector<Uint32>& macroContentCode) {
+    int c = 0;
+    bool _macroFlag = false;
+    Uint16 _kChar = 0;
     for (c = 0; c < key.size(); c++) {
         key[c] = getCharacterCode(key[c]);
     }
-    if (macroMap.find(key) != macroMap.end()) {
+    if (_macroMap.find(key) != _macroMap.end()) {
         macroContentCode.clear();
-        MacroData data = macroMap[key];
+        MacroData data = _macroMap[key];
         macroContentCode = data.macroContentCode;
         return true;
     }
@@ -172,9 +169,9 @@ bool findMacro(vector<Uint32>& key, vector<Uint32>& macroContentCode) {
         }
         
         if (key.size() > 0 && modifyCaseUnicode(key[0], false)) {
-            if (macroMap.find(key) != macroMap.end()) {
+            if (_macroMap.find(key) != _macroMap.end()) {
                 macroContentCode.clear();
-                MacroData data = macroMap[key];
+                MacroData data = _macroMap[key];
                 macroContentCode = data.macroContentCode;
                 for (c = 0; c < macroContentCode.size(); c++) {
                     if (c == 0 || _macroFlag) {
@@ -196,66 +193,66 @@ bool findMacro(vector<Uint32>& key, vector<Uint32>& macroContentCode) {
     return false;
 }
 
-bool hasMacro(const string& macroName) {
+bool vk_engine::hasMacro(const string& macroName) {
     vector<Uint32> key;
     convert(macroName, key);
-    return (macroMap.find(key) != macroMap.end());
+    return (_macroMap.find(key) != _macroMap.end());
 }
 
-void getAllMacro(vector<vector<Uint32>>& keys, vector<string>& macroTexts, vector<string>& macroContents) {
+void vk_engine::getAllMacro(vector<vector<Uint32>>& keys, vector<string>& macroTexts, vector<string>& macroContents) {
     keys.clear();
     macroTexts.clear();
     macroContents.clear();
-    for (std::map<vector<Uint32>, MacroData>::iterator it = macroMap.begin(); it != macroMap.end(); ++it) {
+    for (std::map<vector<Uint32>, MacroData>::iterator it = _macroMap.begin(); it != _macroMap.end(); ++it) {
         keys.push_back(it->first);
         macroTexts.push_back(it->second.macroText);
         macroContents.push_back(it->second.macroContent);
     }
 }
 
-bool addMacro(const string& macroText, const string& macroContent) {
+bool vk_engine::addMacro(const string& macroText, const string& macroContent) {
     vector<Uint32> key;
     convert(macroText, key);
-    if (macroMap.find(key) == macroMap.end()) { //add new macro
+    if (_macroMap.find(key) == _macroMap.end()) { //add new macro
         MacroData data;
         data.macroText = macroText;
         data.macroContent = macroContent;
         convert(macroContent, data.macroContentCode);
-        macroMap[key] = data;
+        _macroMap[key] = data;
     } else { //edit this macro
-        macroMap[key].macroContent = macroContent;
-        convert(macroContent, macroMap[key].macroContentCode);
+        _macroMap[key].macroContent = macroContent;
+        convert(macroContent, _macroMap[key].macroContentCode);
     }
     return true;
 }
 
-bool deleteMacro(const string& macroText) {
+bool vk_engine::deleteMacro(const string& macroText) {
     vector<Uint32> key;
     convert(macroText, key);
-    if (macroMap.find(key) != macroMap.end()) {
-        macroMap.erase(key);
+    if (_macroMap.find(key) != _macroMap.end()) {
+        _macroMap.erase(key);
         return true;
     }
     return false;
 }
 
-void onTableCodeChange() {
-    for (std::map<vector<Uint32>, MacroData>::iterator it = macroMap.begin(); it != macroMap.end(); ++it) {
+void vk_engine::onTableCodeChange() {
+    for (std::map<vector<Uint32>, MacroData>::iterator it = _macroMap.begin(); it != _macroMap.end(); ++it) {
         convert(it->second.macroContent, it->second.macroContentCode);
     }
 }
 
-void saveToFile(const string& path) {
+void vk_engine::saveToFile(const string& path) {
     ofstream myfile;
     myfile.open(path.c_str());
     myfile << ";Compatible OpenKey Macro Data file for UniKey*** version=1 ***\n";
-    for (std::map<vector<Uint32>, MacroData>::iterator it = macroMap.begin(); it != macroMap.end(); ++it) {
+    for (std::map<vector<Uint32>, MacroData>::iterator it = _macroMap.begin(); it != _macroMap.end(); ++it) {
         myfile <<it->second.macroText << ":" << it->second.macroContent<<"\n";
     }
     myfile.close();
 }
 
-void readFromFile(const string& path, const bool& append) {
+void vk_engine::readFromFile(const string& path, const bool& append) {
     ifstream myfile(path.c_str());
     string line;
     int k = 0;
@@ -263,7 +260,7 @@ void readFromFile(const string& path, const bool& append) {
     string name, content;
     if (myfile.is_open()) {
         if (!append) {
-            macroMap.clear();
+            _macroMap.clear();
         }
         while (getline (myfile,line) ) {
             k++;

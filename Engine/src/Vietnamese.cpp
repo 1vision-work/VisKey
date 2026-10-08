@@ -5,6 +5,9 @@
 //  Created by Tuyen on 1/19/19.
 //  Copyright © 2019 Tuyen Mai. All rights reserved.
 //
+//  Modified by VisKey contributors.
+//  SPDX-License-Identifier: GPL-3.0-or-later
+//
 
 #include "Vietnamese.h"
 #include "iostream"
@@ -556,21 +559,18 @@ map<Uint32, Uint32> _characterMap = {
     {' ', KEY_SPACE}
 };
 
-map<Uint32, Uint32> _keyCodeToChar;
-
-void initKeyCodeToChar() {
-    _keyCodeToChar.clear();
-    for (std::map<Uint32, Uint32>::iterator it = _characterMap.begin(); it != _characterMap.end(); ++it) {
-        _keyCodeToChar[it->second] = it->first;
-    }
-}
-
 Uint16 keyCodeToCharacter(const Uint32& keyCode) {
-    if (_keyCodeToChar.size() == 0) { //init data if it is empty
-        initKeyCodeToChar();
-    }
-    if (_keyCodeToChar.find(keyCode) != _keyCodeToChar.end()) {
-        return _keyCodeToChar[keyCode];
+    //reverse of _characterMap, built once (thread-safe) on first use
+    static const map<Uint32, Uint32> keyCodeToChar = [] {
+        map<Uint32, Uint32> m;
+        for (map<Uint32, Uint32>::const_iterator it = _characterMap.begin(); it != _characterMap.end(); ++it) {
+            m[it->second] = it->first;
+        }
+        return m;
+    }();
+    map<Uint32, Uint32>::const_iterator it = keyCodeToChar.find(keyCode);
+    if (it != keyCodeToChar.end()) {
+        return it->second;
     }
     return 0;
 }
