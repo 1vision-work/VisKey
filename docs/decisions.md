@@ -73,3 +73,46 @@ Status: accepted. `Engine/CMakeLists.txt` builds `viskey_engine` + tests on Linu
 project (XcodeGen, done on the Mac) compiles `Engine/src/*.cpp` directly with `Engine/include` on the
 header path and a module map in `VisKey/Bridge/`. The CMake build is the source of truth for engine
 tests only.
+
+## ADR-013 — Xcode project from XcodeGen, generated project not committed
+Status: accepted. `project.yml` is the source of truth; `VisKey.xcodeproj` is generated (`xcodegen generate`) and
+git-ignored, CI generates it too. The engine sources are compiled into the app target with `-w` (OpenKey code,
+unchanged per ADR-009/012); Swift imports the C API through `VisKey/Bridge/module.modulemap` (`import VisKeyEngine`).
+Unit tests are hosted in the app (`@testable import VisKey`); the app skips tap and permission setup when
+`XCTestConfigurationFilePath` is set. The test bundle targets macOS 14 because XCTest itself does; the app targets 13.
+Swift language mode 5 (CLAUDE.md §1: Swift 5.9+) to keep the C callback and AppKit code free of strict-concurrency noise.
+
+## ADR-014 — M0 typing pipeline details
+Status: accepted (M0); revisit in M1 with ContextResolver/AppPolicyStore.
+- The tap runs on the main run loop and the engine is only used there (like OpenKey). EventSender posts on its own serial queue.
+- Key ordering: while a replacement is still being posted, later keyDown/keyUp events are swallowed and re-posted
+  (marked) behind it on the same queue, so a fast key can never overtake a pending replacement. Events with ⌘ are
+  never swallowed or re-posted (⌘Space, shortcuts).
+- The modifier-only hotkey passes its flagsChanged events through; OpenKey swallowed the release, which can leave
+  apps believing a modifier is still down.
+- `_syncKey` is kept in `ReplacementPlanner`. OpenKey's list of apps that delete a base letter + combining mark with
+  one backspace (`_unicodeCompoundApp`) is not hard-coded: `backspaceDeletesCluster` stays false until it becomes
+  policy data in M1. Only matters for the Unicode compound table, which the M0 menu does not offer.
+- The empty-character autocomplete workaround (`vFixRecommendBrowser`) and Shift+← selection are M1 strategies.
+
+## ADR-015 — App assets generated from design/ with system tools only
+Status: accepted. `Tools/gen-assets.sh` runs `gen-colors.py`, copies `design/icons/menubar-*.svg` into template
+image sets as vectors (`preserves-vector-representation`), and renders `AppIcon.appiconset` with Quick Look
+(`qlmanage`, WebKit's SVG renderer, which supports the icon's gradient and drop shadow) plus `sips`: 16 pt @1x from
+`appicon-hinted-16.svg`, 16 @2x and 32 @1x from `appicon-small.svg`, larger sizes from `appicon-1024.svg`
+(brand.md §3). No new dependency. Generated PNGs are committed.
+
+## ADR-016 — Local signing through an xcconfig with an optional override
+Status: accepted. Ad-hoc signing changes the code hash on every build, so macOS drops the Accessibility
+permission after each rebuild. `Config/Signing.xcconfig` keeps ad-hoc as the default (CI and machines without a
+certificate) and includes an optional, git-ignored `Config/Signing.local.xcconfig` where a developer sets
+`CODE_SIGN_IDENTITY = Apple Development` and `DEVELOPMENT_TEAM`; the permission then survives rebuilds.
+`project.yml` must not set `CODE_SIGN_*` itself, because target/project settings override xcconfig values.
+
+## ADR-017 — Missing permission is announced with a dialog that opens the pane
+Status: accepted (M0; onboarding replaces it in M2). VisKey is a menu bar app without a window, and on a Mac with
+a notch its icon can be hidden among other menu bar items, so a launch without the Accessibility permission looked
+like nothing happened. VisKey now shows a dialog (strings of design/ui C2 and E2) whose "Mở Cài đặt hệ thống" button
+opens the Accessibility pane; it closes by itself once the permission is granted. The pane is no longer opened
+automatically at the same time, because System Settings then covers the dialog. Opening VisKey again while it runs
+shows this dialog, or the menu once the permission is granted.

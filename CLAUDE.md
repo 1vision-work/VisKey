@@ -37,7 +37,7 @@ viskey/
 │  └─ Resources/  Assets.xcassets Localizable.xcstrings
 ├─ VisKeyTests/               # XCTest cho Planner, Policy, Bridge
 ├─ Tools/axdump/              # CLI in AX role/subrole của ô đang focus
-├─ Tools/gen-colors.py gen-icons.py   # sinh colorset từ design/tokens.json; sinh design/icons/*.svg
+├─ Tools/gen-colors.py gen-icons.py gen-assets.sh  # colorset từ tokens.json; design/icons/*.svg; Assets.xcassets (ADR-015)
 ├─ Scripts/                   # build-release.sh notarize.sh make-dmg.sh
 ├─ .github/workflows/         # ci.yml (test mỗi push), release.yml (tag v*)
 ├─ design/                    # nguồn sự thật cho giao diện + brand (README.md trong đó tóm tắt)

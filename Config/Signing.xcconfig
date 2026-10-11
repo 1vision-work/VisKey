@@ -1,0 +1,15 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+//
+// Code signing for local builds. Default: ad-hoc (M0). To sign with your "Apple Development" certificate,
+// so the Accessibility permission survives rebuilds, create Config/Signing.local.xcconfig (git-ignored):
+//
+//   CODE_SIGN_IDENTITY = Apple Development
+//   DEVELOPMENT_TEAM = <your team ID>
+//
+// then run `xcodegen generate` again. Release signing (Developer ID) is done by Scripts/build-release.sh (M3).
+
+CODE_SIGN_IDENTITY = -
+CODE_SIGN_STYLE = Manual
+DEVELOPMENT_TEAM =
+
+#include? "Signing.local.xcconfig"
