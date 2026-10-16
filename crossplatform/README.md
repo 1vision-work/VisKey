@@ -1,8 +1,12 @@
-> Thư mục này là bản triển khai đa nền tảng (macOS app + IBus Linux) kèm script đóng gói `.dmg`/`.pkg`/`.deb`, tách biệt với app Swift ở thư mục gốc. Giấy phép: GPL-3.0-or-later (xem `../LICENSE`, `../NOTICE`; dựa trên OpenKey của Mai Vũ Tuyên).
+> Thư mục này là bản triển khai đa nền tảng (macOS app + IBus Linux) kèm script đóng gói `.dmg`/`.pkg`/`.deb`, tách biệt với app Swift ở thư mục gốc (xem [README gốc](../README.md)). Giấy phép: GPL-3.0-or-later (xem [`../LICENSE`](../LICENSE), [`../NOTICE`](../NOTICE); dự án VisKey dựa trên OpenKey của Mai Vũ Tuyên — engine trong thư mục này là bản viết riêng, không phải engine OpenKey).
+>
+> Tài liệu chi tiết: [Kiến trúc & đặc tả](../docs/crossplatform/ARCHITECTURE.md) · [Build, đóng gói & cài đặt](../docs/crossplatform/BUILD.md).
+>
+> Bản cài sẵn (do CI build, **không** lưu trong repo): pre-release [v1.0.0-installers](https://github.com/1vision-work/VisKey/releases/tag/v1.0.0-installers). Bản macOS chỉ ký ad-hoc, chưa notarize và chưa được thử trên máy Mac thật.
 
 # VisKey — Bộ Gõ Tiếng Việt Đa Nền Tảng (macOS & Linux)
 
-**VisKey** là bộ gõ Tiếng Việt mã nguồn mở được thiết kế chuyên biệt cho **macOS** (Apple Silicon & Intel) và **Linux** (X11 & Wayland qua IBus), tập trung giải quyết triệt để **7 vấn đề cốt lõi** mà người dùng các bộ gõ hiện nay trên thị trường thường xuyên gặp phải.
+**VisKey** là bộ gõ Tiếng Việt mã nguồn mở được thiết kế chuyên biệt cho **macOS** (Apple Silicon & Intel) và **Linux** (X11 & Wayland qua IBus), nhắm tới **7 vấn đề cốt lõi** mà người dùng các bộ gõ hiện nay trên thị trường thường xuyên gặp phải.
 
 ## 1. Tổng hợp các vấn đề của bộ gõ hiện tại và giải pháp trong VisKey
 
@@ -27,7 +31,8 @@
 * `tests/test_cpp_engine.cpp` & `tests/test_python_engine.py`: Bộ 109 kịch bản kiểm thử tự động (Unit Tests) cho cả C++17 và Python.
 * `scripts/build_macos_installer.sh` & `Install_macOS.command`: Script tự động biên dịch `VisKey.app` (Universal Binary) và đóng gói file cài đặt **`VisKey-macOS-Installer.dmg`**.
 * `scripts/build_linux_deb.sh` & `scripts/install_linux.sh`: Script đóng gói bộ cài **`ibus-viskey_1.0.0_all.deb`** và cài đặt tự động cho Linux.
-* `.github/workflows/build.yml`: CI tự động chạy kiểm thử, build `.deb`, `.dmg`, `.pkg` và đính kèm vào GitHub Release khi đẩy tag `v*`.
+* [`../.github/workflows/installers.yml`](../.github/workflows/installers.yml) (ở thư mục gốc repo): CI chạy kiểm thử, build `.deb`, `.dmg`, `.pkg` (artifact) khi push nhánh `feat/macos-linux-installers`, và tạo GitHub pre-release đính kèm 3 file khi đẩy tag `v*-installers`.
+* Không có file `.deb`/`.dmg`/`.pkg` dựng sẵn trong repo (bị `.gitignore` loại trừ) — tải từ GitHub Releases hoặc tự build bằng các script trên.
 
 ## 3. Hướng dẫn Build và Cài đặt trên macOS (Tạo bộ cài `.app` & `.dmg`)
 
@@ -36,31 +41,34 @@
 * Bộ công cụ dòng lệnh **Xcode Command Line Tools** (nếu máy chưa có, script sẽ tự bật hộp thoại cài đặt).
 
 ### Cách 1: Nhấp đúp chuột (Nhanh nhất)
-1. Giải nén file `VisKey-macOS-Linux.zip`.
+1. Clone repo (hoặc tải mã nguồn) và mở thư mục `crossplatform/`.
 2. Nhấp đúp vào file **`Install_macOS.command`** (hoặc chuột phải chọn **Open**).
 3. Script sẽ tự động:
    * Chạy 109 bài kiểm thử C++17 để xác nhận bộ lõi hoạt động chính xác.
    * Biên dịch ứng dụng **`build_macos/VisKey.app`** (Universal Binary chạy trên cả chip M và Intel) và ký mã cục bộ (`codesign`).
-   * Đóng gói thành file bộ cài **`VisKey-macOS-Installer.dmg`** và **`VisKey-1.0.0-macOS.pkg`** ngay trong thư mục dự án.
+   * Đóng gói thành file bộ cài **`VisKey-macOS-Installer.dmg`** và **`VisKey-1.0.0-macOS.pkg`** ngay trong thư mục `crossplatform/`.
    * Hỏi bạn có muốn chép thẳng `VisKey.app` vào `/Applications` và khởi động ngay không. *(Bỏ qua khi chạy trong CI — biến `CI` được đặt — hoặc không có terminal.)*
 
 ### Cách 2: Chạy qua Terminal trên macOS
 ```bash
-unzip VisKey-macOS-Linux.zip
-cd VisKey
+git clone https://github.com/1vision-work/VisKey.git
+cd VisKey/crossplatform
 bash scripts/build_macos_installer.sh
 ```
 
 ### Cấp quyền Accessibility trên macOS (Bắt buộc cho mọi bộ gõ bên thứ 3)
+0. Nếu dùng bản tải từ GitHub Releases (chưa notarize): chuột phải › **Open**, hoặc chạy `xattr -cr /Applications/VisKey.app`.
 1. Khi `VisKey.app` chạy lần đầu, macOS sẽ hỏi quyền **Accessibility (Trợ năng)**.
 2. Mở **System Settings (Cài đặt hệ thống) -> Privacy & Security (Quyền riêng tư & Bảo mật) -> Accessibility (Trợ năng)**.
-3. Bật công tắc cho **VisKey**. (Nếu bạn build lại bản mới mà macOS báo quyền cũ bị kẹt, hãy chạy lệnh `tccutil reset Accessibility org.viskey.inputmethod` trong Terminal rồi bật lại).
-4. Trên thanh Menu Bar góc phải màn hình sẽ xuất hiện biểu tượng **`🇻🇳 VI`**. Bạn có thể nhấn **`Ctrl + Space`** hoặc **`Cmd + Shift + V`** để chuyển nhanh giữa Tiếng Việt (`VI`) và Tiếng Anh (`EN`).
+3. Bật công tắc cho **VisKey** (nếu macOS yêu cầu, bật thêm **Input Monitoring**), rồi thoát và mở lại VisKey (event tap chỉ được tạo lúc khởi động). (Nếu bạn build lại bản mới mà macOS báo quyền cũ bị kẹt, hãy chạy lệnh `tccutil reset Accessibility org.viskey.inputmethod` trong Terminal rồi bật lại).
+4. Trên thanh Menu Bar góc phải màn hình sẽ xuất hiện biểu tượng **`🇻🇳 VI`**. Bạn có thể nhấn **`Ctrl + Space`** hoặc **`Cmd + Shift + V`** để chuyển nhanh giữa Tiếng Việt (`VI`) và Tiếng Anh (`EN`). Lưu ý `Ctrl + Space` trùng phím tắt đổi nguồn nhập mặc định của macOS.
+
+*Hạn chế hiện tại của app macOS (`macos/VisKeyApp.mm`):* chỉ có menu trên menu bar (chưa có cửa sổ cài đặt hay UI quản lý gõ tắt), các tùy chọn và chế độ Anh/Việt theo app chưa được lưu sau khi thoát, chưa có tự khởi động cùng hệ thống.
 
 ## 4. Hướng dẫn Cài đặt và Build trên Linux (Ubuntu/Debian, Fedora, Arch)
 
 ### Cách 1: Cài đặt từ gói `.deb` (Ubuntu, Debian, Linux Mint, Pop!_OS)
-Tải gói **`ibus-viskey_1.0.0_all.deb`** từ trang **GitHub Releases** (gói được CI build tự động, không còn lưu sẵn trong mã nguồn), rồi chạy:
+Tải gói [**`ibus-viskey_1.0.0_all.deb`**](https://github.com/1vision-work/VisKey/releases/download/v1.0.0-installers/ibus-viskey_1.0.0_all.deb) từ **GitHub Releases** (gói được CI build tự động, không lưu sẵn trong mã nguồn), rồi chạy:
 ```bash
 sudo apt update
 sudo apt install -y ./ibus-viskey_1.0.0_all.deb   # tự cài ibus, python3-gi, gir1.2-ibus-1.0, python3-tk
@@ -69,8 +77,8 @@ ibus restart
 
 ### Cách 2: Chạy script tự động cài đặt cho mọi bản phân phối Linux (Ubuntu, Fedora, Arch)
 ```bash
-unzip VisKey-macOS-Linux.zip
-cd VisKey
+git clone https://github.com/1vision-work/VisKey.git
+cd VisKey/crossplatform
 bash scripts/install_linux.sh
 ```
 *(Nếu bạn muốn tự tạo file `.deb` từ mã nguồn trên Linux, chạy lệnh: `bash scripts/build_linux_deb.sh` — có thể đổi thư mục đầu ra bằng biến `OUT_DIR=/duong/dan`).*
@@ -101,7 +109,7 @@ viskey-settings --set macros.hs=                     # xóa gõ tắt
 
 ## 5. Hướng dẫn chạy bộ kiểm thử (Unit Tests) & Giả lập trên Terminal
 
-Bạn có thể kiểm tra trực tiếp logic của bộ gõ trên bất kỳ máy tính nào mà chưa cần cài vào hệ thống:
+Bạn có thể kiểm tra trực tiếp logic của bộ gõ trên bất kỳ máy tính nào mà chưa cần cài vào hệ thống (chạy trong thư mục `crossplatform/`):
 
 ```bash
 # 1. Chạy 109 bài kiểm thử trên bộ lõi Python:
@@ -111,5 +119,8 @@ python3 tests/test_python_engine.py
 g++ -std=c++17 -O2 tests/test_cpp_engine.cpp -o build_test_cpp && ./build_test_cpp
 
 # 3. Chạy trình giả lập gõ tiếng Việt tương tác ngay trong Terminal:
-g++ -std=c++17 -O2 core/viskey_cli.cpp -o viskey_cli && ./viskey_cli
+g++ -std=c++17 -O2 -Icore core/viskey_cli.cpp -o viskey_cli && ./viskey_cli
+
+# 4. Hoặc dùng CMake (build CLI + test C++; trên macOS thêm target VisKey.app):
+cmake -S . -B build && cmake --build build -j && ctest --test-dir build --output-on-failure
 ```
