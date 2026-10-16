@@ -1,0 +1,163 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+name: Installers (crossplatform)
+
+on:
+  push:
+    branches: [feat/macos-linux-installers]
+    tags: ["v*-installers"]
+  workflow_dispatch:
+
+defaults:
+  run:
+    working-directory: crossplatform
+
+permissions:
+  contents: read
+
+jobs:
+  linux:
+    name: Linux (.deb)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Python engine tests
+        run: python3 tests/test_python_engine.py
+
+      - name: C++ engine tests (g++)
+        run: |
+          g++ -std=c++17 -O2 -Wall tests/test_cpp_engine.cpp -o build_test_cpp
+          ./build_test_cpp
+
+      - name: Build CLI simulator
+        run: |
+          g++ -std=c++17 -O2 -Wall -Icore core/viskey_cli.cpp -o viskey_cli
+          echo q | ./viskey_cli >/dev/null
+
+      - name: Build .deb
+        env:
+          OUT_DIR: ${{ github.workspace }}/crossplatform/dist
+        run: bash scripts/build_linux_deb.sh
+
+      - name: Inspect .deb
+        run: |
+          dpkg-deb --info dist/ibus-viskey_1.0.0_all.deb
+          dpkg-deb --contents dist/ibus-viskey_1.0.0_all.deb
+
+      - name: Install .deb
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ibus python3-gi gir1.2-ibus-1.0 python3-tk
+          sudo dpkg -i dist/ibus-viskey_1.0.0_all.deb
+
+      - name: Verify installation
+        run: |
+          set -e
+          for f in \
+            /usr/bin/viskey-settings \
+            /usr/libexec/ibus-engine-viskey \
+            /usr/share/viskey/core/viskey_engine.py \
+            /usr/share/viskey/ibus/ibus_viskey.py \
+            /usr/share/viskey/ibus/viskey_settings.py \
+            /usr/share/ibus/component/viskey.xml \
+            /usr/share/applications/viskey-settings.desktop; do
+            test -f "$f" || { echo "missing: $f"; exit 1; }
+            echo "ok: $f"
+          done
+          test -x /usr/bin/viskey-settings
+          test -x /usr/libexec/ibus-engine-viskey
+          export XDG_CONFIG_HOME="$RUNNER_TEMP/xdg"
+          python3 /usr/share/viskey/ibus/viskey_settings.py --print-config
+          viskey-settings --set input_method=vni --set macros.hs="học sinh"
+          viskey-settings --print-config | grep -q '"input_method": "vni"'
+          python3 -c "import sys; sys.path.insert(0, '/usr/share/viskey/ibus'); import ibus_viskey as m; assert m.IBus is not None"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: viskey-linux-deb
+          path: crossplatform/dist/ibus-viskey_1.0.0_all.deb
+          if-no-files-found: error
+
+  macos:
+    name: macOS (.dmg & .pkg)
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: C++ engine tests (clang++)
+        run: |
+          clang++ -std=c++17 -O2 -Wall tests/test_cpp_engine.cpp -o build_test_cpp
+          ./build_test_cpp
+
+      - name: Python engine tests
+        run: python3 tests/test_python_engine.py
+
+      - name: Build VisKey.app, .dmg and .pkg
+        env:
+          CI: "1"
+        run: bash scripts/build_macos_installer.sh
+
+      - name: Verify app bundle
+        run: |
+          set -e
+          BIN=build_macos/VisKey.app/Contents/MacOS/VisKey
+          ARCHS="$(lipo -archs "$BIN")"
+          echo "archs: $ARCHS"
+          [[ " $ARCHS " == *" arm64 "* ]] || { echo "arm64 slice missing"; exit 1; }
+          [[ " $ARCHS " == *" x86_64 "* ]] || { echo "x86_64 slice missing"; exit 1; }
+          codesign -v --verbose=2 build_macos/VisKey.app
+          plutil -lint build_macos/VisKey.app/Contents/Info.plist
+          pkgutil --payload-files VisKey-1.0.0-macOS.pkg | grep -q 'VisKey.app/Contents/MacOS/VisKey'
+          hdiutil imageinfo VisKey-macOS-Installer.dmg >/dev/null
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: viskey-macos
+          path: |
+            crossplatform/VisKey-macOS-Installer.dmg
+            crossplatform/VisKey-1.0.0-macOS.pkg
+          if-no-files-found: error
+
+  release:
+    name: GitHub Release
+    needs: [linux, macos]
+    if: startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    defaults:
+      run:
+        working-directory: .
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+
+      - run: ls -la dist
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          name: VisKey 1.0.0 (installers, pre-release)
+          prerelease: true
+          fail_on_unmatched_files: true
+          files: |
+            dist/VisKey-macOS-Installer.dmg
+            dist/VisKey-1.0.0-macOS.pkg
+            dist/ibus-viskey_1.0.0_all.deb
+          body: |
+            ## Cài đặt / Installation
+
+            **macOS 11+ (Apple Silicon & Intel)**
+            - `VisKey-1.0.0-macOS.pkg`: nhấp đúp để cài vào `/Applications`, hoặc
+            - `VisKey-macOS-Installer.dmg`: kéo `VisKey.app` vào `Applications`.
+            - Ứng dụng được ký ad-hoc: lần đầu hãy chuột phải → **Open**, sau đó cấp quyền
+              **System Settings → Privacy & Security → Accessibility** cho VisKey.
+
+            **Linux (Debian / Ubuntu / Mint)**
+            ```bash
+            sudo apt install ./ibus-viskey_1.0.0_all.deb
+            ibus restart && ibus engine viskey
+            ```
+            Cấu hình bộ gõ (Telex/VNI, gõ tắt...): chạy `viskey-settings` hoặc mở
+            **VisKey - Cấu hình Bộ gõ Tiếng Việt** trong menu ứng dụng.
