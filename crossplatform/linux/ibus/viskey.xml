@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<component>
+    <name>org.freedesktop.IBus.VisKey</name>
+    <description>VisKey Vietnamese Input Method</description>
+    <exec>/usr/libexec/ibus-engine-viskey --ibus</exec>
+    <version>1.0.0</version>
+    <author>VisKey Project</author>
+    <license>MIT</license>
+    <homepage>https://github.com/viskey/viskey</homepage>
+    <textdomain>viskey</textdomain>
+    <engines>
+        <engine>
+            <name>viskey</name>
+            <language>vi</language>
+            <license>MIT</license>
+            <author>VisKey Project</author>
+            <icon>input-keyboard</icon>
+            <layout>us</layout>
+            <longname>VisKey (Tiếng Việt)</longname>
+            <description>Bộ gõ Tiếng Việt Telex/VNI thông minh, không gạch chân, tự khôi phục từ tiếng Anh</description>
+            <rank>99</rank>
+            <symbol>VI</symbol>
+        </engine>
+    </engines>
+</component>

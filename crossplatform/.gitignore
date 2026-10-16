@@ -1,0 +1,9 @@
+build*/
+*.o
+test_cpp_engine
+viskey_cli
+*.dmg
+*.pkg
+__pycache__/
+*.pyc
+*.deb
