@@ -1,0 +1,121 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+//
+// VisKey for Windows (by 1VISION) — based on OpenKey by Mai Vũ Tuyên.
+// This file is UTF-8; the pragma below tells rc.exe so.
+
+#pragma code_page(65001)
+
+#include <windows.h>
+#include <commctrl.h>
+#include "resource.h"
+#include "version.h"
+
+LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL
+
+// The app icon has the lowest ID so Explorer shows it for VisKey.exe.
+IDI_APP       ICON "VisKey.ico"
+IDI_TRAY_VI   ICON "tray-vi.ico"
+IDI_TRAY_EN   ICON "tray-en.ico"
+IDI_TRAY_OFF  ICON "tray-off.ico"
+
+// The manifest is embedded by the linker (CMake adds res/VisKey.manifest to the target sources).
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION    VISKEY_VERSION_MAJOR, VISKEY_VERSION_MINOR, VISKEY_VERSION_PATCH, 0
+ PRODUCTVERSION VISKEY_VERSION_MAJOR, VISKEY_VERSION_MINOR, VISKEY_VERSION_PATCH, 0
+ FILEFLAGSMASK  VS_FFI_FILEFLAGSMASK
+ FILEFLAGS      0x0L
+ FILEOS         VOS_NT_WINDOWS32
+ FILETYPE       VFT_APP
+ FILESUBTYPE    VFT2_UNKNOWN
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904b0"
+        BEGIN
+            VALUE "CompanyName",      "1VISION"
+            VALUE "FileDescription",  "VisKey - Vietnamese input method"
+            VALUE "FileVersion",      VISKEY_VERSION_STR
+            VALUE "InternalName",     "VisKey"
+            VALUE "LegalCopyright",   "GPL-3.0-or-later. Based on OpenKey by Mai Vũ Tuyên."
+            VALUE "OriginalFilename", "VisKey.exe"
+            VALUE "ProductName",      "VisKey"
+            VALUE "ProductVersion",   VISKEY_VERSION_STR
+            VALUE "Comments",         "https://github.com/1vision-work/VisKey"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x409, 1200
+    END
+END
+
+// ---- Settings ---------------------------------------------------------------------------------
+// Layout in dialog units. The header (IDC_HEADER) is owner-drawn: icon, "VisKey", tagline, accent line.
+
+IDD_SETTINGS DIALOGEX 0, 0, 424, 318
+STYLE DS_SHELLFONT | DS_MODALFRAME | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX
+EXSTYLE WS_EX_APPWINDOW
+CAPTION "Cài đặt VisKey"
+FONT 9, "Segoe UI", 400, 0, 0x1
+BEGIN
+    CONTROL         "", IDC_HEADER, "Static", SS_OWNERDRAW, 0, 0, 424, 36
+
+    GROUPBOX        "Gõ tiếng Việt", -1, 8, 42, 204, 178
+    CONTROL         "Bật tiếng Việt", IDC_VIETNAMESE, "Button", BS_AUTOCHECKBOX | WS_TABSTOP, 16, 55, 180, 10
+    LTEXT           "Kiểu gõ:", -1, 16, 72, 60, 8
+    COMBOBOX        IDC_INPUT_TYPE, 80, 70, 124, 80, CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Bảng mã:", -1, 16, 89, 60, 8
+    COMBOBOX        IDC_CODE_TABLE, 80, 87, 124, 80, CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    CONTROL         "Kiểm tra chính tả", IDC_CHECK_SPELLING, "Button", BS_AUTOCHECKBOX | WS_TABSTOP, 16, 105, 188, 10
+    CONTROL         "Khôi phục từ sai (gõ tiếng Anh lẫn tiếng Việt)", IDC_RESTORE_WRONG, "Button", BS_AUTOCHECKBOX | WS_TABSTOP, 16, 117, 188, 10
+    CONTROL         "Đặt dấu kiểu mới (oà, uý)", IDC_MODERN_ORTHO, "Button", BS_AUTOCHECKBOX | WS_TABSTOP, 16, 129, 188, 10
+    CONTROL         "Bỏ dấu tự do", IDC_FREE_MARK, "Button", BS_AUTOCHECKBOX | WS_TABSTOP, 16, 141, 188, 10
+    CONTROL         "Quick Telex (cc=ch, gg=gi, nn=ng…)", IDC_QUICK_TELEX, "Button", BS_AUTOCHECKBOX | WS_TABSTOP, 16, 153, 188, 10
+    CONTROL         "Viết hoa chữ cái đầu câu", IDC_UPPER_FIRST, "Button", BS_AUTOCHECKBOX | WS_TABSTOP, 16, 165, 188, 10
+    CONTROL         "Cho phép phụ âm z, f, w, j", IDC_ALLOW_ZFWJ, "Button", BS_AUTOCHECKBOX | WS_TABSTOP, 16, 177, 188, 10
+    CONTROL         "Phụ âm đầu nhanh (f→ph, j→gi, w→qu)", IDC_QUICK_START, "Button", BS_AUTOCHECKBOX | WS_TABSTOP, 16, 189, 188, 10
+    CONTROL         "Phụ âm cuối nhanh (g→ng, h→nh, k→ch)", IDC_QUICK_END, "Button", BS_AUTOCHECKBOX | WS_TABSTOP, 16, 201, 188, 10
+
+    GROUPBOX        "Hệ thống", -1, 8, 224, 204, 68
+    LTEXT           "Phím chuyển Anh / Việt:", -1, 16, 237, 84, 8
+    CONTROL         "Ctrl + Shift", IDC_HOTKEY_CTRL_SHIFT, "Button", BS_AUTORADIOBUTTON | WS_GROUP | WS_TABSTOP, 104, 236, 50, 10
+    CONTROL         "Alt + Z", IDC_HOTKEY_ALT_Z, "Button", BS_AUTORADIOBUTTON, 158, 236, 46, 10
+    CONTROL         "Khởi động cùng Windows", IDC_RUN_AT_STARTUP, "Button", BS_AUTOCHECKBOX | WS_GROUP | WS_TABSTOP, 16, 252, 188, 10
+    CONTROL         "Sửa lỗi gợi ý trên thanh địa chỉ, ô tìm kiếm", IDC_FIX_AUTOCOMPLETE, "Button", BS_AUTOCHECKBOX | WS_TABSTOP, 16, 265, 188, 10
+    LTEXT           "", IDC_CONFIG_PATH, 16, 278, 190, 10, SS_PATHELLIPSIS | SS_NOPREFIX
+
+    GROUPBOX        "Gõ tắt", -1, 220, 42, 196, 250
+    CONTROL         "Bật gõ tắt", IDC_USE_MACRO, "Button", BS_AUTOCHECKBOX | WS_TABSTOP, 228, 55, 180, 10
+    CONTROL         "Gõ tắt cả khi đang ở chế độ tiếng Anh", IDC_MACRO_ENGLISH, "Button", BS_AUTOCHECKBOX | WS_TABSTOP, 228, 68, 180, 10
+    CONTROL         "Tự viết hoa theo từ gõ tắt (Ko → Không)", IDC_MACRO_AUTOCAPS, "Button", BS_AUTOCHECKBOX | WS_TABSTOP, 228, 81, 180, 10
+    CONTROL         "", IDC_MACRO_LIST, "SysListView32", LVS_REPORT | LVS_SINGLESEL | LVS_SHOWSELALWAYS | LVS_SORTASCENDING | WS_BORDER | WS_TABSTOP, 228, 96, 180, 128
+    LTEXT           "Viết tắt:", -1, 228, 232, 40, 8
+    EDITTEXT        IDC_MACRO_ABBR, 272, 230, 136, 12, ES_AUTOHSCROLL
+    LTEXT           "Nội dung:", -1, 228, 248, 40, 8
+    EDITTEXT        IDC_MACRO_TEXT, 272, 246, 136, 12, ES_AUTOHSCROLL
+    PUSHBUTTON      "Thêm / Sửa", IDC_MACRO_ADD, 272, 266, 66, 16
+    PUSHBUTTON      "Xoá", IDC_MACRO_DELETE, 342, 266, 66, 16
+
+    DEFPUSHBUTTON   "Lưu", IDOK, 254, 298, 52, 14
+    PUSHBUTTON      "Huỷ", IDCANCEL, 310, 298, 52, 14
+    PUSHBUTTON      "Áp dụng", IDC_APPLY, 366, 298, 52, 14
+END
+
+// ---- About -------------------------------------------------------------------------------------
+
+IDD_ABOUT DIALOGEX 0, 0, 236, 132
+STYLE DS_SHELLFONT | DS_MODALFRAME | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU
+EXSTYLE WS_EX_APPWINDOW
+CAPTION "Giới thiệu VisKey"
+FONT 9, "Segoe UI", 400, 0, 0x1
+BEGIN
+    CONTROL         "", IDC_ABOUT_ICON, "Static", SS_ICON | SS_REALSIZECONTROL, 12, 12, 32, 32
+    LTEXT           "VisKey", IDC_ABOUT_NAME, 56, 10, 170, 16
+    LTEXT           "", IDC_ABOUT_VERSION, 56, 28, 170, 8
+    LTEXT           "Gõ đúng ở mọi nơi.", -1, 56, 40, 170, 8
+    LTEXT           "by 1VISION", -1, 56, 56, 170, 8
+    LTEXT           "Dựa trên OpenKey của Mai Vũ Tuyên · GPL-3.0", -1, 56, 68, 170, 8
+    CONTROL         "<a href=""https://github.com/1vision-work/VisKey"">github.com/1vision-work/VisKey</a>", IDC_ABOUT_LINK, "SysLink", WS_TABSTOP, 56, 82, 170, 10
+    DEFPUSHBUTTON   "Đóng", IDOK, 174, 108, 52, 14
+END

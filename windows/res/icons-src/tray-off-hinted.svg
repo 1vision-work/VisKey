@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="16" height="16">
+  <!-- SPDX-License-Identifier: GPL-3.0-or-later -->
+  <!-- Windows tray, paused / keyboard hook unavailable, <= 24 px: charcoal tile, dimmed V with a white slash. -->
+  <rect x="4" y="4" width="92" height="92" rx="20" fill="#666D7A"/>
+  <g transform="translate(16.4 16) scale(1.05)" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M21 22L32 11L43 22" stroke="#A3A9B5" stroke-width="8.5"/>
+    <path d="M14 30L32 54L50 30" stroke="#A3A9B5" stroke-width="11"/>
+  </g>
+  <path d="M20 20L80 80" stroke="#FFFFFF" stroke-width="9" stroke-linecap="round"/>
+</svg>

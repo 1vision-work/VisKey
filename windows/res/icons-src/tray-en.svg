@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="32" height="32">
+  <!-- SPDX-License-Identifier: GPL-3.0-or-later -->
+  <!-- Windows tray, English, >= 32 px. -->
+  <rect x="4" y="4" width="92" height="92" rx="20" fill="#666D7A"/>
+  <path d="M66 27H36V73H66M36 50H61" fill="none" stroke="#FFFFFF" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
