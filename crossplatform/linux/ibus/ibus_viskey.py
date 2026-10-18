@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+# SPDX-License-Identifier: GPL-3.0-or-later
 """
 VisKey Linux IBus Engine
 Supports two seamless commit strategies to solve the classic Linux "Preedit Underline" bug:

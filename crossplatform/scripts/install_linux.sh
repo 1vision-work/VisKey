@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# SPDX-License-Identifier: GPL-3.0-or-later
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -29,6 +30,10 @@ else
     sudo install -m 0755 "$ROOT_DIR/linux/ibus/viskey_settings.py" /usr/share/viskey/ibus/
     sudo install -m 0644 "$ROOT_DIR/linux/ibus/viskey.xml" /usr/share/ibus/component/
     sudo install -m 0644 "$ROOT_DIR/linux/viskey-settings.desktop" /usr/share/applications/
+    (cd "$ROOT_DIR/branding/linux/hicolor" && find . -type f) | while read -r icon; do
+        sudo install -D -m 0644 "$ROOT_DIR/branding/linux/hicolor/$icon" "/usr/share/icons/hicolor/${icon#./}"
+    done
+    sudo gtk-update-icon-cache -q /usr/share/icons/hicolor 2>/dev/null || true
     sudo tee /usr/libexec/ibus-engine-viskey >/dev/null <<'EOF'
 #!/bin/sh
 exec /usr/bin/python3 /usr/share/viskey/ibus/ibus_viskey.py "$@"

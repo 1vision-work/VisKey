@@ -1,20 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- SPDX-License-Identifier: GPL-3.0-or-later -->
+<!-- Based on OpenKey by Mai Vũ Tuyên (GPL-3.0). Modified by VisKey contributors. -->
 <component>
     <name>org.freedesktop.IBus.VisKey</name>
     <description>VisKey Vietnamese Input Method</description>
     <exec>/usr/libexec/ibus-engine-viskey --ibus</exec>
     <version>1.0.0</version>
-    <author>VisKey Project</author>
-    <license>MIT</license>
-    <homepage>https://github.com/viskey/viskey</homepage>
+    <author>1VISION &lt;dat.cyblog@gmail.com&gt;</author>
+    <license>GPL-3.0-or-later</license>
+    <homepage>https://github.com/1vision-work/VisKey</homepage>
     <textdomain>viskey</textdomain>
     <engines>
         <engine>
             <name>viskey</name>
             <language>vi</language>
-            <license>MIT</license>
-            <author>VisKey Project</author>
-            <icon>input-keyboard</icon>
+            <license>GPL-3.0-or-later</license>
+            <author>1VISION &lt;dat.cyblog@gmail.com&gt;</author>
+            <icon>/usr/share/icons/hicolor/scalable/apps/viskey.svg</icon>
             <layout>us</layout>
             <longname>VisKey (Tiếng Việt)</longname>
             <description>Bộ gõ Tiếng Việt Telex/VNI thông minh, không gạch chân, tự khôi phục từ tiếng Anh</description>

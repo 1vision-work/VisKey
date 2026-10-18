@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+# SPDX-License-Identifier: GPL-3.0-or-later
 """
 VisKey Settings (Linux)
 Tkinter GUI + headless CLI to edit ~/.config/viskey/config.json
@@ -30,7 +31,26 @@ elif os.path.isdir("/usr/share/viskey/core"):
 
 from viskey_engine import EngineConfig
 
-APP_TITLE = "VisKey - Cấu hình Bộ gõ Tiếng Việt"
+APP_TITLE = "VisKey — Cấu hình bộ gõ"
+APP_TAGLINE = "Gõ đúng ở mọi nơi."
+APP_CREDITS = "by 1VISION · Dựa trên OpenKey của Mai Vũ Tuyên · GPL-3.0"
+
+# Brand colours (design/tokens.json, light theme)
+COLOR_BG = "#FFFFFF"
+COLOR_SURFACE = "#F6F7F9"
+COLOR_BORDER = "#DADDE4"
+COLOR_TEXT = "#16181C"
+COLOR_TEXT_SECONDARY = "#666D7A"
+COLOR_PRIMARY = "#3044D6"
+COLOR_PRIMARY_PRESSED = "#2534B8"
+COLOR_ON_PRIMARY = "#FFFFFF"
+COLOR_ACCENT = "#0B7F6D"
+
+# App icon: installed hicolor theme first, then the source tree (crossplatform/branding/)
+ICON_CANDIDATES = (
+    "/usr/share/icons/hicolor/256x256/apps/viskey.png",
+    os.path.abspath(os.path.join(SCRIPT_DIR, "..", "..", "branding", "linux", "viskey-256.png")),
+)
 INPUT_METHODS = ("telex", "vni")
 
 # Boolean options: (key, Vietnamese label). Mirrors EngineConfig + IBus-only no_underline_mode.
@@ -183,6 +203,45 @@ def apply_setting(cfg: Dict[str, Any], assignment: str) -> None:
         raise ValueError(f"unknown option '{key}'. Valid options: {', '.join(valid)}")
 
 
+def _find_icon() -> Optional[str]:
+    for path in ICON_CANDIDATES:
+        if os.path.isfile(path):
+            return path
+    return None
+
+
+def _apply_brand_style(root, ttk) -> None:
+    """Configure ttk styles with the VisKey brand colours. Purely cosmetic."""
+    style = ttk.Style(root)
+    if "clam" in style.theme_names():
+        style.theme_use("clam")  # the only built-in theme that honours custom colours everywhere
+    root.configure(background=COLOR_BG)
+    style.configure(".", background=COLOR_BG, foreground=COLOR_TEXT)
+    style.configure("TFrame", background=COLOR_BG)
+    style.configure("TLabel", background=COLOR_BG, foreground=COLOR_TEXT)
+    style.configure("TLabelframe", background=COLOR_BG, bordercolor=COLOR_BORDER)
+    style.configure("TLabelframe.Label", background=COLOR_BG, foreground=COLOR_TEXT)
+    for widget in ("TCheckbutton", "TRadiobutton"):
+        style.configure(widget, background=COLOR_BG, foreground=COLOR_TEXT)
+        style.map(widget, background=[("active", COLOR_BG)],
+                  indicatorforeground=[("selected", COLOR_ACCENT)])
+    style.configure("TButton", background=COLOR_SURFACE, foreground=COLOR_TEXT, bordercolor=COLOR_BORDER)
+    style.map("TButton", background=[("active", COLOR_BORDER)])
+    style.configure("Primary.TButton", background=COLOR_PRIMARY, foreground=COLOR_ON_PRIMARY,
+                    bordercolor=COLOR_PRIMARY, focuscolor=COLOR_ON_PRIMARY)
+    style.map("Primary.TButton",
+              background=[("pressed", COLOR_PRIMARY_PRESSED), ("active", COLOR_PRIMARY_PRESSED)],
+              foreground=[("disabled", COLOR_BORDER)])
+    style.configure("Treeview", background=COLOR_BG, fieldbackground=COLOR_BG, foreground=COLOR_TEXT)
+    style.configure("Treeview.Heading", background=COLOR_SURFACE, foreground=COLOR_TEXT)
+    style.map("Treeview", background=[("selected", COLOR_PRIMARY)], foreground=[("selected", COLOR_ON_PRIMARY)])
+    style.configure("Header.TFrame", background=COLOR_SURFACE)
+    style.configure("Header.TLabel", background=COLOR_SURFACE, foreground=COLOR_TEXT)
+    style.configure("Tagline.TLabel", background=COLOR_SURFACE, foreground=COLOR_TEXT_SECONDARY)
+    style.configure("Secondary.TLabel", background=COLOR_BG, foreground=COLOR_TEXT_SECONDARY)
+    style.configure("Footer.TLabel", background=COLOR_SURFACE, foreground=COLOR_TEXT_SECONDARY)
+
+
 # ---------------------------------------------------------------------------
 # Tkinter GUI (tkinter is imported lazily so the module works without DISPLAY)
 # ---------------------------------------------------------------------------
@@ -201,7 +260,21 @@ def run_gui() -> int:
         return 1
 
     root.title(APP_TITLE)
-    root.minsize(560, 560)
+    root.minsize(560, 620)
+
+    header_icon = None
+    try:
+        icon_path = _find_icon()
+        if icon_path:
+            icon = tk.PhotoImage(file=icon_path)
+            root.iconphoto(True, icon)
+            header_icon = icon.subsample(max(1, icon.width() // 40))
+    except Exception:  # cosmetic only: never block the settings window on icon problems
+        header_icon = None
+    try:
+        _apply_brand_style(root, ttk)
+    except tk.TclError:
+        pass
 
     cfg = load_config()
     macros: Dict[str, str] = dict(cfg["macros"])
@@ -212,10 +285,22 @@ def run_gui() -> int:
     expansion_var = tk.StringVar()
     status_var = tk.StringVar(value=f"Tệp cấu hình: {config_path()}")
 
+    header = ttk.Frame(root, padding=(12, 10), style="Header.TFrame")
+    header.pack(fill="x")
+    if header_icon is not None:
+        icon_label = ttk.Label(header, image=header_icon, style="Header.TLabel")
+        icon_label.image = header_icon  # keep a reference so Tk does not drop the image
+        icon_label.pack(side="left", padx=(0, 10))
+    ttk.Label(header, text="VisKey", style="Header.TLabel",
+              font=("TkDefaultFont", 16, "bold")).pack(anchor="w")
+    ttk.Label(header, text=APP_TAGLINE, style="Tagline.TLabel").pack(anchor="w")
+
+    footer = ttk.Frame(root, padding=(12, 6), style="Header.TFrame")
+    footer.pack(side="bottom", fill="x")
+    ttk.Label(footer, text=APP_CREDITS, style="Footer.TLabel", font=("TkDefaultFont", 9)).pack(anchor="w")
+
     main = ttk.Frame(root, padding=12)
     main.pack(fill="both", expand=True)
-
-    ttk.Label(main, text=APP_TITLE, font=("TkDefaultFont", 13, "bold")).pack(anchor="w", pady=(0, 8))
 
     method_frame = ttk.LabelFrame(main, text="Kiểu gõ", padding=8)
     method_frame.pack(fill="x", pady=4)
@@ -337,11 +422,11 @@ def run_gui() -> int:
 
     bottom = ttk.Frame(main)
     bottom.pack(fill="x", pady=(8, 0))
-    ttk.Button(bottom, text="Lưu cấu hình & Áp dụng", command=save).pack(side="right")
+    ttk.Button(bottom, text="Lưu cấu hình & Áp dụng", command=save, style="Primary.TButton").pack(side="right")
     ttk.Button(bottom, text="Đóng", command=root.destroy).pack(side="right", padx=6)
     ttk.Button(bottom, text="Khôi phục mặc định", command=reset_defaults).pack(side="left")
 
-    ttk.Label(main, textvariable=status_var, foreground="gray").pack(anchor="w", pady=(6, 0))
+    ttk.Label(main, textvariable=status_var, style="Secondary.TLabel").pack(anchor="w", pady=(6, 0))
 
     refresh_tree()
     root.mainloop()

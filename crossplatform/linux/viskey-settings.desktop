@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
 [Desktop Entry]
 Type=Application
 Name=VisKey - Cấu hình Bộ gõ Tiếng Việt
@@ -5,7 +6,7 @@ Name[vi]=VisKey - Cấu hình Bộ gõ Tiếng Việt
 Comment=Configure the VisKey Vietnamese input method (IBus)
 Comment[vi]=Cấu hình kiểu gõ Telex/VNI, gõ tắt và các tùy chọn của bộ gõ VisKey
 Exec=viskey-settings
-Icon=input-keyboard
+Icon=viskey
 Terminal=false
 Categories=Settings;Utility;
 Keywords=vietnamese;ibus;telex;vni;input;viskey;
