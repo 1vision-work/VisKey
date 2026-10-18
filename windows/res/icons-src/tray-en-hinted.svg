@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="16" height="16">
+  <!-- SPDX-License-Identifier: GPL-3.0-or-later -->
+  <!-- Windows tray, English, <= 24 px: charcoal #666D7A tile with a white E (white on #666D7A = 5.2:1). -->
+  <rect x="4" y="4" width="92" height="92" rx="20" fill="#666D7A"/>
+  <path d="M67 26H35V74H67M35 50H62" fill="none" stroke="#FFFFFF" stroke-width="13" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
