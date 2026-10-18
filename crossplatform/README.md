@@ -28,10 +28,11 @@
 * `macos/VisKeyApp.mm` & `macos/Info.plist`: Ứng dụng macOS gốc (Objective-C++ / Cocoa Menu Bar + `CGEventTap`).
 * `linux/ibus/ibus_viskey.py` & `linux/ibus/viskey.xml`: Bộ gõ IBus Engine cho Linux (X11 & Wayland).
 * `linux/ibus/viskey_settings.py` & `linux/viskey-settings.desktop`: Ứng dụng cấu hình **`viskey-settings`** (Tkinter) cho Linux.
+* `branding/`: Tài sản thương hiệu đã render sẵn từ `design/icons/*.svg` theo [`design/brand.md`](../design/brand.md) §3 — `macos/VisKey.iconset` + `VisKey.icns`, ảnh template menu bar `menubar-{vi,en,off}.png` (@1x/@2x), icon Linux theme `hicolor` (16–512 px + `scalable`), `viskey-symbol.svg`, nền cửa sổ DMG `dmg/background.png` (@2x). Sinh lại bằng `bash branding/gen_branding.sh` (cần `rsvg-convert`, `png2icns`) mỗi khi SVG trong `design/icons/` thay đổi, rồi commit kết quả.
 * `tests/test_cpp_engine.cpp` & `tests/test_python_engine.py`: Bộ 109 kịch bản kiểm thử tự động (Unit Tests) cho cả C++17 và Python.
 * `scripts/build_macos_installer.sh` & `Install_macOS.command`: Script tự động biên dịch `VisKey.app` (Universal Binary) và đóng gói file cài đặt **`VisKey-macOS-Installer.dmg`**.
 * `scripts/build_linux_deb.sh` & `scripts/install_linux.sh`: Script đóng gói bộ cài **`ibus-viskey_1.0.0_all.deb`** và cài đặt tự động cho Linux.
-* [`../.github/workflows/installers.yml`](../.github/workflows/installers.yml) (ở thư mục gốc repo): CI chạy kiểm thử, build `.deb`, `.dmg`, `.pkg` (artifact) khi push nhánh `feat/macos-linux-installers`, và tạo GitHub pre-release đính kèm 3 file khi đẩy tag `v*-installers`.
+* [`../.github/workflows/installers.yml`](../.github/workflows/installers.yml) (ở thư mục gốc repo): CI chạy kiểm thử, build `.deb`, `.dmg`, `.pkg` (artifact) khi push nhánh `feat/macos-linux-installers` hoặc `feat/branding-windows`, và tạo GitHub pre-release đính kèm 3 file khi đẩy tag `v*-installers`.
 * Không có file `.deb`/`.dmg`/`.pkg` dựng sẵn trong repo (bị `.gitignore` loại trừ) — tải từ GitHub Releases hoặc tự build bằng các script trên.
 
 ## 3. Hướng dẫn Build và Cài đặt trên macOS (Tạo bộ cài `.app` & `.dmg`)
@@ -61,7 +62,7 @@ bash scripts/build_macos_installer.sh
 1. Khi `VisKey.app` chạy lần đầu, macOS sẽ hỏi quyền **Accessibility (Trợ năng)**.
 2. Mở **System Settings (Cài đặt hệ thống) -> Privacy & Security (Quyền riêng tư & Bảo mật) -> Accessibility (Trợ năng)**.
 3. Bật công tắc cho **VisKey** (nếu macOS yêu cầu, bật thêm **Input Monitoring**), rồi thoát và mở lại VisKey (event tap chỉ được tạo lúc khởi động). (Nếu bạn build lại bản mới mà macOS báo quyền cũ bị kẹt, hãy chạy lệnh `tccutil reset Accessibility org.viskey.inputmethod` trong Terminal rồi bật lại).
-4. Trên thanh Menu Bar góc phải màn hình sẽ xuất hiện biểu tượng **`🇻🇳 VI`**. Bạn có thể nhấn **`Ctrl + Space`** hoặc **`Cmd + Shift + V`** để chuyển nhanh giữa Tiếng Việt (`VI`) và Tiếng Anh (`EN`). Lưu ý `Ctrl + Space` trùng phím tắt đổi nguồn nhập mặc định của macOS.
+4. Trên thanh Menu Bar góc phải màn hình sẽ xuất hiện biểu tượng VisKey (khối đặc = `VI`, khung rỗng chữ E = `EN`, khung có gạch chéo = chưa có quyền / event tap không chạy). Mục **Giới thiệu VisKey** trong menu hiện phiên bản và ghi công. Bạn có thể nhấn **`Ctrl + Space`** hoặc **`Cmd + Shift + V`** để chuyển nhanh giữa Tiếng Việt (`VI`) và Tiếng Anh (`EN`). Lưu ý `Ctrl + Space` trùng phím tắt đổi nguồn nhập mặc định của macOS.
 
 *Hạn chế hiện tại của app macOS (`macos/VisKeyApp.mm`):* chỉ có menu trên menu bar (chưa có cửa sổ cài đặt hay UI quản lý gõ tắt), các tùy chọn và chế độ Anh/Việt theo app chưa được lưu sau khi thoát, chưa có tự khởi động cùng hệ thống.
 

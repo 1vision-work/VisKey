@@ -23,6 +23,7 @@ Khi giải nén `VisKey-macOS-Linux.zip`, bạn sẽ có đầy đủ các thàn
 | `linux/ibus/viskey.xml` | File đăng ký thành phần bộ gõ với hệ thống IBus (`/usr/share/ibus/component/viskey.xml`). |
 | `tests/test_cpp_engine.cpp` | Bộ 109 bài kiểm thử tự động (Unit Tests) cho nhân C++17. |
 | `tests/test_python_engine.py` | Bộ 109 bài kiểm thử tự động (Unit Tests) cho nhân Python. |
+| `branding/` | Icon app (`macos/VisKey.iconset`, `VisKey.icns`), ảnh template menu bar, icon `hicolor` cho Linux và nền DMG — render từ `design/icons/*.svg` bằng `branding/gen_branding.sh` (xem mục 5). |
 | `CMakeLists.txt` | File cấu hình hệ thống build CMake đa nền tảng (macOS & Linux). |
 | `Install_macOS.command` | File chạy tự động bằng cú nhấp đúp chuột trên macOS để test, build `VisKey.app` và tạo bộ cài `.dmg`. |
 | `scripts/build_macos_installer.sh` | Script build chuyên sâu cho macOS: biên dịch Universal Binary (`arm64` + `x86_64`), ký `codesign`, đóng gói `.dmg`. |
@@ -79,6 +80,8 @@ Nếu bạn muốn tự kiểm soát từng lệnh biên dịch hoặc tích h�
 # Cách A: Biên dịch trực tiếp bằng clang++ tạo Universal App Bundle
 mkdir -p VisKey.app/Contents/MacOS VisKey.app/Contents/Resources
 cp macos/Info.plist VisKey.app/Contents/Info.plist
+iconutil -c icns branding/macos/VisKey.iconset -o VisKey.app/Contents/Resources/VisKey.icns
+cp branding/macos/menubar-*.png VisKey.app/Contents/Resources/
 
 clang++ -std=c++17 -O2 -fobjc-arc -arch arm64 -arch x86_64 \
     macos/VisKeyApp.mm \
@@ -109,7 +112,7 @@ Vì VisKey sử dụng cơ chế `CGEventTap` cấp thấp để triệt tiêu l
    tccutil reset Accessibility org.viskey.inputmethod
    open /Applications/VisKey.app
    ```
-4. Nhấp vào biểu tượng **`🇻🇳 VI`** trên thanh Menu Bar góc phải màn hình:
+4. Nhấp vào biểu tượng VisKey trên thanh Menu Bar góc phải màn hình (ảnh template `menubar-vi` / `menubar-en` / `menubar-off`):
    * Nhấn **`Ctrl + Space`** hoặc **`Cmd + Shift + V`** để bật/tắt nhanh chế độ gõ Tiếng Việt (`VI` / `EN`).
    * Chọn **"Bảng điều khiển VisKey..."** (hoặc nhấn `Cmd + ,`) để mở cửa sổ giao diện cài đặt đầy đủ (chọn kiểu gõ Telex/VNI, bật/tắt sửa lỗi Spotlight, thêm/xóa từ Gõ tắt Macro và bật **Tự khởi động VisKey cùng hệ điều hành macOS**).
 
@@ -170,3 +173,21 @@ bash scripts/install_linux.sh
    export QT_IM_MODULE=ibus
    export XMODIFIERS=@im=ibus
    ```
+
+## 5. Tài sản thương hiệu (`branding/`)
+
+Icon và hình ảnh của bản đa nền tảng được render từ vector gốc `design/icons/*.svg` theo quy tắc trong [`design/brand.md`](../../design/brand.md) §3 (16 px dùng `appicon-hinted-16.svg`, ≤ 32 px dùng `appicon-small.svg`, lớn hơn dùng `appicon-1024.svg`; menu bar chỉ đen + alpha). Kết quả được commit để CI không cần công cụ render:
+
+| Đầu ra | Dùng ở |
+| :--- | :--- |
+| `branding/macos/VisKey.iconset/`, `VisKey.icns` | `Contents/Resources/VisKey.icns` (`build_macos_installer.sh` ưu tiên `iconutil -c icns` từ iconset, nếu không có thì dùng `.icns` đã commit), icon ổ đĩa DMG |
+| `branding/macos/menubar-{vi,en,off}.png` (+ `@2x`) | Ảnh template trên menu bar của `VisKeyApp.mm` |
+| `branding/dmg/background.png` (+ `@2x`) | Nền cửa sổ DMG 660×400 (bố cục Finder chỉ áp dụng khi build ngoài CI) |
+| `branding/linux/hicolor/…/viskey.png`, `scalable/apps/viskey.svg` | `/usr/share/icons/hicolor/` (gói `.deb`, `install_linux.sh`), icon engine IBus, `Icon=viskey` của `viskey-settings.desktop` |
+| `branding/linux/viskey-256.png`, `viskey-symbol.svg` | Icon cửa sổ `viskey-settings` khi chạy từ mã nguồn; symbol cho IBus |
+
+Sinh lại (Linux, cần `rsvg-convert` và `png2icns` từ gói `librsvg2-bin`, `icnsutils`):
+
+```bash
+bash crossplatform/branding/gen_branding.sh
+```

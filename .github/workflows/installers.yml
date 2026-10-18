@@ -3,7 +3,7 @@ name: Installers (crossplatform)
 
 on:
   push:
-    branches: [feat/macos-linux-installers]
+    branches: [feat/macos-linux-installers, feat/branding-windows]
     tags: ["v*-installers"]
   workflow_dispatch:
 
@@ -72,6 +72,20 @@ jobs:
           viskey-settings --print-config | grep -q '"input_method": "vni"'
           python3 -c "import sys; sys.path.insert(0, '/usr/share/viskey/ibus'); import ibus_viskey as m; assert m.IBus is not None"
 
+      - name: Verify branding
+        run: |
+          set -e
+          for f in \
+            /usr/share/icons/hicolor/256x256/apps/viskey.png \
+            /usr/share/icons/hicolor/scalable/apps/viskey.svg \
+            /usr/share/doc/ibus-viskey/copyright; do
+            test -f "$f" || { echo "missing: $f"; exit 1; }
+            echo "ok: $f"
+          done
+          grep -q 'GPL-3.0-or-later' /usr/share/ibus/component/viskey.xml
+          grep -q '<icon>/usr/share/icons/hicolor/scalable/apps/viskey.svg</icon>' /usr/share/ibus/component/viskey.xml
+          grep -q '^Icon=viskey$' /usr/share/applications/viskey-settings.desktop
+
       - uses: actions/upload-artifact@v4
         with:
           name: viskey-linux-deb
@@ -110,6 +124,16 @@ jobs:
           pkgutil --payload-files VisKey-1.0.0-macOS.pkg | grep -q 'VisKey.app/Contents/MacOS/VisKey'
           hdiutil imageinfo VisKey-macOS-Installer.dmg >/dev/null
 
+      - name: Verify branding
+        run: |
+          set -e
+          RES=build_macos/VisKey.app/Contents/Resources
+          for f in VisKey.icns menubar-vi.png menubar-vi@2x.png menubar-en.png menubar-off.png; do
+            test -f "$RES/$f" || { echo "missing: $RES/$f"; exit 1; }
+            echo "ok: $RES/$f"
+          done
+          test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIconFile' build_macos/VisKey.app/Contents/Info.plist)" = VisKey
+
       - uses: actions/upload-artifact@v4
         with:
           name: viskey-macos
@@ -138,26 +162,30 @@ jobs:
 
       - uses: softprops/action-gh-release@v2
         with:
-          name: VisKey 1.0.0 (installers, pre-release)
+          name: VisKey ${{ github.ref_name }} (installers, pre-release)
           prerelease: true
           fail_on_unmatched_files: true
           files: |
             dist/VisKey-macOS-Installer.dmg
-            dist/VisKey-1.0.0-macOS.pkg
-            dist/ibus-viskey_1.0.0_all.deb
+            dist/VisKey-*-macOS.pkg
+            dist/ibus-viskey_*_all.deb
           body: |
+            ## VisKey ${{ github.ref_name }}
+
             ## Cài đặt / Installation
 
             **macOS 11+ (Apple Silicon & Intel)**
-            - `VisKey-1.0.0-macOS.pkg`: nhấp đúp để cài vào `/Applications`, hoặc
+            - `VisKey-*-macOS.pkg`: nhấp đúp để cài vào `/Applications`, hoặc
             - `VisKey-macOS-Installer.dmg`: kéo `VisKey.app` vào `Applications`.
             - Ứng dụng được ký ad-hoc: lần đầu hãy chuột phải → **Open**, sau đó cấp quyền
               **System Settings → Privacy & Security → Accessibility** cho VisKey.
 
             **Linux (Debian / Ubuntu / Mint)**
             ```bash
-            sudo apt install ./ibus-viskey_1.0.0_all.deb
+            sudo apt install ./ibus-viskey_*_all.deb
             ibus restart && ibus engine viskey
             ```
             Cấu hình bộ gõ (Telex/VNI, gõ tắt...): chạy `viskey-settings` hoặc mở
             **VisKey - Cấu hình Bộ gõ Tiếng Việt** trong menu ứng dụng.
+
+            Based on OpenKey by Mai Vũ Tuyên · GPL-3.0 · by 1VISION
