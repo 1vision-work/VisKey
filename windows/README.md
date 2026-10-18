@@ -81,10 +81,10 @@ UI thread (app.cpp, dialogs.cpp)              hook thread (typing_service.cpp)
 
 ## Build
 
-Cần Visual Studio 2022 (MSVC, workload "Desktop development with C++") và CMake ≥ 3.20.
+Cần Visual Studio 2022 trở lên (MSVC, workload "Desktop development with C++") và CMake ≥ 3.20 (đủ mới để nhận ra bản Visual Studio đang cài). Không cần `-G`: CMake tự chọn generator Visual Studio mới nhất trên máy; muốn chỉ định thì thêm `-G "Visual Studio 17 2022"` hoặc generator tương ứng.
 
 ```bat
-cmake -S windows -B build -G "Visual Studio 17 2022" -A x64
+cmake -S windows -B build -A x64
 cmake --build build --config Release
 ctest --test-dir build -C Release --output-on-failure
 build\Release\VisKey.exe

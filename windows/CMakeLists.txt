@@ -5,7 +5,7 @@
 # Builds a portable, self-contained VisKey.exe: Win32 C++17, static MSVC runtime (/MT), icons + manifest +
 # version info embedded, no DLL dependency beyond Windows system DLLs.
 #
-#   cmake -S windows -B build -G "Visual Studio 17 2022" -A x64
+#   cmake -S windows -B build -A x64      # newest installed Visual Studio generator (or pass -G explicitly)
 #   cmake --build build --config Release
 #   ctest --test-dir build -C Release
 cmake_minimum_required(VERSION 3.20)

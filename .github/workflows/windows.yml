@@ -28,6 +28,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # Developer environment of the newest installed Visual Studio (msvc-dev-cmd locates it with
+      # vswhere -latest, no version pinned). Host x64 tools on both legs: cl only builds the x64-only
+      # crossplatform tests, and dumpbin/mt.exe inspect ARM64 binaries just as well.
       - name: Set up MSVC
         uses: ilammy/msvc-dev-cmd@v1
         with:
@@ -52,8 +55,14 @@ jobs:
           .\build-cp\test_cpp_engine.exe
           if ($LASTEXITCODE -ne 0) { exit 1 }
 
+      # No -G: CMake defaults to the newest installed Visual Studio generator, so the job keeps working
+      # when windows-latest moves to a new Visual Studio release (needs a CMake that knows that release).
       - name: Configure
-        run: cmake -S windows -B build -G "Visual Studio 17 2022" -A ${{ matrix.arch }}
+        run: |
+          cmake --version
+          cmake -S windows -B build -A ${{ matrix.arch }}
+          if ($LASTEXITCODE -ne 0) { exit 1 }
+          Select-String -Path build\CMakeCache.txt -Pattern '^CMAKE_GENERATOR(_INSTANCE)?:' | ForEach-Object { $_.Line }
 
       - name: Build
         run: cmake --build build --config Release --parallel
@@ -99,7 +108,7 @@ jobs:
         run: |
           # Expected to fail on MSVC: the snapshot target uses GCC/Clang flags and the snapshots are recorded
           # with macOS key codes, while on _WIN32 the engine uses Windows virtual-key codes (windows/README.md).
-          cmake -S Engine -B build-engine-tests -G "Visual Studio 17 2022" -A x64 -DVISKEY_BUILD_TESTS=ON
+          cmake -S Engine -B build-engine-tests -A x64 -DVISKEY_BUILD_TESTS=ON
           cmake --build build-engine-tests --config Release --parallel
           ctest --test-dir build-engine-tests -C Release --output-on-failure
 
