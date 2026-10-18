@@ -46,6 +46,17 @@ Pre-release [**v1.0.0-installers**](https://github.com/1vision-work/VisKey/relea
 | [VisKey-1.0.0-macOS.pkg](https://github.com/1vision-work/VisKey/releases/download/v1.0.0-installers/VisKey-1.0.0-macOS.pkg) | macOS 11+, trình cài đặt cài vào `/Applications` |
 | [ibus-viskey_1.0.0_all.deb](https://github.com/1vision-work/VisKey/releases/download/v1.0.0-installers/ibus-viskey_1.0.0_all.deb) | Debian / Ubuntu / Linux Mint / Pop!_OS (IBus) |
 
+### Windows (preview)
+
+App Win32 native mới trong [`windows/`](windows/README.md), dùng engine C++ của `Engine/` (nhánh a). Pre-release trên [GitHub Releases](https://github.com/1vision-work/VisKey/releases) (tag `v*-windows-preview`), build bởi workflow [`.github/workflows/windows.yml`](.github/workflows/windows.yml):
+
+| File | Dành cho |
+| :--- | :--- |
+| `VisKey-1.1.0-Windows-x64-portable.zip` | Windows 10/11 x64 — một file `VisKey.exe` portable, không cần cài (cài đặt lưu ở `config.json` cạnh exe, hoặc `%APPDATA%\VisKey`) |
+| `VisKey-1.1.0-Windows-Setup.exe` | Trình cài đặt (tuỳ chọn, nếu CI build được) |
+
+> ⚠️ Chưa ký số (SmartScreen: **More info › Run anyway**) và **chưa được thử trên máy Windows thật**. Chi tiết, giới hạn (cửa sổ Administrator, antivirus…): [windows/README.md](windows/README.md).
+
 ## Cài đặt trên macOS
 
 > ⚠️ **Lưu ý trung thực:** `VisKey.app` chỉ được **ký ad-hoc**, **chưa notarize**, và **chưa được thử trên máy Mac thật** — CI chỉ kiểm tra build Universal, chữ ký ad-hoc, `Info.plist` và nội dung `.pkg`/`.dmg`. Hãy coi đây là bản thử nghiệm.
@@ -97,6 +108,7 @@ VisKey/
 ├─ design/             # (a) thiết kế UI + brand (nguồn sự thật cho giao diện)
 ├─ Config/             # (a) Signing.xcconfig
 ├─ project.yml         # (a) XcodeGen
+├─ windows/            # app Windows native (Win32, dùng Engine/): src/ res/ tests/ installer/
 ├─ crossplatform/      # (b) dự án macOS + Linux
 │  ├─ core/            #     viskey_engine.hpp, viskey_engine.py, viskey_cli.cpp
 │  ├─ macos/           #     VisKeyApp.mm, Info.plist
@@ -105,7 +117,7 @@ VisKey/
 │  ├─ scripts/         #     build_macos_installer.sh, build_linux_deb.sh, install_linux.sh
 │  ├─ CMakeLists.txt  Install_macOS.command
 ├─ docs/               # decisions.md (ADR), design-doc.md, crossplatform/ (ARCHITECTURE.md, BUILD.md)
-└─ .github/workflows/  # ci.yml (nhánh a), installers.yml (nhánh b)
+└─ .github/workflows/  # ci.yml (nhánh a), installers.yml (nhánh b), windows.yml (Windows)
 ```
 
 ## Build từ mã nguồn & chạy test
