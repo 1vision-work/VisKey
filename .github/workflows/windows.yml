@@ -1,0 +1,165 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# VisKey for Windows (by 1VISION) — based on OpenKey by Mai Vũ Tuyên.
+name: Windows
+
+on:
+  push:
+    branches: [feat/windows-app, feat/branding-windows]
+    tags: ["v*-windows-preview", "v*-installers"]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Windows (${{ matrix.arch }})
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: [x64, ARM64]
+    # ARM64 is best effort: it never blocks the x64 artifact or the release.
+    continue-on-error: ${{ matrix.arch == 'ARM64' }}
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up MSVC
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+
+      - name: Version
+        id: version
+        run: |
+          $m = Select-String -Path windows/CMakeLists.txt -Pattern 'project\(VisKeyWindows VERSION ([0-9.]+)'
+          $v = $m.Matches[0].Groups[1].Value
+          "version=$v" >> $env:GITHUB_OUTPUT
+          $arch = '${{ matrix.arch }}'.ToLower()
+          "zip=VisKey-$v-Windows-$arch-portable.zip" >> $env:GITHUB_OUTPUT
+          Write-Host "VisKey $v ($arch)"
+
+      - name: crossplatform engine tests (cl, 109 cases)
+        if: matrix.arch == 'x64'
+        run: |
+          New-Item -ItemType Directory -Force build-cp | Out-Null
+          cl /nologo /std:c++17 /EHsc /utf-8 /W3 /O2 /MT crossplatform\tests\test_cpp_engine.cpp /Fobuild-cp\ /Febuild-cp\test_cpp_engine.exe
+          if ($LASTEXITCODE -ne 0) { exit 1 }
+          .\build-cp\test_cpp_engine.exe
+          if ($LASTEXITCODE -ne 0) { exit 1 }
+
+      - name: Configure
+        run: cmake -S windows -B build -G "Visual Studio 17 2022" -A ${{ matrix.arch }}
+
+      - name: Build
+        run: cmake --build build --config Release --parallel
+
+      - name: Windows app tests
+        if: matrix.arch == 'x64'
+        run: ctest --test-dir build -C Release --output-on-failure
+
+      - name: Verify VisKey.exe
+        run: |
+          $exe = 'build\Release\VisKey.exe'
+          if (-not (Test-Path $exe)) { throw "missing $exe" }
+          $expected = @{ x64 = '8664 machine (x64)'; ARM64 = 'AA64 machine (ARM64)' }['${{ matrix.arch }}']
+          $headers = dumpbin /nologo /headers $exe | Out-String
+          if ($headers -notmatch [regex]::Escape($expected)) { throw "not a ${{ matrix.arch }} PE: expected '$expected'" }
+          if ($headers -notmatch 'subsystem \(Windows GUI\)') { throw 'not a GUI subsystem executable' }
+          Write-Host "PE: $expected, Windows GUI"
+
+          $deps = dumpbin /nologo /dependents $exe | Select-String -Pattern '^\s+\S+\.dll\s*$' | ForEach-Object { $_.Line.Trim() }
+          Write-Host "Dependencies:`n  $($deps -join "`n  ")"
+          $bad = $deps | Where-Object { $_ -match '(?i)^(vcruntime|msvcp|ucrtbase|api-ms-win-crt|concrt|libstdc|libgcc|libwinpthread)' }
+          if ($bad) { throw "non-system DLL dependencies: $($bad -join ', ')" }
+          $allowed = 'kernel32.dll','user32.dll','gdi32.dll','shell32.dll','comctl32.dll','advapi32.dll','ole32.dll','shlwapi.dll','uxtheme.dll'
+          $unknown = $deps | Where-Object { $allowed -notcontains $_.ToLower() }
+          if ($unknown) { throw "unexpected DLL dependencies: $($unknown -join ', ')" }
+
+          mt.exe -nologo "-inputresource:$exe;#1" -out:build\extracted.manifest
+          if ($LASTEXITCODE -ne 0) { throw 'no embedded manifest' }
+          $manifest = Get-Content build\extracted.manifest -Raw
+          foreach ($needle in 'PerMonitorV2', 'Microsoft.Windows.Common-Controls', 'asInvoker') {
+            if ($manifest -notmatch [regex]::Escape($needle)) { throw "manifest lacks $needle" }
+          }
+
+          $info = (Get-Item $exe).VersionInfo
+          Write-Host "ProductName=$($info.ProductName) CompanyName=$($info.CompanyName) ProductVersion=$($info.ProductVersion)"
+          if ($info.ProductName -ne 'VisKey' -or $info.CompanyName -ne '1VISION') { throw 'bad version resource' }
+          if ($info.ProductVersion -ne '${{ steps.version.outputs.version }}') { throw 'version resource does not match CMake project version' }
+          Write-Host "Size: $((Get-Item $exe).Length) bytes"
+
+      - name: Engine/tests (informational, macOS key-code snapshots)
+        if: matrix.arch == 'x64'
+        continue-on-error: true
+        run: |
+          # Expected to fail on MSVC: the snapshot target uses GCC/Clang flags and the snapshots are recorded
+          # with macOS key codes, while on _WIN32 the engine uses Windows virtual-key codes (windows/README.md).
+          cmake -S Engine -B build-engine-tests -G "Visual Studio 17 2022" -A x64 -DVISKEY_BUILD_TESTS=ON
+          cmake --build build-engine-tests --config Release --parallel
+          ctest --test-dir build-engine-tests -C Release --output-on-failure
+
+      - name: Portable zip
+        run: |
+          $stage = 'dist\stage'
+          New-Item -ItemType Directory -Force $stage | Out-Null
+          Copy-Item build\Release\VisKey.exe $stage\
+          Copy-Item LICENSE $stage\LICENSE.txt
+          Copy-Item NOTICE $stage\NOTICE.txt
+          # CRLF so old Notepad versions show the text correctly.
+          (Get-Content windows\README-Windows.txt -Raw -Encoding utf8) -replace "`r?`n", "`r`n" |
+            Set-Content $stage\README-Windows.txt -Encoding utf8 -NoNewline
+          Compress-Archive -Path "$stage\*" -DestinationPath "dist\${{ steps.version.outputs.zip }}" -Force
+          Remove-Item -Recurse $stage
+          Get-ChildItem dist
+
+      - name: Installer (optional, Inno Setup)
+        if: matrix.arch == 'x64'
+        continue-on-error: true
+        run: |
+          $iscc = (Get-Command iscc.exe -ErrorAction SilentlyContinue).Source
+          if (-not $iscc) {
+            foreach ($p in "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe", "$env:ProgramFiles\Inno Setup 6\ISCC.exe") {
+              if (Test-Path $p) { $iscc = $p }
+            }
+          }
+          if (-not $iscc) {
+            choco install innosetup -y --no-progress | Out-Null
+            $iscc = "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe"
+          }
+          if (-not (Test-Path $iscc)) { throw 'Inno Setup not available; skipping installer' }
+          & $iscc /Q "/DAppVersion=${{ steps.version.outputs.version }}" "/DSourceExe=$PWD\build\Release\VisKey.exe" "/DRepoRoot=$PWD" "/O$PWD\dist" windows\installer\VisKey.iss
+          if ($LASTEXITCODE -ne 0) { throw "iscc failed ($LASTEXITCODE)" }
+          Get-ChildItem dist
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.arch == 'x64' && 'viskey-windows' || 'viskey-windows-arm64' }}
+          path: dist/*
+          if-no-files-found: error
+
+  release:
+    name: Pre-release
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: viskey-windows*
+          path: dist
+          merge-multiple: true
+
+      - run: ls -l dist
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          prerelease: true
+          files: dist/*
+          fail_on_unmatched_files: true
