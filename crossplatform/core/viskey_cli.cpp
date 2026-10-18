@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 // viskey_cli.cpp
 // Interactive terminal simulator to test VisKey Engine directly in CLI
 #include "viskey_engine.hpp"

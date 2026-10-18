@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Based on OpenKey by Mai Vũ Tuyên (GPL-3.0). Modified by VisKey contributors.
 """
 VisKey Core Engine (Telex & VNI Vietnamese Input Method Engine)
 Addresses the core issues of existing Vietnamese IMEs on macOS and Linux:

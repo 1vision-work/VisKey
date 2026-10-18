@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Based on OpenKey by Mai Vũ Tuyên (GPL-3.0). Modified by VisKey contributors.
 #ifndef VISKEY_ENGINE_HPP
 #define VISKEY_ENGINE_HPP
 
