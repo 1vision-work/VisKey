@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 // VisKeyApp.mm
 // Native macOS Vietnamese Input Method Engine using CGEventTap + Cocoa Status Bar
 // Compile on macOS:
@@ -15,6 +16,7 @@ static const int64_t kVisKeyEventMagic = 0x564B5821; // 'VKX!' marker for synthe
 @property (assign, nonatomic) CFMachPortRef eventTap;
 @property (assign, nonatomic) CFRunLoopSourceRef runLoopSource;
 @property (assign, nonatomic) BOOL vietnameseEnabled;
+@property (assign, nonatomic) BOOL eventTapActive;
 @property (assign, nonatomic) BOOL smartPerAppMode;
 @property (strong, nonatomic) NSMutableDictionary<NSString *, NSNumber *> *appModes;
 @property (strong, nonatomic) NSSet<NSString *> *autocompleteBundles;
@@ -213,6 +215,7 @@ static CGEventRef VisKeyEventCallback(CGEventTapProxy /*proxy*/, CGEventType typ
     [self checkAccessibilityPermissions];
     [self setupStatusBar];
     [self setupEventTap];
+    [self updateStatusIcon];
 
     [[[NSWorkspace sharedWorkspace] notificationCenter]
         addObserver:self
@@ -303,6 +306,12 @@ static CGEventRef VisKeyEventCallback(CGEventTapProxy /*proxy*/, CGEventType typ
 
     [menu addItem:[NSMenuItem separatorItem]];
 
+    NSMenuItem *aboutItem = [[NSMenuItem alloc] initWithTitle:@"Giới thiệu VisKey"
+                                                       action:@selector(showAbout:)
+                                                keyEquivalent:@""];
+    aboutItem.target = self;
+    [menu addItem:aboutItem];
+
     NSMenuItem *quitItem = [[NSMenuItem alloc] initWithTitle:@"Thoát VisKey"
                                                       action:@selector(terminate:)
                                                keyEquivalent:@"q"];
@@ -326,18 +335,60 @@ static CGEventRef VisKeyEventCallback(CGEventTapProxy /*proxy*/, CGEventType typ
                                      NULL);
     if (!self.eventTap) {
         NSLog(@"[VisKey] Failed to create CGEventTap. Grant Accessibility permission in System Settings.");
+        self.eventTapActive = NO;
         return;
     }
 
+    self.eventTapActive = YES;
     self.runLoopSource = CFMachPortCreateRunLoopSource(kCFAllocatorDefault, self.eventTap, 0);
     CFRunLoopAddSource(CFRunLoopGetCurrent(), self.runLoopSource, kCFRunLoopCommonModes);
     CGEventTapEnable(self.eventTap, true);
 }
 
+// Menu bar template images (design/icons/menubar-*.svg, rendered by crossplatform/branding/gen_branding.sh).
+// "off" = event tap unavailable (missing Accessibility permission).
 - (void)updateStatusIcon {
-    self.statusItem.button.title = self.vietnameseEnabled ? @"🇻🇳 VI" : @"🇬🇧 EN";
+    NSString *imageName = !self.eventTapActive ? @"menubar-off"
+                        : (self.vietnameseEnabled ? @"menubar-vi" : @"menubar-en");
+    NSImage *image = [NSImage imageNamed:imageName];
+    if (image) {
+        image.template = YES;
+        image.size = NSMakeSize(18, 18);
+        self.statusItem.button.image = image;
+        self.statusItem.button.title = @"";
+    } else {
+        self.statusItem.button.image = nil;
+        self.statusItem.button.title = self.vietnameseEnabled ? @"VI" : @"EN";
+    }
     NSMenuItem *toggleItem = [self.statusItem.menu itemWithTag:100];
     toggleItem.state = self.vietnameseEnabled ? NSControlStateValueOn : NSControlStateValueOff;
+}
+
+- (void)showAbout:(id)sender {
+    NSMutableParagraphStyle *centered = [[NSMutableParagraphStyle alloc] init];
+    centered.alignment = NSTextAlignmentCenter;
+    NSColor *primary = [NSColor colorWithSRGBRed:0x30 / 255.0 green:0x44 / 255.0 blue:0xD6 / 255.0 alpha:1.0];
+
+    NSMutableAttributedString *credits = [[NSMutableAttributedString alloc] init];
+    [credits appendAttributedString:[[NSAttributedString alloc]
+        initWithString:@"Gõ đúng ở mọi nơi.\n"
+            attributes:@{NSFontAttributeName: [NSFont systemFontOfSize:13 weight:NSFontWeightSemibold],
+                         NSForegroundColorAttributeName: primary,
+                         NSParagraphStyleAttributeName: centered}]];
+    [credits appendAttributedString:[[NSAttributedString alloc]
+        initWithString:@"by 1VISION · Dựa trên OpenKey của Mai Vũ Tuyên · GPL-3.0"
+            attributes:@{NSFontAttributeName: [NSFont systemFontOfSize:11],
+                         NSForegroundColorAttributeName: [NSColor secondaryLabelColor],
+                         NSParagraphStyleAttributeName: centered}]];
+
+    NSString *version = [NSBundle.mainBundle objectForInfoDictionaryKey:@"CFBundleShortVersionString"] ?: @"1.0.0";
+    [NSApp activateIgnoringOtherApps:YES];
+    [NSApp orderFrontStandardAboutPanelWithOptions:@{
+        NSAboutPanelOptionApplicationName: @"VisKey",
+        NSAboutPanelOptionApplicationVersion: version,
+        NSAboutPanelOptionVersion: @"",
+        NSAboutPanelOptionCredits: credits
+    }];
 }
 
 - (void)toggleVietnameseMode:(id)sender {

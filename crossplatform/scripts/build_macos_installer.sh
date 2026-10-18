@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# SPDX-License-Identifier: GPL-3.0-or-later
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -6,6 +7,8 @@ ROOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 APP_VERSION="1.0.0"
 BUNDLE_ID="org.viskey.inputmethod"
 BUILD_DIR="$ROOT_DIR/build_macos"
+BRANDING_DIR="$ROOT_DIR/branding/macos"
+DMG_BRANDING_DIR="$ROOT_DIR/branding/dmg"
 APP_BUNDLE="$BUILD_DIR/VisKey.app"
 DMG_PATH="$ROOT_DIR/VisKey-macOS-Installer.dmg"
 PKG_PATH="$ROOT_DIR/VisKey-${APP_VERSION}-macOS.pkg"
@@ -49,6 +52,19 @@ mkdir -p "$APP_BUNDLE/Contents/Resources"
 cp "$ROOT_DIR/macos/Info.plist" "$APP_BUNDLE/Contents/Info.plist"
 plutil -lint "$APP_BUNDLE/Contents/Info.plist"
 
+# App icon: prefer building from the iconset with iconutil, fall back to the committed .icns
+if command -v iconutil >/dev/null 2>&1 && \
+    iconutil -c icns "$BRANDING_DIR/VisKey.iconset" -o "$APP_BUNDLE/Contents/Resources/VisKey.icns" 2>/dev/null; then
+    echo " -> VisKey.icns tao tu iconset (iconutil)"
+else
+    cp "$BRANDING_DIR/VisKey.icns" "$APP_BUNDLE/Contents/Resources/VisKey.icns"
+    echo " -> VisKey.icns lay tu ban da commit"
+fi
+# Menu bar template images (VI / EN / off)
+for state in vi en off; do
+    cp "$BRANDING_DIR/menubar-$state.png" "$BRANDING_DIR/menubar-$state@2x.png" "$APP_BUNDLE/Contents/Resources/"
+done
+
 APP_BIN="$APP_BUNDLE/Contents/MacOS/VisKey"
 CXX_FLAGS=(-std=c++17 -O2 -fobjc-arc -mmacosx-version-min=11.0)
 FRAMEWORKS=(-framework Cocoa -framework ApplicationServices -framework Carbon)
@@ -84,9 +100,78 @@ mkdir -p "$DMG_STAGE"
 cp -R "$APP_BUNDLE" "$DMG_STAGE/"
 ln -s /Applications "$DMG_STAGE/Applications"
 
-hdiutil create -volname "VisKey Installer" \
+# Branding: background image + volume icon (layout applied below, best-effort)
+mkdir -p "$DMG_STAGE/.background"
+cp "$DMG_BRANDING_DIR/background.png" "$DMG_BRANDING_DIR/background@2x.png" "$DMG_STAGE/.background/"
+cp "$APP_BUNDLE/Contents/Resources/VisKey.icns" "$DMG_STAGE/.VolumeIcon.icns"
+
+DMG_VOLNAME="VisKey Installer"
+DMG_RW="$BUILD_DIR/VisKey-rw.dmg"
+rm -f "$DMG_RW"
+hdiutil create -volname "$DMG_VOLNAME" \
     -srcfolder "$DMG_STAGE" \
-    -ov -format UDZO "$DMG_PATH" >/dev/null
+    -fs HFS+ -ov -format UDRW "$DMG_RW" >/dev/null
+
+# Run a command with a time limit (macOS has no coreutils `timeout` by default)
+run_with_timeout() {
+    local secs="$1"; shift
+    "$@" &
+    local pid=$!
+    ( sleep "$secs"; kill "$pid" 2>/dev/null ) >/dev/null 2>&1 &
+    local watcher=$!
+    local rc=0
+    wait "$pid" || rc=$?
+    kill "$watcher" 2>/dev/null || true
+    wait "$watcher" 2>/dev/null || true
+    return "$rc"
+}
+
+# Finder window layout needs a GUI session + Finder automation permission, so only try it outside CI
+DO_LAYOUT=0
+if [[ "$IS_CI" != 1 ]] && command -v osascript >/dev/null 2>&1; then
+    DO_LAYOUT=1
+fi
+ATTACH_FLAGS=(-readwrite -noverify -noautoopen)
+[[ "$DO_LAYOUT" == 1 ]] || ATTACH_FLAGS+=(-nobrowse)
+
+MOUNT_DIR="$(mktemp -d /tmp/viskey-dmg.XXXXXX)"
+if hdiutil attach "$DMG_RW" "${ATTACH_FLAGS[@]}" -mountpoint "$MOUNT_DIR" >/dev/null; then
+    # Custom volume icon flag (SetFile ships with Xcode; skip quietly if missing)
+    if command -v SetFile >/dev/null 2>&1; then
+        SetFile -a C "$MOUNT_DIR" 2>/dev/null || true
+    fi
+    # Icons centred at (179,204) / (469,204) to match the 660x400 background
+    if [[ "$DO_LAYOUT" == 1 ]]; then
+        LAYOUT_SCRIPT="$BUILD_DIR/dmg_layout.applescript"
+        cat > "$LAYOUT_SCRIPT" <<OSA
+tell application "Finder"
+    set dmgFolder to (POSIX file "$MOUNT_DIR" as alias)
+    open dmgFolder
+    set theWindow to container window of dmgFolder
+    set current view of theWindow to icon view
+    set toolbar visible of theWindow to false
+    set statusbar visible of theWindow to false
+    set bounds of theWindow to {200, 120, 860, 520}
+    set viewOptions to icon view options of theWindow
+    set arrangement of viewOptions to not arranged
+    set icon size of viewOptions to 128
+    set background picture of viewOptions to file ".background:background.png" of dmgFolder
+    set position of item "VisKey.app" of dmgFolder to {179, 204}
+    set position of item "Applications" of dmgFolder to {469, 204}
+    update dmgFolder without registering applications
+    delay 1
+    close theWindow
+end tell
+OSA
+        run_with_timeout 30 osascript "$LAYOUT_SCRIPT" >/dev/null 2>&1 || echo " -> (Bo qua bo cuc Finder cho DMG)"
+    fi
+    sync
+    hdiutil detach "$MOUNT_DIR" -quiet || hdiutil detach "$MOUNT_DIR" -force -quiet || true
+fi
+rmdir "$MOUNT_DIR" 2>/dev/null || true
+
+hdiutil convert "$DMG_RW" -format UDZO -imagekey zlib-level=9 -ov -o "$DMG_PATH" >/dev/null
+rm -f "$DMG_RW"
 
 echo "[5/5] Dong goi bo cai dat VisKey-${APP_VERSION}-macOS.pkg..."
 PKG_ROOT="$BUILD_DIR/pkg_root"

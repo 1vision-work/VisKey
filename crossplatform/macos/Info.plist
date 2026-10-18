@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!-- SPDX-License-Identifier: GPL-3.0-or-later -->
 <plist version="1.0">
 <dict>
     <key>CFBundleDevelopmentRegion</key>
@@ -8,12 +9,14 @@
     <string>VisKey</string>
     <key>CFBundleIdentifier</key>
     <string>org.viskey.inputmethod</string>
+    <key>CFBundleIconFile</key>
+    <string>VisKey</string>
     <key>CFBundleInfoDictionaryVersion</key>
     <string>6.0</string>
     <key>CFBundleName</key>
     <string>VisKey</string>
     <key>CFBundleDisplayName</key>
-    <string>VisKey - Bộ Gõ Tiếng Việt</string>
+    <string>VisKey</string>
     <key>CFBundlePackageType</key>
     <string>APPL</string>
     <key>CFBundleShortVersionString</key>
@@ -24,6 +27,8 @@
     <string>11.0</string>
     <key>LSUIElement</key>
     <true/>
+    <key>NSHumanReadableCopyright</key>
+    <string>© 2026 1VISION · GPL-3.0 · Based on OpenKey by Mai Vũ Tuyên</string>
     <key>NSHighResolutionCapable</key>
     <true/>
 </dict>
