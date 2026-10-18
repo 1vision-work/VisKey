@@ -352,7 +352,7 @@ static CGEventRef VisKeyEventCallback(CGEventTapProxy /*proxy*/, CGEventType typ
                         : (self.vietnameseEnabled ? @"menubar-vi" : @"menubar-en");
     NSImage *image = [NSImage imageNamed:imageName];
     if (image) {
-        image.template = YES;
+        [image setTemplate:YES];
         image.size = NSMakeSize(18, 18);
         self.statusItem.button.image = image;
         self.statusItem.button.title = @"";
