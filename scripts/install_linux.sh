@@ -13,18 +13,27 @@ python3 "$ROOT_DIR/core/viskey_engine.py"
 
 if command -v apt-get >/dev/null 2>&1 && command -v dpkg >/dev/null 2>&1; then
     echo "[2/3] Phat hien he thong Debian/Ubuntu/Mint. Dang cai dat goi .deb..."
-    DEB_FILE="$ROOT_DIR/ibus-viskey_1.0.0_all.deb"
+    PKG_VER="$(sed -n 's/^VERSION = "\([^"]*\)".*/\1/p' "$ROOT_DIR/linux/ibus/viskey_version.py")"
+    DEB_FILE="$ROOT_DIR/ibus-viskey_${PKG_VER}_all.deb"
     if [[ ! -f "$DEB_FILE" ]]; then
         bash "$ROOT_DIR/scripts/build_linux_deb.sh"
     fi
     sudo apt-get update -y || true
     sudo apt-get install -y ibus python3-gi gir1.2-ibus-1.0 || true
+    sudo apt-get install -y gir1.2-adw-1 || sudo apt-get install -y python3-tk || true
     sudo dpkg -i "$DEB_FILE"
 else
     echo "[2/3] Dang cai dat truc tiep vao /usr/share/viskey va /usr/share/ibus/component..."
     sudo mkdir -p /usr/share/viskey/core /usr/share/viskey/ibus /usr/libexec /usr/share/ibus/component
     sudo cp "$ROOT_DIR/core/viskey_engine.py" /usr/share/viskey/core/
-    sudo cp "$ROOT_DIR/linux/ibus/ibus_viskey.py" /usr/share/viskey/ibus/
+    sudo cp "$ROOT_DIR/linux/ibus/ibus_viskey.py" \
+            "$ROOT_DIR/linux/ibus/viskey_settings.py" \
+            "$ROOT_DIR/linux/ibus/viskey_settings_tk.py" \
+            "$ROOT_DIR/linux/ibus/viskey_settings_model.py" \
+            "$ROOT_DIR/linux/ibus/viskey_version.py" /usr/share/viskey/ibus/
+    sudo mkdir -p /usr/share/viskey/icons
+    sudo cp -r "$ROOT_DIR/linux/ibus/icons/hicolor" /usr/share/viskey/icons/
+    sudo cp "$ROOT_DIR/design/icons/appicon-1024.svg" /usr/share/viskey/icons/
     sudo cp "$ROOT_DIR/linux/ibus/viskey.xml" /usr/share/ibus/component/
     sudo tee /usr/libexec/ibus-engine-viskey >/dev/null <<'EOF'
 #!/usr/bin/env bash
