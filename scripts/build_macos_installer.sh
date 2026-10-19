@@ -27,6 +27,8 @@ echo "[2/4] Chay bo kiem thu Unit Test C++17..."
 mkdir -p "$BUILD_DIR"
 clang++ -std=c++17 -O2 "$ROOT_DIR/tests/test_cpp_engine.cpp" -o "$BUILD_DIR/test_cpp_engine"
 "$BUILD_DIR/test_cpp_engine"
+clang++ -std=c++17 -O2 "$ROOT_DIR/tests/test_update_policy.cpp" -o "$BUILD_DIR/test_update_policy"
+"$BUILD_DIR/test_update_policy"
 
 echo "[3/4] Bien dich VisKey.app (Universal Binary arm64 + x86_64)..."
 rm -rf "$APP_BUNDLE"
@@ -50,6 +52,7 @@ MACOS_SOURCES=(
     "$ROOT_DIR/macos/ui/VKPopover.mm"
     "$ROOT_DIR/macos/ui/VKHUD.mm"
     "$ROOT_DIR/macos/ui/VKOnboarding.mm"
+    "$ROOT_DIR/macos/ui/VKUpdate.mm"
 )
 
 # Try Universal build (arm64 + x86_64), fallback to host architecture

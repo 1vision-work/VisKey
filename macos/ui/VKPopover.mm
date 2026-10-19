@@ -135,6 +135,47 @@ static const CGFloat kVKPopW = 340.0;
 
 @end
 
+#pragma mark - Update line
+
+/// "● Có bản mới x.y.z — Tải về ↗" (shown once per new version, see VKModel.updateNoticePending).
+@interface VKUpdateRow : VKControlView
+@property (nonatomic, copy) NSString *version;
+@end
+
+@implementation VKUpdateRow
+
+- (void)drawRect:(NSRect)dirtyRect {
+    NSRect b = self.bounds;
+    NSBezierPath *p = [NSBezierPath bezierPathWithRoundedRect:b xRadius:10 yRadius:10];
+    [VKTheme.primaryTint setFill];
+    [p fill];
+    if (self.hovering) {
+        [VKTheme.hoverBg setFill];
+        [p fill];
+    }
+    [VKTheme.primary setFill];
+    [[NSBezierPath bezierPathWithOvalInRect:NSMakeRect(12, round(NSMidY(b) - 4), 8, 8)] fill];
+
+    NSDictionary *aa = @{NSFontAttributeName: VKFont(13.5, NSFontWeightSemibold), NSForegroundColorAttributeName: VKTheme.primary};
+    NSString *action = @"Tải về";
+    NSSize as = [action sizeWithAttributes:aa];
+    CGFloat arrowW = 12;
+    CGFloat ax = b.size.width - 12 - arrowW - 3 - as.width;
+    [action drawAtPoint:NSMakePoint(ax, round(NSMidY(b) - as.height / 2.0)) withAttributes:aa];
+    VKDrawSymbol(@"arrow.up.right", 10, NSFontWeightSemibold, VKTheme.primary,
+                 NSMakeRect(ax + as.width + 3, 0, arrowW, b.size.height));
+
+    NSMutableParagraphStyle *ps = [[NSMutableParagraphStyle alloc] init];
+    ps.lineBreakMode = NSLineBreakByTruncatingTail;
+    NSDictionary *ta = @{NSFontAttributeName: VKFont(13.5, NSFontWeightRegular), NSForegroundColorAttributeName: VKTheme.text,
+                         NSParagraphStyleAttributeName: ps};
+    NSString *title = [NSString stringWithFormat:@"Có bản mới %@", self.version ?: @""];
+    NSSize ts = [title sizeWithAttributes:ta];
+    [title drawInRect:NSMakeRect(28, round(NSMidY(b) - ts.height / 2.0), MAX(0.0, ax - 10 - 28), ts.height) withAttributes:ta];
+}
+
+@end
+
 #pragma mark - Controller
 
 @interface VKPopoverController ()
@@ -293,6 +334,16 @@ static const CGFloat kVKPopW = 340.0;
                            title:@"Theo ứng dụng" subtitle:[m perAppSummary] on:m.smartPerAppMode];
     t4.onClick = ^{ [weakSelf.model.actions vk_openSettingsPage:VKSettingsPageApps]; };
     y += th + 14;
+
+    if (m.updateNoticePending && m.availableUpdateVersion.length) {
+        VKUpdateRow *update = [[VKUpdateRow alloc] initWithFrame:NSMakeRect(pad, y, IW, 36)];
+        update.version = m.availableUpdateVersion;
+        update.showsHandCursor = YES;
+        update.toolTip = @"Mở trang tải về trên GitHub";
+        update.onClick = ^{ [weakSelf.model.actions vk_openUpdateDownload]; };
+        [root addSubview:update];
+        y += 36 + 12;
+    }
 
     VKBox *divider = [[VKBox alloc] initWithFrame:NSMakeRect(pad + 4, y, IW - 8, 1) fill:VKTheme.separator radius:0];
     [root addSubview:divider];

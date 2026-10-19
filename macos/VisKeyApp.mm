@@ -25,6 +25,7 @@
 #import "ui/VKPopover.h"
 #import "ui/VKHUD.h"
 #import "ui/VKOnboarding.h"
+#import "ui/VKUpdate.h"
 
 static const int64_t kVisKeyEventMagic = 0x564B5821; // 'VKX!' synthetic event marker
 
@@ -38,6 +39,7 @@ static const int64_t kVisKeyEventMagic = 0x564B5821; // 'VKX!' synthetic event m
 @property (strong, nonatomic) VKHUDController *hud;
 @property (strong, nonatomic) id popoverMonitor;
 @property (strong, nonatomic) NSTimer *permissionTimer;
+@property (strong, nonatomic) VKUpdateChecker *updater;
 @property (assign, nonatomic) CFMachPortRef eventTap;
 @property (assign, nonatomic) CFRunLoopSourceRef runLoopSource;
 @property (strong, nonatomic) NSSet<NSString *> *autocompleteBundles;
@@ -325,6 +327,8 @@ static CGEventRef VisKeyEventCallback(CGEventTapProxy /*proxy*/, CGEventType typ
                                                  name:VKModelDidChangeNotification object:self.model];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(environmentDidChange:)
                                                  name:VKEnvironmentDidChangeNotification object:self.model];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(environmentDidChange:)
+                                                 name:VKUpdateStateDidChangeNotification object:self.model];
 
     self.hud = [[VKHUDController alloc] init];
     [self setupMainMenu];
@@ -346,6 +350,10 @@ static CGEventRef VisKeyEventCallback(CGEventTapProxy /*proxy*/, CGEventType typ
     if (!self.model.onboardingDone || !self.lastTrusted) {
         [self showOnboarding];
     }
+
+    // Automatic update check: main-run-loop timers, the request itself runs on a background session.
+    self.updater = [[VKUpdateChecker alloc] initWithModel:self.model];
+    [self.updater start];
 }
 
 - (BOOL)applicationShouldHandleReopen:(NSApplication *)sender hasVisibleWindows:(BOOL)flag {
@@ -700,6 +708,24 @@ static CGEventRef VisKeyEventCallback(CGEventTapProxy /*proxy*/, CGEventType typ
     [NSApp terminate:nil];
 }
 
+- (void)vk_checkForUpdates {
+    if (self.snapshotMode) return;
+    [self.updater checkNow];
+}
+
+- (void)vk_openUpdateDownload {
+    if (self.snapshotMode) return;
+    NSString *u = self.model.availableUpdateURL;
+    if (!u.length) u = [VKRepoURL stringByAppendingString:@"/releases"];
+    NSURL *url = [NSURL URLWithString:u];
+    if (url) [[NSWorkspace sharedWorkspace] openURL:url];
+    [self.popover performClose:nil];
+    if (self.model.updateNoticePending) {
+        self.model.updateNoticePending = NO;
+        [self.model notifyUpdateStateChanged];
+    }
+}
+
 #pragma mark Snapshot mode
 
 - (NSWindow *)hostWindowForView:(NSView *)view {
@@ -750,6 +776,24 @@ static CGEventRef VisKeyEventCallback(CGEventTapProxy /*proxy*/, CGEventType typ
     return ok;
 }
 
+/// Demo "new version found" state for the update snapshots (in memory only, nothing is fetched).
+- (void)setDemoUpdate:(BOOL)on model:(VKModel *)m {
+    NSString *current = [m versionString];
+    if (on) {
+        m.availableUpdateVersion = @"1.1.0";
+        m.availableUpdateURL = [VKRepoURL stringByAppendingString:@"/releases"];
+        m.updateNoticePending = YES;
+        m.lastUpdateResult = [VKUpdateResult resultWithStatus:VKUpdateStatusAvailable currentVersion:current
+                                                latestVersion:@"1.1.0" releaseURL:m.availableUpdateURL httpCode:200];
+    } else {
+        m.availableUpdateVersion = nil;
+        m.availableUpdateURL = nil;
+        m.updateNoticePending = NO;
+        m.lastUpdateResult = [VKUpdateResult resultWithStatus:VKUpdateStatusUpToDate currentVersion:current
+                                                latestVersion:nil releaseURL:nil httpCode:200];
+    }
+}
+
 - (void)runSnapshotsInto:(NSString *)dir {
     NSString *outDir = [dir stringByStandardizingPath];
     NSError *err = nil;
@@ -771,18 +815,20 @@ static CGEventRef VisKeyEventCallback(CGEventTapProxy /*proxy*/, CGEventType typ
     NSMutableArray<NSString *> *written = [NSMutableArray array];
     NSInteger failures = 0;
 
-    struct Shot { VKSettingsPage page; BOOL dark; const char *name; };
+    struct Shot { VKSettingsPage page; BOOL dark; BOOL update; const char *name; };
     const Shot shots[] = {
-        {VKSettingsPageGeneral, NO, "macos-general-light.png"},
-        {VKSettingsPageGeneral, YES, "macos-general-dark.png"},
-        {VKSettingsPageMacros, YES, "macos-macros-dark.png"},
-        {VKSettingsPageApps, NO, "macos-perapp-light.png"},
-        {VKSettingsPageShortcuts, NO, "macos-shortcuts-light.png"},
-        {VKSettingsPagePrivacy, NO, "macos-privacy-light.png"},
-        {VKSettingsPageAbout, NO, "macos-about-light.png"},
+        {VKSettingsPageGeneral, NO, NO, "macos-general-light.png"},
+        {VKSettingsPageGeneral, YES, NO, "macos-general-dark.png"},
+        {VKSettingsPageMacros, YES, NO, "macos-macros-dark.png"},
+        {VKSettingsPageApps, NO, NO, "macos-perapp-light.png"},
+        {VKSettingsPageShortcuts, NO, NO, "macos-shortcuts-light.png"},
+        {VKSettingsPagePrivacy, NO, NO, "macos-privacy-light.png"},
+        {VKSettingsPageAbout, NO, NO, "macos-about-light.png"},
+        {VKSettingsPageAbout, NO, YES, "macos-about-update-light.png"},
     };
     for (const Shot &s : shots) {
         @autoreleasepool {
+            [self setDemoUpdate:s.update model:m];
             // A fresh window per shot so every view resolves colors for its own appearance.
             VKSettingsWindowController *wc = [[VKSettingsWindowController alloc] initWithModel:m snapshot:YES];
             NSAppearance *app = s.dark ? dark : light;
@@ -795,16 +841,21 @@ static CGEventRef VisKeyEventCallback(CGEventTapProxy /*proxy*/, CGEventType typ
         }
     }
 
-    @autoreleasepool {
-        VKPopoverController *pc = [[VKPopoverController alloc] initWithModel:m];
-        NSView *pv = pc.view;
-        [pc reload];
-        NSWindow *w = [self hostWindowForView:pv];
-        NSString *path = [outDir stringByAppendingPathComponent:@"macos-popover-light.png"];
-        if ([self renderView:pv window:w appearance:light path:path]) [written addObject:path];
-        else failures++;
-        [w close];
+    for (int variant = 0; variant < 2; variant++) {
+        @autoreleasepool {
+            [self setDemoUpdate:(variant == 1) model:m];
+            VKPopoverController *pc = [[VKPopoverController alloc] initWithModel:m];
+            NSView *pv = pc.view;
+            [pc reload];
+            NSWindow *w = [self hostWindowForView:pv];
+            NSString *path = [outDir stringByAppendingPathComponent:
+                                         (variant == 1 ? @"macos-popover-update-light.png" : @"macos-popover-light.png")];
+            if ([self renderView:pv window:w appearance:light path:path]) [written addObject:path];
+            else failures++;
+            [w close];
+        }
     }
+    [self setDemoUpdate:NO model:m];
 
     @autoreleasepool {
         NSView *hv = [VKHUDController hudViewVietnamese:YES hint:[m hudHint]];

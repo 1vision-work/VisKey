@@ -1,12 +1,14 @@
 // VKModel.mm — see VKModel.h. MIT License, 1VISION.
 
 #import "VKModel.h"
+#import "VKUpdate.h"
 #import <ApplicationServices/ApplicationServices.h>
 #import <Carbon/Carbon.h>
 
 NSNotificationName const VKModelDidChangeNotification = @"VKModelDidChangeNotification";
 NSNotificationName const VKMacroUsageDidChangeNotification = @"VKMacroUsageDidChangeNotification";
 NSNotificationName const VKEnvironmentDidChangeNotification = @"VKEnvironmentDidChangeNotification";
+NSNotificationName const VKUpdateStateDidChangeNotification = @"VKUpdateStateDidChangeNotification";
 
 static const NSInteger kVKKeySpace = 49;
 static const NSUInteger kVKMaxMacroKeyLength = 16;
@@ -232,6 +234,9 @@ static VKModel *gSharedModel = nil;
     _launchAtLogin = NO;
     _showHUD = YES;
     _onboardingDone = NO;
+    _autoUpdateCheck = YES;
+    _lastUpdateCheck = 0;
+    _lastNotifiedVersion = nil;
     _macros = [self.defaultMacros mutableCopy] ?: [NSMutableDictionary dictionary];
     _macroUsage = [NSMutableDictionary dictionary];
     _appRules = [NSMutableDictionary dictionary];
@@ -287,6 +292,9 @@ static BOOL VKBool(NSUserDefaults *defs, NSString *key, BOOL fallback) {
     }
     _showHUD = VKBool(defs, @"showHUD", YES);
     _onboardingDone = VKBool(defs, @"onboardingDone", NO);
+    _autoUpdateCheck = VKBool(defs, @"autoUpdateCheck", YES);
+    _lastUpdateCheck = [defs doubleForKey:@"lastUpdateCheck"];
+    _lastNotifiedVersion = [[defs stringForKey:@"lastNotifiedVersion"] copy];
 
     NSDictionary *usage = [defs dictionaryForKey:@"macroUsage"];
     for (id k in usage) {
@@ -338,6 +346,16 @@ static BOOL VKBool(NSUserDefaults *defs, NSString *key, BOOL fallback) {
     [defs setObject:[self.primaryHotkey plist] forKey:@"hotkeyPrimary"];
     [defs setObject:[self.secondaryHotkey plist] forKey:@"hotkeySecondary"];
     [defs setObject:[self.methodHotkey plist] forKey:@"hotkeyMethod"];
+    [self saveUpdateState];
+}
+
+- (void)saveUpdateState {
+    if (!self.persistent) return;
+    NSUserDefaults *defs = [NSUserDefaults standardUserDefaults];
+    [defs setBool:self.autoUpdateCheck forKey:@"autoUpdateCheck"];
+    [defs setDouble:self.lastUpdateCheck forKey:@"lastUpdateCheck"];
+    if (self.lastNotifiedVersion.length) [defs setObject:self.lastNotifiedVersion forKey:@"lastNotifiedVersion"];
+    else [defs removeObjectForKey:@"lastNotifiedVersion"];
 }
 
 - (void)commit {
@@ -347,6 +365,10 @@ static BOOL VKBool(NSUserDefaults *defs, NSString *key, BOOL fallback) {
 
 - (void)notifyEnvironmentChanged {
     [[NSNotificationCenter defaultCenter] postNotificationName:VKEnvironmentDidChangeNotification object:self];
+}
+
+- (void)notifyUpdateStateChanged {
+    [[NSNotificationCenter defaultCenter] postNotificationName:VKUpdateStateDidChangeNotification object:self];
 }
 
 - (void)loadDemoData {
@@ -394,6 +416,22 @@ static BOOL VKBool(NSUserDefaults *defs, NSString *key, BOOL fallback) {
     self.demoSystemCtrlSpace = @YES;
     self.demoSecureInput = @NO;
     self.demoRunningFrontmost = @YES;
+
+    // Fixed demo stamp (19/10/2026 08:30 local time) and result; nothing is fetched in demo mode.
+    NSDateComponents *dc = [[NSDateComponents alloc] init];
+    dc.year = 2026;
+    dc.month = 10;
+    dc.day = 19;
+    dc.hour = 8;
+    dc.minute = 30;
+    NSDate *demoDate = [[NSCalendar calendarWithIdentifier:NSCalendarIdentifierGregorian] dateFromComponents:dc];
+    _lastUpdateCheck = demoDate ? demoDate.timeIntervalSince1970 : 0;
+    self.updateChecking = NO;
+    self.lastUpdateResult = [VKUpdateResult resultWithStatus:VKUpdateStatusUpToDate currentVersion:[self versionString]
+                                               latestVersion:nil releaseURL:nil httpCode:200];
+    self.availableUpdateVersion = nil;
+    self.availableUpdateURL = nil;
+    self.updateNoticePending = NO;
 }
 
 #pragma mark Macros
@@ -683,6 +721,18 @@ static BOOL VKBool(NSUserDefaults *defs, NSString *key, BOOL fallback) {
 - (NSString *)versionString {
     NSString *v = [NSBundle mainBundle].infoDictionary[@"CFBundleShortVersionString"];
     return v.length ? v : @"1.0.0";
+}
+
+- (NSString *)lastUpdateCheckText {
+    if (self.lastUpdateCheck <= 0) return nil;
+    static NSDateFormatter *fmt = nil;
+    if (!fmt) {
+        fmt = [[NSDateFormatter alloc] init];
+        fmt.locale = [NSLocale localeWithLocaleIdentifier:@"en_US_POSIX"];
+        fmt.dateFormat = @"HH:mm dd/MM/yyyy";
+    }
+    NSDate *d = [NSDate dateWithTimeIntervalSince1970:self.lastUpdateCheck];
+    return [NSString stringWithFormat:@"Lần kiểm tra cuối: %@", [fmt stringFromDate:d]];
 }
 
 - (NSString *)hudHint {

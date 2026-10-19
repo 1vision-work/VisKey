@@ -92,6 +92,7 @@ static const CGFloat kVKNavStep = 38.0;
         [nc addObserver:self selector:@selector(modelChanged:) name:VKModelDidChangeNotification object:model];
         [nc addObserver:self selector:@selector(usageChanged:) name:VKMacroUsageDidChangeNotification object:model];
         [nc addObserver:self selector:@selector(environmentChanged:) name:VKEnvironmentDidChangeNotification object:model];
+        [nc addObserver:self selector:@selector(updateStateChanged:) name:VKUpdateStateDidChangeNotification object:model];
         [self showPage:VKSettingsPageGeneral];
     }
     return self;
@@ -201,6 +202,7 @@ static const CGFloat kVKNavStep = 38.0;
     self.navItems[VKSettingsPageMacros].badge = VKFormatCount((NSInteger)self.model.macros.count);
     self.navItems[VKSettingsPageShortcuts].dotColor = [self.model hasHotkeyConflict] ? VKTheme.warning : nil;
     self.navItems[VKSettingsPagePrivacy].dotColor = [self.model accessibilityTrusted] ? nil : VKTheme.warning;
+    self.navItems[VKSettingsPageAbout].dotColor = self.model.updateNoticePending ? VKTheme.primary : nil;
 }
 
 #pragma mark Notifications
@@ -217,6 +219,18 @@ static const CGFloat kVKNavStep = 38.0;
 - (void)environmentChanged:(NSNotification *)n {
     [self refreshSidebar];
     [[self pageAt:self.currentPage] environmentChanged];
+}
+
+- (void)updateStateChanged:(NSNotification *)n {
+    // A notice that arrives while "Giới thiệu" is on screen counts as seen.
+    if (!self.snapshot && self.model.updateNoticePending && self.currentPage == VKSettingsPageAbout &&
+        self.window.isVisible) {
+        self.model.updateNoticePending = NO;
+        [self.model notifyUpdateStateChanged];
+        return;
+    }
+    [self refreshSidebar];
+    if (self.currentPage == VKSettingsPageAbout) [[self pageAt:self.currentPage] reload];
 }
 
 #pragma mark Search

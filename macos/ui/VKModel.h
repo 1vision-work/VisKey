@@ -9,6 +9,9 @@ NS_ASSUME_NONNULL_BEGIN
 extern NSNotificationName const VKModelDidChangeNotification;        // settings changed (saved)
 extern NSNotificationName const VKMacroUsageDidChangeNotification;   // usage counters changed (coalesced)
 extern NSNotificationName const VKEnvironmentDidChangeNotification;  // AX permission / current app / conflicts
+extern NSNotificationName const VKUpdateStateDidChangeNotification;  // update check started / finished / notice seen
+
+@class VKUpdateResult;
 
 typedef NS_ENUM(NSInteger, VKAppMode) {
     VKAppModeVI = 0,
@@ -83,6 +86,9 @@ typedef NS_ENUM(NSInteger, VKSettingsPage) {
 - (void)vk_hotkeyRecordingChanged:(BOOL)recording;
 - (void)vk_closePopover;
 - (void)vk_quit;
+- (void)vk_checkForUpdates;                    // "Kiểm tra cập nhật" button
+- (void)vk_openUpdateDownload;                 // open the release page of the available update
+
 @end
 
 #pragma mark - Model
@@ -109,6 +115,17 @@ typedef NS_ENUM(NSInteger, VKSettingsPage) {
 @property (nonatomic) BOOL launchAtLogin;
 @property (nonatomic) BOOL showHUD;
 @property (nonatomic) BOOL onboardingDone;
+
+// Update check. Persisted: autoUpdateCheck (default YES), lastUpdateCheck, lastNotifiedVersion.
+@property (nonatomic) BOOL autoUpdateCheck;
+@property (nonatomic) NSTimeInterval lastUpdateCheck;  // seconds since 1970 of the last attempt (any outcome), 0 = never
+@property (nonatomic, copy, nullable) NSString *lastNotifiedVersion;  // newest version already announced
+// Runtime only (never saved)
+@property (nonatomic) BOOL updateChecking;
+@property (nonatomic, strong, nullable) VKUpdateResult *lastUpdateResult;
+@property (nonatomic, copy, nullable) NSString *availableUpdateVersion;  // newer release found this session
+@property (nonatomic, copy, nullable) NSString *availableUpdateURL;
+@property (nonatomic) BOOL updateNoticePending;  // sidebar dot + popover line until seen
 
 // Macros
 @property (nonatomic, strong) NSMutableDictionary<NSString *, NSString *> *macros;
@@ -137,6 +154,9 @@ typedef NS_ENUM(NSInteger, VKSettingsPage) {
 /// Save (if persistent) and post VKModelDidChangeNotification.
 - (void)commit;
 - (void)notifyEnvironmentChanged;
+/// Saves only the update-check keys (if persistent).
+- (void)saveUpdateState;
+- (void)notifyUpdateStateChanged;
 - (void)loadDemoData;
 
 // Macros
@@ -175,6 +195,8 @@ typedef NS_ENUM(NSInteger, VKSettingsPage) {
 - (NSString *)perAppSummary;
 - (NSString *)versionString;
 - (NSString *)hudHint;
+/// "Lần kiểm tra cuối: 08:30 19/10/2026", or nil if never checked.
+- (nullable NSString *)lastUpdateCheckText;
 
 @end
 

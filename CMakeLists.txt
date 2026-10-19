@@ -15,9 +15,12 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/core)
 # 1. Cross-platform CLI Simulator & Unit Test Suite
 add_executable(viskey_cli core/viskey_cli.cpp)
 add_executable(test_cpp_engine tests/test_cpp_engine.cpp)
+# Pure C++ policy of the macOS automatic update check (header-only, builds on every platform).
+add_executable(test_update_policy tests/test_update_policy.cpp)
 
 enable_testing()
 add_test(NAME VisKeyCoreTests COMMAND test_cpp_engine)
+add_test(NAME VisKeyUpdatePolicyTests COMMAND test_update_policy)
 
 # 2. Native macOS App Bundle Target
 if(APPLE)
@@ -38,6 +41,7 @@ if(APPLE)
         macos/ui/VKPopover.mm
         macos/ui/VKHUD.mm
         macos/ui/VKOnboarding.mm
+        macos/ui/VKUpdate.mm
     )
     add_executable(VisKey MACOSX_BUNDLE ${VISKEY_MACOS_SOURCES})
     set_target_properties(VisKey PROPERTIES
