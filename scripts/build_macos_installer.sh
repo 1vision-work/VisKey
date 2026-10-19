@@ -35,15 +35,32 @@ mkdir -p "$APP_BUNDLE/Contents/Resources"
 
 cp "$ROOT_DIR/macos/Info.plist" "$APP_BUNDLE/Contents/Info.plist"
 
+# Sources: keep in sync with VISKEY_MACOS_SOURCES in CMakeLists.txt.
+MACOS_SOURCES=(
+    "$ROOT_DIR/macos/VisKeyApp.mm"
+    "$ROOT_DIR/macos/ui/VKUIKit.mm"
+    "$ROOT_DIR/macos/ui/VKModel.mm"
+    "$ROOT_DIR/macos/ui/VKPageBase.mm"
+    "$ROOT_DIR/macos/ui/VKPageGeneral.mm"
+    "$ROOT_DIR/macos/ui/VKPageMacros.mm"
+    "$ROOT_DIR/macos/ui/VKPageApps.mm"
+    "$ROOT_DIR/macos/ui/VKPageShortcuts.mm"
+    "$ROOT_DIR/macos/ui/VKPageInfo.mm"
+    "$ROOT_DIR/macos/ui/VKSettingsWindow.mm"
+    "$ROOT_DIR/macos/ui/VKPopover.mm"
+    "$ROOT_DIR/macos/ui/VKHUD.mm"
+    "$ROOT_DIR/macos/ui/VKOnboarding.mm"
+)
+
 # Try Universal build (arm64 + x86_64), fallback to host architecture
-if clang++ -std=c++17 -O2 -fobjc-arc -arch arm64 -arch x86_64 \
-    "$ROOT_DIR/macos/VisKeyApp.mm" \
+if clang++ -std=c++17 -O2 -fobjc-arc -mmacosx-version-min=11.0 -arch arm64 -arch x86_64 \
+    "${MACOS_SOURCES[@]}" \
     -framework Cocoa -framework ApplicationServices -framework Carbon \
     -o "$APP_BUNDLE/Contents/MacOS/VisKey" 2>/dev/null; then
     echo " -> Da bien dich thanh cong Universal Binary (Apple Silicon + Intel)!"
 else
-    clang++ -std=c++17 -O2 -fobjc-arc \
-        "$ROOT_DIR/macos/VisKeyApp.mm" \
+    clang++ -std=c++17 -O2 -fobjc-arc -mmacosx-version-min=11.0 \
+        "${MACOS_SOURCES[@]}" \
         -framework Cocoa -framework ApplicationServices -framework Carbon \
         -o "$APP_BUNDLE/Contents/MacOS/VisKey"
     echo " -> Da bien dich thanh cong cho kien truc may hien tai ($(uname -m))!"

@@ -34,7 +34,7 @@
 VisKey cung cấp đầy đủ **2 lớp giao diện đồ họa** trên mọi nền tảng:
 1. **Biểu tượng Thanh trạng thái (Menu Bar / System Tray):**
    * Hiển thị trạng thái **`🇻🇳 VI`** (Tiếng Việt) hoặc **`🇬🇧 EN`** (Tiếng Anh) theo thời gian thực.
-   * Phím tắt chuyển đổi nhanh: **`Ctrl + Space`** (trên cả macOS, Linux, Windows), **`Cmd + Shift + V`** (trên macOS) hoặc **`Alt + Z`** (trên Windows).
+   * Phím tắt chuyển đổi nhanh: **`Ctrl + Space`** (trên cả macOS, Linux, Windows; trên macOS đổi được trong *Bảng điều khiển → Phím tắt*) hoặc **`Alt + Z`** (trên Windows).
 2. **Cửa sổ Bảng Điều Khiển & Quản lý Gõ tắt (Settings & Macro Manager Window):**
    * **Trên macOS:** Cửa sổ Cocoa `NSWindow` gốc mở từ menu *"Bảng điều khiển VisKey..."* (`Cmd + ,`), lưu cấu hình vào `NSUserDefaults` và hỗ trợ tự khởi động qua `~/Library/LaunchAgents/org.viskey.inputmethod.plist`.
    * **Trên Linux:** Ứng dụng đồ họa `viskey-settings` (có icon trong menu ứng dụng của máy), lưu cấu hình vào `~/.config/viskey/config.json` và tự động áp dụng ngay lập tức.
@@ -113,6 +113,12 @@ open /Applications/VisKey.app
    tccutil reset Accessibility org.viskey.inputmethod
    open /Applications/VisKey.app
    ```
+
+### 5.4. Giao diện trên macOS
+* **Lần đầu mở** (hoặc khi chưa có quyền Trợ năng): cửa sổ hướng dẫn 3 bước — chọn kiểu gõ, cấp quyền, gõ thử. VisKey tự nhận quyền mà không cần mở lại ứng dụng.
+* **Thanh menu:** bấm biểu tượng `VI`/`EN` để mở bảng nhanh (đổi VI/EN, Telex/VNI, quy tắc cho ứng dụng đang mở); chuột phải để mở menu rút gọn. Khi đổi VI/EN, một HUD nhỏ hiện ở cuối màn hình (tắt được).
+* **Bảng điều khiển** (`Cmd + ,`): Chung, Gõ tắt (nhập/xuất JSON hoặc `viết tắt<TAB>nội dung`, đếm số lần dùng), Theo ứng dụng (VI / EN / Nhớ cho từng ứng dụng, mặc định cho ứng dụng mới), Phím tắt (phím chính mặc định `Ctrl + Space`, phím phụ, phím đổi Telex ↔ VNI), Quyền & Bảo mật, Giới thiệu (kiểm tra cập nhật thủ công).
+* Ảnh chụp giao diện không cần quyền: `build_macos/VisKey.app/Contents/MacOS/VisKey --ui-snapshot ./shots`.
 
 ## 6. Hướng dẫn Cài đặt & Build trên Linux (Ubuntu/Debian, Fedora, Arch)
 
