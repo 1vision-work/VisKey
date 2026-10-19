@@ -165,7 +165,7 @@ NSImage *VKStatusMarkImage(CGFloat pointSize) {
         VKDrawMark(markRect, [NSColor blackColor], [NSColor blackColor]);
         return YES;
     }];
-    img.template = YES;
+    [img setTemplate:YES];
     return img;
 }
 
