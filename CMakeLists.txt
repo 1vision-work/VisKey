@@ -24,8 +24,8 @@ add_test(NAME VisKeyUpdatePolicyTests COMMAND test_update_policy)
 
 # Pure logic of the Windows update check (24 h throttle, notify once per version). No Windows
 # headers, so it builds and runs on every platform.
-add_executable(test_update_policy windows/tests/test_update_policy.cpp)
-add_test(NAME VisKeyWindowsUpdatePolicyTests COMMAND test_update_policy)
+add_executable(test_windows_update_policy windows/tests/test_update_policy.cpp)
+add_test(NAME VisKeyWindowsUpdatePolicyTests COMMAND test_windows_update_policy)
 
 # 2. Native macOS App Bundle Target
 if(APPLE)
