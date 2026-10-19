@@ -27,6 +27,11 @@ add_test(NAME VisKeyUpdatePolicyTests COMMAND test_update_policy)
 add_executable(test_windows_update_policy windows/tests/test_update_policy.cpp)
 add_test(NAME VisKeyWindowsUpdatePolicyTests COMMAND test_windows_update_policy)
 
+# Platform-stream typing regression (cases in tests/data/typing_regression.tsv)
+add_executable(test_typing_regression tests/test_typing_regression.cpp)
+target_compile_definitions(test_typing_regression PRIVATE VISKEY_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}")
+add_test(NAME VisKeyTypingRegression COMMAND test_typing_regression)
+
 # 2. Native macOS App Bundle Target
 if(APPLE)
     enable_language(OBJCXX)
