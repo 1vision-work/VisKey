@@ -155,6 +155,9 @@ Theme MakeLight() {
     t.segmentBg = Rgb(0xE6E8ED);
     t.segmentSel = Rgb(0xFFFFFF);
     t.tileBlue = Rgb(0x3044D6);
+    t.flyoutLayer = WithAlpha(t.flyoutBg, 0.62f);
+    t.flyoutFooterLayer = WithAlpha(t.flyoutFooter, 0.55f);
+    t.flyoutAcrylicTint = WithAlpha(t.flyoutBg, 0.80f);
     return t;
 }
 
@@ -204,6 +207,9 @@ Theme MakeDark() {
     t.segmentBg = Rgb(0x1F2023);
     t.segmentSel = Rgb(0x48494F);
     t.tileBlue = Rgb(0x3044D6);
+    t.flyoutLayer = WithAlpha(t.flyoutBg, 0.70f);
+    t.flyoutFooterLayer = WithAlpha(t.flyoutFooter, 0.60f);
+    t.flyoutAcrylicTint = WithAlpha(t.flyoutBg, 0.84f);
     return t;
 }
 
@@ -631,6 +637,119 @@ void ApplyWindowFrameTheme(HWND hwnd, bool dark, bool popup) {
         DWORD backdrop = 2;  // DWMSBT_MAINWINDOW (Mica) - visible in the caption area
         setAttr(hwnd, 38, &backdrop, sizeof(backdrop));
     }
+}
+
+// ---------------------------------------------------------------------------------------------
+// Flyout backdrop
+typedef LONG(WINAPI* PfnRtlGetVersion)(OSVERSIONINFOW*);
+
+namespace {
+
+struct Margins {  // MARGINS without pulling in uxtheme.h
+    int left, right, top, bottom;
+};
+typedef HRESULT(WINAPI* PfnDwmExtendFrameIntoClientArea)(HWND, const Margins*);
+
+// Undocumented but stable since Windows 10 1803 (user32!SetWindowCompositionAttribute).
+struct AccentPolicy {
+    DWORD accentState;  // 0 disabled, 4 ACCENT_ENABLE_ACRYLICBLURBEHIND
+    DWORD accentFlags;
+    DWORD gradientColor;  // AABBGGRR
+    DWORD animationId;
+};
+struct WindowCompositionAttribData {
+    DWORD attrib;  // 19 = WCA_ACCENT_POLICY
+    void* data;
+    SIZE_T size;
+};
+typedef BOOL(WINAPI* PfnSetWindowCompositionAttribute)(HWND, WindowCompositionAttribData*);
+
+HMODULE DwmModule() {
+    static HMODULE dwm = LoadLibraryW(L"dwmapi.dll");
+    return dwm;
+}
+
+bool SetAccent(HWND hwnd, DWORD state, DWORD abgr) {
+    static auto setWca = LoadProc<PfnSetWindowCompositionAttribute>(GetModuleHandleW(L"user32.dll"), "SetWindowCompositionAttribute");
+    if (!setWca) return false;
+    AccentPolicy policy = {state, state ? 2u : 0u, abgr, 0};
+    WindowCompositionAttribData data = {19, &policy, sizeof(policy)};
+    return setWca(hwnd, &data) != FALSE;
+}
+
+DWORD ToAbgr(Color c) {
+    auto b = [](float v) { return (DWORD)(std::min(1.f, std::max(0.f, v)) * 255.f + .5f); };
+    return (b(c.a) << 24) | (b(c.b) << 16) | (b(c.g) << 8) | b(c.r);
+}
+
+}  // namespace
+
+DWORD WindowsBuildNumber() {
+    static DWORD build = [] {
+        auto rtlGetVersion = LoadProc<PfnRtlGetVersion>(GetModuleHandleW(L"ntdll.dll"), "RtlGetVersion");
+        OSVERSIONINFOW vi = {};
+        vi.dwOSVersionInfoSize = sizeof(vi);
+        if (!rtlGetVersion || rtlGetVersion(&vi) != 0 || vi.dwMajorVersion < 10) return (DWORD)0;
+        return vi.dwBuildNumber;
+    }();
+    return build;
+}
+
+bool TranslucencyAllowed() {
+    // Settings > Personalisation > Colours > Transparency effects.
+    DWORD value = 1, size = sizeof(value);
+    HKEY key = nullptr;
+    if (RegOpenKeyExW(HKEY_CURRENT_USER, L"Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize", 0, KEY_READ, &key) == ERROR_SUCCESS) {
+        if (RegQueryValueExW(key, L"EnableTransparency", nullptr, nullptr, reinterpret_cast<LPBYTE>(&value), &size) != ERROR_SUCCESS) value = 1;
+        RegCloseKey(key);
+    }
+    if (value == 0) return false;
+    HIGHCONTRASTW hc = {};
+    hc.cbSize = sizeof(hc);
+    if (SystemParametersInfoW(SPI_GETHIGHCONTRAST, sizeof(hc), &hc, 0) && (hc.dwFlags & HCF_HIGHCONTRASTON)) return false;
+    // Battery saver: SYSTEM_POWER_STATUS.SystemStatusFlag (4th byte; older headers call it Reserved1).
+    SYSTEM_POWER_STATUS ps = {};
+    if (GetSystemPowerStatus(&ps) && (reinterpret_cast<const BYTE*>(&ps)[3] & 1)) return false;
+    return true;
+}
+
+Backdrop ApplyFlyoutBackdrop(HWND hwnd, bool dark, bool allowTranslucent) {
+    if (!hwnd) return Backdrop::Solid;
+    static auto setAttr = LoadProc<PfnDwmSetWindowAttribute>(DwmModule(), "DwmSetWindowAttribute");
+    static auto extend = LoadProc<PfnDwmExtendFrameIntoClientArea>(DwmModule(), "DwmExtendFrameIntoClientArea");
+    const DWORD build = WindowsBuildNumber();
+    const bool allowed = allowTranslucent && TranslucencyAllowed();
+    BOOL useDark = dark ? TRUE : FALSE;
+    if (setAttr) {
+        if (FAILED(setAttr(hwnd, 20, &useDark, sizeof(useDark)))) setAttr(hwnd, 19, &useDark, sizeof(useDark));
+        DWORD corner = 2;  // DWMWA_WINDOW_CORNER_PREFERENCE (33) = DWMWCP_ROUND (Windows 11; ignored before)
+        setAttr(hwnd, 33, &corner, sizeof(corner));
+    }
+
+    // 1. Windows 11 22H2+: system acrylic for a transient window behind a frame extended over the
+    //    whole client area; we then draw with per-pixel alpha (D2D premultiplied target).
+    if (allowed && build >= 22621 && setAttr && extend) {
+        DWORD backdrop = 3;  // DWMWA_SYSTEMBACKDROP_TYPE (38) = DWMSBT_TRANSIENTWINDOW
+        Margins m = {-1, -1, -1, -1};
+        if (SUCCEEDED(setAttr(hwnd, 38, &backdrop, sizeof(backdrop))) && SUCCEEDED(extend(hwnd, &m))) {
+            SetAccent(hwnd, 0, 0);
+            return Backdrop::SystemAcrylic;
+        }
+    }
+    // Anything else: no system backdrop, frame not extended.
+    if (setAttr) {
+        DWORD none = 1;  // DWMSBT_NONE
+        setAttr(hwnd, 38, &none, sizeof(none));
+    }
+    if (extend) {
+        Margins zero = {0, 0, 0, 0};
+        extend(hwnd, &zero);
+    }
+    // 2. Windows 10 1803+ / early Windows 11: acrylic blur behind through the accent policy.
+    if (allowed && build >= 17134 && SetAccent(hwnd, 4, ToAbgr(GetTheme(dark).flyoutAcrylicTint))) return Backdrop::AccentAcrylic;
+    // 3. Solid (classic rounded background).
+    SetAccent(hwnd, 0, 0);
+    return Backdrop::Solid;
 }
 
 }  // namespace vk

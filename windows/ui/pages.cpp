@@ -18,7 +18,7 @@ const wchar_t* kPageKeywords[kPageCount] = {
     L"Gõ tắt macro Bật gõ tắt Quick Telex Thêm cụm từ Nhập Xuất Lọc viết tắt",
     L"Theo ứng dụng Khi mở ứng dụng mới Nhớ lần cuối Luôn VI Luôn EN Thêm ứng dụng Khôi phục danh sách mặc định",
     L"Phím tắt Bật / tắt Tiếng Việt Phím tắt chính Phím tắt phụ Đổi Telex VNI Mở Bảng điều khiển hotkey",
-    L"Cập nhật Kiểm tra cập nhật phiên bản tải về",
+    L"Cập nhật Kiểm tra cập nhật Tự động kiểm tra cập nhật Lần kiểm tra cuối phiên bản tải về",
     L"Giới thiệu Mã nguồn Báo lỗi Bản phát hành Giấy phép MIT Sao chép thông tin hệ thống Khôi phục toàn bộ cài đặt",
 };
 
@@ -561,6 +561,8 @@ float PageHotkeys(Ctx& c, float y) {
 
 // ------------------------------------------------------------------------------------------
 float PageUpdate(Ctx& c, float y) {
+    const Model& m = c.m;
+    UpdateState state = UpdateStateOf(m);
     PageTitle(c, y, L"Cập nhật");
     y += 60.f;
     {
@@ -570,21 +572,37 @@ float PageUpdate(Ctx& c, float y) {
         c.g.Text(L"VisKey " + AppVersion(), R(c.x0 + 92.f, y + 20.f, c.x1 - 240.f, y + 46.f), TS(18.f, Weight::Semibold), c.t.text);
         c.g.Text(std::wstring(L"Phiên bản hiện tại · bản portable cho Windows ") + ArchText(), R(c.x0 + 92.f, y + 48.f, c.x1 - 240.f, y + 70.f), TS(13.f),
                  c.t.text2);
-        bool checking = c.v.update == UpdateState::Checking;
+        bool checking = state == UpdateState::Checking;
         std::wstring label = checking ? L"Đang kiểm tra…" : L"Kiểm tra cập nhật";
         float bw = c.ui.ButtonWidth(label, Icon::Update) + 8.f;
         c.ui.Button(kIdCheckUpdate, RW(c.x1 - 24.f - bw, y + 28.f, bw, 36.f), label, Btn::Accent, Icon::Update, !checking);
-        y += 92.f + 12.f;
+        y += 92.f + 4.f;
+    }
+    {
+        const float h = 66.f;
+        std::wstring last = m.lastUpdateCheck > 0 ? FormatLocalTime(m.lastUpdateCheck) : std::wstring(L"chưa có");
+        if (m.haveUpdateResult && !m.update.ok && !m.updateChecking) last += L" (không thành công)";
+        Row(c, y, h, kIdAutoUpdate, Icon::Update, nullptr, L"Tự động kiểm tra cập nhật", L"Mỗi ngày tối đa một lần · Lần kiểm tra cuối: " + last,
+            Ui::ToggleWidth() + 40.f);
+        c.ui.Toggle(kIdAutoUpdate, c.x1 - 24.f, y + h * .5f, m.autoUpdateCheck);
+        y += h + 12.f;
     }
     {
         Icon icon = Icon::Info;
         Color ic = c.t.text2;
         std::wstring title, body;
-        switch (c.v.update) {
+        std::wstring available = AvailableUpdateVersion(m);
+        switch (state) {
         case UpdateState::Idle:
-            title = L"Chỉ kiểm tra khi bạn bấm nút";
-            body = L"VisKey không tự kiểm tra cập nhật. Khi bạn bấm “Kiểm tra cập nhật”, VisKey chỉ đọc danh sách bản phát hành công khai trên "
-                   L"GitHub — không gửi phím gõ hay dữ liệu nào của bạn.";
+            if (m.autoUpdateCheck) {
+                title = L"Tự động kiểm tra mỗi ngày một lần";
+                body = L"VisKey chỉ đọc danh sách bản phát hành công khai trên GitHub — không gửi phím gõ, mã máy hay dữ liệu nào của bạn. "
+                       L"Khi có bản mới, VisKey chỉ báo ở đây và ở khay hệ thống; không tự tải hay tự cài.";
+            } else {
+                title = L"Chỉ kiểm tra khi bạn bấm nút";
+                body = L"Đã tắt tự động kiểm tra. Khi bạn bấm “Kiểm tra cập nhật”, VisKey chỉ đọc danh sách bản phát hành công khai trên "
+                       L"GitHub — không gửi phím gõ hay dữ liệu nào của bạn.";
+            }
             break;
         case UpdateState::Checking:
             icon = Icon::Update;
@@ -595,30 +613,35 @@ float PageUpdate(Ctx& c, float y) {
             icon = Icon::Check;
             ic = c.t.jadeText;
             title = L"Đã là phiên bản mới nhất";
-            body = L"Bản mới nhất trên GitHub: " + c.v.updateResult.latest + L". Bạn đang dùng " + AppVersion() + L".";
+            body = L"Bản mới nhất trên GitHub: " + m.update.latest + L". Bạn đang dùng " + AppVersion() + L".";
             break;
         case UpdateState::Newer:
             icon = Icon::Download;
             ic = c.t.accent;
-            title = L"Có bản mới " + c.v.updateResult.latest;
-            body = L"Bạn đang dùng " + AppVersion() + L". Tải tệp zip mới từ trang phát hành rồi thay VisKey64.exe.";
+            title = L"Có bản mới " + available;
+            body = L"Bạn đang dùng " + AppVersion() + L". Tải tệp zip mới từ trang phát hành rồi thay VisKey64.exe. VisKey không tự tải hay tự cài.";
             break;
         case UpdateState::Failed:
             icon = Icon::Warning;
             ic = c.t.error;
             title = L"Không kiểm tra được cập nhật";
-            body = c.v.updateResult.error;
+            body = m.update.error;
             break;
         }
-        bool newer = c.v.update == UpdateState::Newer;
+        bool newer = state == UpdateState::Newer;
         float textW = c.x1 - c.x0 - 60.f - 24.f - (newer ? 190.f : 0.f);
         float bh = c.g.WrappedHeight(body, textW, TS(13.f));
         float h = std::max(72.f, 44.f + bh + 16.f);
         RectF r = R(c.x0, y, c.x1, y + h);
         c.ui.Card(r);
+        if (newer) {  // banner: tinted card with an accent edge
+            c.g.FillRound(Inset(r, 1.f, 1.f), 7.f, c.t.accentTint);
+            c.g.FillRound(RW(r.left + 1.f, r.top + 12.f, 3.f, h - 24.f), 1.5f, c.t.accent);
+        }
         c.g.DrawIcon(icon, c.x0 + 30.f, y + 30.f, 18.f, ic);
-        c.g.Text(title, R(c.x0 + 60.f, y + 16.f, c.x0 + 60.f + textW, y + 40.f), TS(15.f, Weight::Semibold), c.v.update == UpdateState::Failed ? c.t.error : c.t.text);
-        c.g.TextWrapped(body, R(c.x0 + 60.f, y + 42.f, c.x0 + 60.f + textW, r.bottom), TS(13.f), c.t.text2);
+        c.g.Text(title, R(c.x0 + 60.f, y + 16.f, c.x0 + 60.f + textW, y + 40.f), TS(15.f, Weight::Semibold),
+                 state == UpdateState::Failed ? c.t.error : newer ? c.t.accentTintText : c.t.text);
+        c.g.TextWrapped(body, R(c.x0 + 60.f, y + 42.f, c.x0 + 60.f + textW, r.bottom), TS(13.f), newer ? c.t.text : c.t.text2);
         if (newer) c.ui.Button(kIdOpenDownload, RW(c.x1 - 24.f - 170.f, Cy(r) - 18.f, 170.f, 36.f), L"Mở trang tải về", Btn::Accent);
         y += h + 26.f;
     }
@@ -655,9 +678,10 @@ float PageAbout(Ctx& c, float y) {
         float vw = c.g.TextWidth(ver, TS(13.f, Weight::Semibold)) + 26.f;
         std::wstring status;
         Color sb = c.t.jadeTint, sf = c.t.jadeText;
-        if (c.v.update == UpdateState::UpToDate) status = L"✓ Đã là phiên bản mới nhất";
-        else if (c.v.update == UpdateState::Newer) {
-            status = L"Có bản mới " + c.v.updateResult.latest;
+        UpdateState state = UpdateStateOf(c.m);
+        if (state == UpdateState::UpToDate) status = L"✓ Đã là phiên bản mới nhất";
+        else if (state == UpdateState::Newer) {
+            status = L"Có bản mới " + AvailableUpdateVersion(c.m);
             sb = c.t.accentTint;
             sf = c.t.accentTintText;
         } else {
@@ -744,6 +768,15 @@ float PageAbout(Ctx& c, float y) {
 
 }  // namespace
 
+UpdateState UpdateStateOf(const Model& m) {
+    if (m.updateChecking) return UpdateState::Checking;
+    if (m.haveUpdateResult && m.update.ok) return m.update.newer ? UpdateState::Newer : UpdateState::UpToDate;
+    if (m.haveUpdateResult && !m.updateResultAuto) return UpdateState::Failed;  // automatic failures stay silent
+    return AvailableUpdateVersion(m).empty() ? UpdateState::Idle : UpdateState::Newer;
+}
+
+float FlyoutHeight(const Model& m) { return kFlyoutH + (AvailableUpdateVersion(m).empty() ? 0.f : kFlyoutUpdateH); }
+
 bool SettingsPageMatches(int page, const std::wstring& q) { return page >= 0 && page < kPageCount && PageMatches(page, q); }
 
 std::wstring HotkeyWarning(const Model& m, int slot) {
@@ -797,6 +830,7 @@ void PaintSettings(Ui& ui, SettingsView& v, const Model& m, float w, float h) {
     RectF search = RW(16.f, 94.f, kNavW - 32.f, 36.f);
     ui.Field(kIdSearch, search, v.search, L"Tìm cài đặt", v.activeField == kIdSearch, false, Icon::Search);
     v.fieldRects[kIdSearch] = search;
+    bool updateDot = !AvailableUpdateVersion(m).empty();
     for (int i = 0; i < kPageCount; ++i) {
         RectF r = RW(16.f, 146.f + (float)i * 44.f, kNavW - 32.f, 40.f);
         int id = kIdNavBase + i;
@@ -808,6 +842,7 @@ void PaintSettings(Ui& ui, SettingsView& v, const Model& m, float w, float h) {
         Color fg = match ? t.text : t.text3;
         g.DrawIcon(kNavIcons[i], r.left + 24.f, Cy(r), 17.f, match ? t.accent : t.text3);
         g.Text(kNavTitles[i], R(r.left + 50.f, r.top, r.right - 8.f, r.bottom), TS(15.f, sel ? Weight::Medium : Weight::Regular), fg);
+        if (i == kPageUpdate && updateDot) g.FillCircle(r.right - 18.f, Cy(r), 4.5f, t.accent);  // "Có bản mới"
         ui.FocusRing(r, 6.f, id);
         ui.Add(id, r);
     }
@@ -844,11 +879,15 @@ void PaintSettings(Ui& ui, SettingsView& v, const Model& m, float w, float h) {
 
 // ------------------------------------------------------------------------------------------
 // Tray flyout (08-win11-system-tray.png)
-void PaintFlyout(Ui& ui, const Model& m, float w, float h) {
+void PaintFlyout(Ui& ui, const Model& m, float w, float h, FlyoutSurface surface) {
     Gfx& g = *ui.g;
     const Theme& t = *ui.t;
+    const bool glass = surface == FlyoutSurface::Translucent;
     ui.Reset();
-    g.Clear(t.flyoutBg);
+    // Translucent: the backdrop (acrylic) is drawn by DWM behind us; this layer keeps text readable.
+    // Live windows Clear (replace last frame's pixels); snapshots composite over a sample desktop.
+    if (glass && !ui.live) g.Fill(R(0, 0, w, h), t.flyoutLayer);
+    else g.Clear(glass ? t.flyoutLayer : t.flyoutBg);
     const float pad = 18.f;
     float y = 16.f;
     // Header
@@ -916,7 +955,18 @@ void PaintFlyout(Ui& ui, const Model& m, float w, float h) {
 
     // Footer
     float fy = h - 54.f;
-    g.Fill(R(0, fy, w, h), t.flyoutFooter);
+    std::wstring available = AvailableUpdateVersion(m);
+    if (!available.empty()) {
+        RectF r = RW(pad, fy - kFlyoutUpdateH + 2.f, w - pad * 2, 34.f);
+        g.FillRound(r, 6.f, ui.Hot(kIdFlyUpdate) ? Mix(t.accentTint, t.text, 0.06f) : t.accentTint);
+        g.FillCircle(r.left + 16.f, Cy(r), 4.f, t.accent);
+        g.Text(L"Có bản mới " + available, R(r.left + 30.f, r.top, r.right - 90.f, r.bottom), TS(14.f, Weight::Semibold), t.accentTintText);
+        g.Text(L"Xem", R(r.right - 90.f, r.top, r.right - 30.f, r.bottom), TS(14.f), t.accentTintText, HAlign::Right);
+        g.DrawIcon(Icon::ChevronRight, r.right - 16.f, Cy(r), 12.f, t.accentTintText);
+        ui.FocusRing(r, 6.f, kIdFlyUpdate);
+        ui.Add(kIdFlyUpdate, r);
+    }
+    g.Fill(R(0, fy, w, h), glass ? t.flyoutFooterLayer : t.flyoutFooter);
     g.Line(0, fy, w, fy, t.separator, 1.f);
     std::wstring link = L"Mở Bảng điều khiển";
     float lw = g.TextWidth(link, TS(15.f));

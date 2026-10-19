@@ -1,4 +1,11 @@
 // VisKey for Windows - tray flyout (left click on the tray icon), MIT License, 1VISION.
+//
+// Backdrop: on Windows 11 22H2+ DWM draws transient-window acrylic behind the whole client area
+// (DWMWA_SYSTEMBACKDROP_TYPE + DwmExtendFrameIntoClientArea(-1)); older builds use the accent
+// policy acrylic. In both cases the D2D HWND render target is created with
+// B8G8R8A8 + D2D1_ALPHA_MODE_PREMULTIPLIED so the alpha we draw reaches DWM (no DirectComposition,
+// no WS_EX_NOREDIRECTIONBITMAP needed), and text uses grayscale antialiasing because ClearType
+// needs an opaque destination. Solid mode keeps the original opaque target with ClearType.
 #include "views.h"
 
 #include <shellapi.h>
@@ -16,6 +23,7 @@ struct Flyout {
     bool dark = false;
     DWORD hiddenTick = 0;
     bool tracking = false;
+    Backdrop backdrop = Backdrop::Solid;
 };
 Flyout g_fly;
 
@@ -47,6 +55,10 @@ void Activate(int id) {
         Hide();
         OpenSettings(-1);
         break;
+    case kIdFlyUpdate:
+        Hide();
+        OpenSettings(kPageUpdate);
+        break;
     case kIdFlyQuit:
         Hide();
         QuitApp();
@@ -60,11 +72,21 @@ void Paint(HWND hwnd) {
     BeginPaint(hwnd, &ps);
     RECT rc;
     GetClientRect(hwnd, &rc);
+    const bool glass = g_fly.backdrop != Backdrop::Solid;
     if (!g_fly.rt) {
         float dpi = (float)DpiForWindow(hwnd);
-        D2D1_RENDER_TARGET_PROPERTIES p = D2D1::RenderTargetProperties(D2D1_RENDER_TARGET_TYPE_DEFAULT,
-                                                                       D2D1::PixelFormat(DXGI_FORMAT_UNKNOWN, D2D1_ALPHA_MODE_UNKNOWN), dpi, dpi);
+        D2D1_PIXEL_FORMAT pf = glass ? D2D1::PixelFormat(DXGI_FORMAT_B8G8R8A8_UNORM, D2D1_ALPHA_MODE_PREMULTIPLIED)
+                                     : D2D1::PixelFormat(DXGI_FORMAT_UNKNOWN, D2D1_ALPHA_MODE_UNKNOWN);
+        D2D1_RENDER_TARGET_PROPERTIES p = D2D1::RenderTargetProperties(D2D1_RENDER_TARGET_TYPE_DEFAULT, pf, dpi, dpi);
         D2D()->CreateHwndRenderTarget(p, D2D1::HwndRenderTargetProperties(hwnd, D2D1::SizeU((UINT32)rc.right, (UINT32)rc.bottom)), &g_fly.rt);
+        if (!g_fly.rt && glass) {
+            // Translucent target refused: go back to the solid look for this window.
+            g_fly.backdrop = Backdrop::Solid;
+            ApplyFlyoutBackdrop(hwnd, g_fly.dark, false);
+            p.pixelFormat = D2D1::PixelFormat(DXGI_FORMAT_UNKNOWN, D2D1_ALPHA_MODE_UNKNOWN);
+            D2D()->CreateHwndRenderTarget(p, D2D1::HwndRenderTargetProperties(hwnd, D2D1::SizeU((UINT32)rc.right, (UINT32)rc.bottom)), &g_fly.rt);
+        }
+        if (g_fly.rt && g_fly.backdrop != Backdrop::Solid) g_fly.rt->SetTextAntialiasMode(D2D1_TEXT_ANTIALIAS_MODE_GRAYSCALE);
     }
     if (g_fly.rt) {
         g_fly.rt->BeginDraw();
@@ -73,12 +95,24 @@ void Paint(HWND hwnd) {
             g_fly.ui.g = &g;
             g_fly.ui.t = &GetTheme(g_fly.dark);
             float s = Scale();
-            PaintFlyout(g_fly.ui, M(), (float)rc.right / s, (float)rc.bottom / s);
+            PaintFlyout(g_fly.ui, M(), (float)rc.right / s, (float)rc.bottom / s,
+                        g_fly.backdrop == Backdrop::Solid ? FlyoutSurface::Solid : FlyoutSurface::Translucent);
             g_fly.ui.g = nullptr;
         }
         if (g_fly.rt->EndDraw() == (HRESULT)D2DERR_RECREATE_TARGET) SafeRelease(g_fly.rt);
     }
     EndPaint(hwnd, &ps);
+}
+
+// Re-evaluates theme + backdrop; the render target is recreated when the surface kind changes.
+void UpdateLook() {
+    if (!g_fly.hwnd) return;
+    g_fly.dark = SystemPrefersDark();
+    ApplyWindowFrameTheme(g_fly.hwnd, g_fly.dark, true);
+    Backdrop b = ApplyFlyoutBackdrop(g_fly.hwnd, g_fly.dark);
+    if ((b == Backdrop::Solid) != (g_fly.backdrop == Backdrop::Solid)) SafeRelease(g_fly.rt);
+    g_fly.backdrop = b;
+    InvalidateRect(g_fly.hwnd, nullptr, FALSE);
 }
 
 LRESULT CALLBACK FlyoutProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp) {
@@ -145,12 +179,11 @@ LRESULT CALLBACK FlyoutProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp) {
     case WM_ACTIVATE:
         if (LOWORD(wp) == WA_INACTIVE) Hide();
         return 0;
-    case WM_SETTINGCHANGE:
-        if (lp && lstrcmpiW(reinterpret_cast<LPCWSTR>(lp), L"ImmersiveColorSet") == 0) {
-            g_fly.dark = SystemPrefersDark();
-            ApplyWindowFrameTheme(hwnd, g_fly.dark, true);
-            InvalidateRect(hwnd, nullptr, FALSE);
-        }
+    case WM_SETTINGCHANGE:      // theme, transparency effects (ImmersiveColorSet), high contrast
+    case WM_THEMECHANGED:
+    case WM_SYSCOLORCHANGE:
+    case 0x031E:                // WM_DWMCOMPOSITIONCHANGED
+        UpdateLook();
         break;
     case WM_CLOSE:
         Hide();
@@ -170,7 +203,13 @@ bool TrayFlyoutRecentlyClosed() { return GetTickCount() - g_fly.hiddenTick < 300
 void HideTrayFlyout() { Hide(); }
 
 void RefreshFlyout() {
-    if (g_fly.hwnd && IsWindowVisible(g_fly.hwnd)) InvalidateRect(g_fly.hwnd, nullptr, FALSE);
+    if (!g_fly.hwnd || !IsWindowVisible(g_fly.hwnd)) return;
+    // An update notice may have appeared or gone: grow / shrink upwards, keeping the bottom edge.
+    RECT wr;
+    GetWindowRect(g_fly.hwnd, &wr);
+    int h = (int)(FlyoutHeight(M()) * Scale());
+    if (wr.bottom - wr.top != h) SetWindowPos(g_fly.hwnd, nullptr, wr.left, wr.bottom - h, wr.right - wr.left, h, SWP_NOZORDER | SWP_NOACTIVATE);
+    InvalidateRect(g_fly.hwnd, nullptr, FALSE);
 }
 
 void ShowTrayFlyout(HWND trayHost, UINT trayId) {
@@ -186,8 +225,7 @@ void ShowTrayFlyout(HWND trayHost, UINT trayId) {
         g_fly.hwnd = CreateWindowExW(WS_EX_TOOLWINDOW | WS_EX_TOPMOST, wc.lpszClassName, L"VisKey", WS_POPUP, 0, 0, 10, 10, nullptr, nullptr, inst, nullptr);
         if (!g_fly.hwnd) return;
     }
-    g_fly.dark = SystemPrefersDark();
-    ApplyWindowFrameTheme(g_fly.hwnd, g_fly.dark, true);
+    UpdateLook();
     g_fly.ui.hot = g_fly.ui.pressed = g_fly.ui.focus = 0;
     g_fly.ui.focusVisible = false;
 
@@ -220,7 +258,7 @@ void ShowTrayFlyout(HWND trayHost, UINT trayId) {
     // Move onto the monitor first so the window picks up that monitor's DPI.
     SetWindowPos(g_fly.hwnd, HWND_TOPMOST, mi.rcWork.left, mi.rcWork.top, 10, 10, SWP_NOACTIVATE);
     float s = Scale();
-    int w = (int)(kFlyoutW * s), h = (int)(kFlyoutH * s), margin = (int)(12 * s);
+    int w = (int)(kFlyoutW * s), h = (int)(FlyoutHeight(M()) * s), margin = (int)(12 * s);
     const RECT& wk = mi.rcWork;
     const RECT& mr = mi.rcMonitor;
     int x, y;

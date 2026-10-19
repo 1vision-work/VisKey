@@ -497,16 +497,11 @@ void Activate(int id) {
         SetFieldText(kIdMacroValue, L"");
         Invalidate();
         break;
-    case kIdCheckUpdate:
-        if (v.update != UpdateState::Checking) {
-            v.update = UpdateState::Checking;
-            StartUpdateCheck(g_sw.hwnd);
-            Invalidate();
-        }
-        break;
+    case kIdCheckUpdate: RequestManualUpdateCheck(); break;
+    case kIdAutoUpdate: m.autoUpdateCheck = !m.autoUpdateCheck; Commit(kChangeSettings); break;
     case kIdOpenDownload: {
         std::wstring url = L"https://github.com/1vision-work/VisKey/releases";
-        if (!v.updateResult.tag.empty()) url += L"/tag/" + v.updateResult.tag;
+        if (m.haveUpdateResult && m.update.ok && m.update.newer && !m.update.tag.empty()) url += L"/tag/" + m.update.tag;
         OpenUrl(url.c_str());
         break;
     }
@@ -831,16 +826,6 @@ LRESULT CALLBACK SettingsProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp) {
     case WM_VK_HOTKEY_RECORDED:
         RecordHotkey((UINT)wp, (DWORD)lp);
         return 0;
-    case WM_VK_UPDATE: {
-        UpdateResult* r = reinterpret_cast<UpdateResult*>(lp);
-        if (r) {
-            g_sw.v.updateResult = *r;
-            g_sw.v.update = !r->ok ? UpdateState::Failed : r->newer ? UpdateState::Newer : UpdateState::UpToDate;
-            delete r;
-        }
-        Invalidate();
-        return 0;
-    }
     case WM_TIMER:
         if (wp == kFlashTimer) {
             KillTimer(hwnd, kFlashTimer);

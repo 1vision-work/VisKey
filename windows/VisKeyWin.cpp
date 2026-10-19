@@ -8,6 +8,8 @@
 //  - Configurable hotkeys (primary / secondary VI-EN toggle, Telex <-> VNI)
 //  - System tray icon with a Fluent flyout (left click) and a small classic menu (right click)
 //  - Custom-drawn Direct2D settings window (windows/ui/*), registry persistence, launch at startup
+//  - Update check: manual button + optional automatic check (at most once per 24 h, tray timer,
+//    quiet notice: nav dot, flyout line, one balloon per new version; never downloads anything)
 //  - "--ui-snapshot <dir>" renders every screen to PNG without hooks, tray or registry access
 //
 // Build: see CMakeLists.txt (MSVC) or windows/README-Windows.txt (MinGW-w64).
@@ -32,11 +34,21 @@
 #include <set>
 #include "../core/viskey_engine.hpp"
 #include "ui/common.h"
-#include "ui/gfx.h"
+#include "ui/views.h"
+#include "ui/update_policy.h"
 
 static const ULONG_PTR kVisKeyEventMagic = 0x564B5821;
 static const UINT kTrayId = 1;
 static const UINT_PTR kSaveTimer = 1;
+static const UINT_PTR kUpdateTimer = 2;
+static const UINT kUpdateFirstDelayMs = 30 * 1000;             // after startup, off the critical path
+static const UINT kUpdateRecheckMs = 3 * 60 * 60 * 1000;       // re-evaluate; the 24 h rule decides
+#ifndef NIIF_RESPECT_QUIET_TIME
+#define NIIF_RESPECT_QUIET_TIME 0x00000080
+#endif
+#ifndef NIN_BALLOONUSERCLICK
+#define NIN_BALLOONUSERCLICK (WM_USER + 5)
+#endif
 
 enum ControlID {
     ID_TRAY_TOGGLE = 1001,
@@ -121,6 +133,7 @@ void ResetModelToDefaults(Model& m) {
     m.macros = def.macros;
     m.usage.clear();
     m.rules = DefaultRules();
+    m.autoUpdateCheck = true;  // LastUpdateCheck / LastNotifiedVersion are bookkeeping, not options: kept
 }
 
 }  // namespace vk
@@ -231,6 +244,7 @@ static void FlushSaves() {
     if (f & vk::kChangeMacros) vk::SaveMacros(g_model);
     if (f & vk::kChangeUsage) vk::SaveUsage(g_model);
     if (f & vk::kChangeRules) vk::SaveRules(g_model);
+    if (f & vk::kChangeUpdateState) vk::SaveUpdateState(g_model);
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -558,6 +572,61 @@ void EndHotkeyRecord() { g_recordTarget = nullptr; }
 }  // namespace vk
 
 // ---------------------------------------------------------------------------------------------
+// Update check: manual button and automatic daily check share vk::StartUpdateCheck (one GET on a
+// worker thread); the result comes back to the tray host as WM_VK_UPDATE.
+static void BeginUpdateCheck(bool automatic) {
+    g_model.updateChecking = true;
+    g_model.lastUpdateCheck = vk::UnixNow();  // attempt time: failures count for the 24 h rule too
+    vk::SaveUpdateState(g_model);
+    vk::StartUpdateCheck(g_hHostWnd, automatic);
+    RefreshWindows();
+}
+
+void vk::RequestManualUpdateCheck() {
+    if (g_model.snapshot || g_model.updateChecking || !g_hHostWnd) return;
+    BeginUpdateCheck(false);
+}
+
+static void MaybeAutoUpdateCheck() {
+    if (g_model.snapshot || g_model.updateChecking) return;
+    if (!vk::update::AutoCheckDue(g_model.autoUpdateCheck, vk::UnixNow(), g_model.lastUpdateCheck)) return;
+    BeginUpdateCheck(true);
+}
+
+// Quiet one-off balloon (no sound, respects quiet time); clicking it opens the update page.
+static void ShowUpdateBalloon(const std::wstring& version) {
+    if (!g_nid.hWnd) return;
+    NOTIFYICONDATAW n = g_nid;
+    n.uFlags = NIF_INFO;
+    n.dwInfoFlags = NIIF_INFO | NIIF_NOSOUND | NIIF_RESPECT_QUIET_TIME;
+    std::wstring title = L"Có bản mới VisKey " + version;
+    wcsncpy_s(n.szInfoTitle, title.c_str(), _TRUNCATE);
+    wcsncpy_s(n.szInfo, L"Bấm để mở trang Cập nhật. VisKey không tự tải hay cài đặt gì.", _TRUNCATE);
+    Shell_NotifyIconW(NIM_MODIFY, &n);
+}
+
+static void OnUpdateResult(bool automatic, vk::UpdateResult* r) {
+    g_model.updateChecking = false;
+    if (!r) return;
+    g_model.update = *r;
+    g_model.haveUpdateResult = true;
+    g_model.updateResultAuto = automatic;
+    delete r;
+    const vk::UpdateResult& u = g_model.update;
+    if (!u.ok) {
+        // Automatic failures stay silent: only the "Lần kiểm tra cuối" line on the update page.
+        std::wstring log = L"VisKey: update check failed (" + std::wstring(automatic ? L"auto" : L"manual") + L"): " + u.error + L"\n";
+        OutputDebugStringW(log.c_str());
+    } else if (u.newer && vk::update::ShouldNotify(u.latest, vk::AppVersion(), g_model.lastNotifiedVersion)) {
+        // Once per version: a manual check that finds it counts as seen, so no balloon later.
+        g_model.lastNotifiedVersion = u.latest;
+        vk::SaveUpdateState(g_model);
+        if (automatic) ShowUpdateBalloon(u.latest);
+    }
+    RefreshWindows();
+}
+
+// ---------------------------------------------------------------------------------------------
 // Tray host window
 static void ShowTrayMenu(HWND hWnd) {
     POINT pt;
@@ -608,6 +677,9 @@ static LRESULT CALLBACK HostWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM l
             g_ignoreNextTrayUp = true;
             vk::OpenSettings(-1);
             break;
+        case NIN_BALLOONUSERCLICK:
+            vk::OpenSettings(vk::kPageUpdate);
+            break;
         case WM_RBUTTONUP:
         case WM_CONTEXTMENU:
             vk::HideTrayFlyout();
@@ -621,7 +693,13 @@ static LRESULT CALLBACK HostWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM l
             KillTimer(hWnd, kSaveTimer);
             FlushSaves();
             RefreshWindows();
+        } else if (wParam == kUpdateTimer) {
+            SetTimer(hWnd, kUpdateTimer, kUpdateRecheckMs, nullptr);  // first shot after startup, then every 3 h
+            MaybeAutoUpdateCheck();
         }
+        return 0;
+    case vk::WM_VK_UPDATE:
+        OnUpdateResult(wParam != 0, reinterpret_cast<vk::UpdateResult*>(lParam));
         return 0;
     case WM_DESTROY:
         if (g_nid.hWnd) Shell_NotifyIconW(NIM_DELETE, &g_nid);
@@ -674,6 +752,9 @@ int APIENTRY wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, int) {
     g_hKeyboardHook = SetWindowsHookExW(WH_KEYBOARD_LL, LowLevelKeyboardProc, GetModuleHandleW(nullptr), 0);
     g_hMouseHook    = SetWindowsHookExW(WH_MOUSE_LL,    LowLevelMouseProc,    GetModuleHandleW(nullptr), 0);
     g_model.hooksActive = g_hKeyboardHook != nullptr;
+
+    // Automatic update check (if enabled): first look 30 s after startup, never more than once a day.
+    if (g_hHostWnd) SetTimer(g_hHostWnd, kUpdateTimer, kUpdateFirstDelayMs, nullptr);
 
     // Show the control panel on launch so the user knows VisKey is active.
     if (g_uiAvailable) {

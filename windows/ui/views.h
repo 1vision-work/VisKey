@@ -19,8 +19,6 @@ struct SettingsView {
     int macroSort = 0;  // 0 = A -> Z, 1 = most used
     int recordingSlot = -1;
     std::string editingMacro;  // key being edited ("" = adding)
-    UpdateState update = UpdateState::Idle;
-    UpdateResult updateResult;
     int flashId = 0;  // control showing a short confirmation ("Đã sao chép")
     std::string demoHoverMacro;  // snapshot only: row drawn as hovered
 
@@ -37,9 +35,17 @@ constexpr float kSettingsH = 720.f;
 constexpr float kNavW = 272.f;
 constexpr float kFlyoutW = 360.f;
 constexpr float kFlyoutH = 412.f;
+constexpr float kFlyoutUpdateH = 44.f;  // extra row "Có bản mới x.y.z" when an update is known
+
+// How the flyout background is drawn: opaque (classic), or translucent over a DWM backdrop
+// (Windows 11 22H2+ system acrylic, older builds SetWindowCompositionAttribute acrylic).
+enum class FlyoutSurface { Solid, Translucent };
+
+UpdateState UpdateStateOf(const Model& m);  // shown on the update page (silent automatic failures -> Idle)
+float FlyoutHeight(const Model& m);
 
 void PaintSettings(Ui& ui, SettingsView& v, const Model& m, float w, float h);
-void PaintFlyout(Ui& ui, const Model& m, float w, float h);
+void PaintFlyout(Ui& ui, const Model& m, float w, float h, FlyoutSurface surface = FlyoutSurface::Solid);
 // Draws a Windows 11 style caption strip (used only for snapshots: the live window keeps the
 // real system caption).
 void PaintFakeCaption(Gfx& g, const Theme& t, float w, float h);
@@ -58,7 +64,7 @@ enum ControlId : int {
 
     kIdHotkeyRecBase = 400, kIdHotkeyClearBase = 410,
 
-    kIdCheckUpdate = 500, kIdOpenDownload, kIdReleases,
+    kIdCheckUpdate = 500, kIdOpenDownload, kIdReleases, kIdAutoUpdate,
 
     kIdLinkBase = 600, kIdCopyInfo = 610, kIdResetAll,
 
@@ -67,7 +73,7 @@ enum ControlId : int {
     kIdRuleRowBase = 40000,   // + i*8 + {0 row, 1 VI, 2 EN, 3 remember, 4 delete}
 
     // flyout
-    kIdFlyVi = 900, kIdFlyEn, kIdFlyTelex, kIdFlyVni, kIdFlyTileBase = 910, kIdFlyOpen = 920, kIdFlyQuit,
+    kIdFlyVi = 900, kIdFlyEn, kIdFlyTelex, kIdFlyVni, kIdFlyTileBase = 910, kIdFlyOpen = 920, kIdFlyQuit, kIdFlyUpdate,
 };
 
 std::wstring HotkeyWarning(const Model& m, int slot);

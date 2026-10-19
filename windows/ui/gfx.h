@@ -69,6 +69,10 @@ struct Theme {
     Color separator, keycap, keycapStroke, focus;
     Color flyoutBg, flyoutFooter, tileOff, tileOffHover, segmentBg, segmentSel;
     Color tileBlue;  // app tile (ink-600 in both modes)
+    // Translucent flyout (DWM backdrop behind): layer over the system acrylic, footer band, and the
+    // tint handed to SetWindowCompositionAttribute on older builds. All derived from flyoutBg /
+    // flyoutFooter so the translucent and solid flyouts read the same.
+    Color flyoutLayer, flyoutFooterLayer, flyoutAcrylicTint;
 };
 const Theme& GetTheme(bool dark);
 
@@ -144,6 +148,17 @@ private:
     ID2D1StrokeStyle* roundStroke_ = nullptr;
     ID2D1StrokeStyle* dashStroke_ = nullptr;
 };
+
+// Tray flyout backdrop. SystemAcrylic: Windows 11 22H2+ (DWMWA_SYSTEMBACKDROP_TYPE = transient
+// window acrylic + frame extended into the whole client area). AccentAcrylic: older Windows 10/11
+// builds (user32 SetWindowCompositionAttribute, ACCENT_ENABLE_ACRYLICBLURBEHIND). Solid when
+// transparency effects are off, high contrast or battery saver is on, or any call fails.
+// All entry points are resolved at runtime (dwmapi via LoadLibraryW, user32 via GetProcAddress).
+enum class Backdrop { Solid, SystemAcrylic, AccentAcrylic };
+bool TranslucencyAllowed();
+DWORD WindowsBuildNumber();
+// Applies the best backdrop for hwnd (or removes it when Solid is chosen) and returns what is active.
+Backdrop ApplyFlyoutBackdrop(HWND hwnd, bool dark, bool allowTranslucent = true);
 
 // Creates a WIC bitmap render target (offscreen), used by --ui-snapshot.
 struct OffscreenTarget {

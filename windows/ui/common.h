@@ -30,7 +30,7 @@ constexpr UINT WM_VK_TRAYICON = WM_USER + 100;
 constexpr UINT WM_VK_REFRESH = WM_APP + 1;          // model changed: repaint
 constexpr UINT WM_VK_HOTKEY_RECORDED = WM_APP + 2;  // wParam = vk, lParam = modifier bits
 constexpr UINT WM_VK_POPUP = WM_APP + 3;            // wParam = tag, lParam = chosen index (-1 = none)
-constexpr UINT WM_VK_UPDATE = WM_APP + 4;           // lParam = UpdateResult* (receiver deletes)
+constexpr UINT WM_VK_UPDATE = WM_APP + 4;           // wParam = 1 if automatic, lParam = UpdateResult* (receiver deletes)
 constexpr UINT WM_VK_FIELD = WM_APP + 5;            // wParam = field id, lParam = FieldKey
 
 enum FieldKey { kFieldTab = 1, kFieldShiftTab, kFieldEnter, kFieldEscape };
@@ -77,6 +77,14 @@ struct AppRule {
     const std::wstring& Name() const { return display.empty() ? exe : display; }
 };
 
+struct UpdateResult {
+    bool ok = false;
+    bool newer = false;
+    std::wstring latest;  // "1.2.0"
+    std::wstring tag;     // "v1.2.0"
+    std::wstring error;
+};
+
 // The whole user-visible state. The keyboard pipeline copies the typing options into the engine
 // (see ApplyModelToEngine in VisKeyWin.cpp); the UI only reads and mutates this struct and then
 // calls Commit().
@@ -97,6 +105,15 @@ struct Model {
     std::vector<AppRule> rules;
     bool snapshot = false;                       // --ui-snapshot: never touch registry/hooks
     bool hooksActive = false;
+
+    // Update check. Persisted: autoUpdateCheck, lastUpdateCheck, lastNotifiedVersion.
+    bool autoUpdateCheck = true;
+    int64_t lastUpdateCheck = 0;       // Unix seconds of the last attempt (manual or automatic), 0 = never
+    std::wstring lastNotifiedVersion;  // newest version already announced (tray balloon / seen on the page)
+    bool updateChecking = false;       // session state below
+    bool haveUpdateResult = false;
+    bool updateResultAuto = false;     // the last result came from the automatic check
+    UpdateResult update;
 };
 
 enum ChangeFlags : unsigned {
@@ -105,6 +122,7 @@ enum ChangeFlags : unsigned {
     kChangeUsage = 1u << 2,
     kChangeRules = 1u << 3,
     kChangeHotkeys = 1u << 4,
+    kChangeUpdateState = 1u << 5,  // LastUpdateCheck / LastNotifiedVersion
     kChangeAll = 0xFFu,
 };
 
@@ -119,6 +137,7 @@ void EndHotkeyRecord();
 std::map<std::string, std::string> DefaultMacros();
 std::vector<AppRule> DefaultRules();
 void ResetModelToDefaults(Model& m);      // in-memory defaults (no registry)
+void RequestManualUpdateCheck();          // "Kiểm tra cập nhật" button; result arrives as WM_VK_UPDATE on the tray host
 
 // ---- store.cpp: persistence, import/export, version, system info, update check ----------------
 void LoadModel(Model& m);
@@ -126,6 +145,7 @@ void SaveSettings(const Model& m);
 void SaveMacros(const Model& m);
 void SaveUsage(const Model& m);
 void SaveRules(const Model& m);
+void SaveUpdateState(const Model& m);
 void DeleteAllStoredSettings();
 void FillDemoModel(Model& m);
 
@@ -138,14 +158,14 @@ std::wstring SystemInfoText(const Model& m);
 std::wstring WindowsVersionText();  // "Windows 10.0.22631"
 const wchar_t* ArchText();          // "x64" / "ARM64"
 
-struct UpdateResult {
-    bool ok = false;
-    bool newer = false;
-    std::wstring latest;  // "1.2.0"
-    std::wstring tag;     // "v1.2.0"
-    std::wstring error;
-};
-void StartUpdateCheck(HWND notify);  // worker thread, posts WM_VK_UPDATE
+// One anonymous GET of the public GitHub release list on a worker thread, shared by the manual
+// button and the automatic check; posts WM_VK_UPDATE(automatic, UpdateResult*) to notify.
+void StartUpdateCheck(HWND notify, bool automatic);
+int64_t UnixNow();
+std::wstring FormatLocalTime(int64_t unixSeconds);  // "19/10/2026 14:05"
+// Newest version known to be newer than the running build ("" if none): this session's result,
+// else the last announced version.
+std::wstring AvailableUpdateVersion(const Model& m);
 
 // ---- small utilities (store.cpp) ------------------------------------------------------------
 std::wstring Utf8ToWide(const std::string& s);

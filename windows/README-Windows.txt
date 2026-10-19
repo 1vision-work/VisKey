@@ -25,8 +25,9 @@ Bảng điều khiển:
   Chung (kiểu gõ, đặt dấu, khôi phục từ tiếng Anh, sửa lỗi trình duyệt,
   ghi nhớ theo ứng dụng, khởi động cùng Windows), Gõ tắt (thêm/sửa/xoá,
   lọc, số lần dùng, Nhập/Xuất JSON hoặc tệp "viết tắt<Tab>nội dung"),
-  Theo ứng dụng (VI / EN / Nhớ cho từng .exe), Phím tắt, Cập nhật (chỉ
-  kiểm tra khi bạn bấm nút), Giới thiệu (sao chép thông tin hệ thống,
+  Theo ứng dụng (VI / EN / Nhớ cho từng .exe), Phím tắt, Cập nhật (nút
+  "Kiểm tra cập nhật" và công tắc "Tự động kiểm tra cập nhật", mặc định
+  bật, tối đa mỗi ngày một lần), Giới thiệu (sao chép thông tin hệ thống,
   khôi phục toàn bộ cài đặt). Giao diện sáng/tối theo Windows.
 
 Cấu hình (tự lưu):
@@ -45,6 +46,12 @@ Cảnh báo SmartScreen:
   "Windows protected your PC". Bấm "More info" -> "Run anyway".
 
 Cập nhật:
+  Khi bật "Tự động kiểm tra cập nhật", VisKey đọc danh sách bản phát hành
+  công khai trên GitHub tối đa mỗi ngày một lần (yêu cầu ẩn danh, không gửi
+  phím gõ hay thông tin máy). Có bản mới thì chỉ hiện chấm ở mục Cập nhật,
+  một dòng trong bảng nhanh và một thông báo nhỏ ở khay (một lần cho mỗi
+  phiên bản); VisKey không tự tải hay tự cài. Tắt công tắc này để chỉ kiểm
+  tra khi bạn bấm nút.
   Tải zip mới ở https://github.com/1vision-work/VisKey/releases, thoát
   VisKey rồi thay VisKey64.exe. Cài đặt được giữ nguyên.
 
@@ -74,8 +81,12 @@ Toggle Vietnamese on/off:
 Settings are stored automatically in the registry:
   HKCU\Software\VisKey (plus subkeys Macros, MacroUsage, AppRules).
   Nothing else is written and keystrokes never leave your computer. The
-  update check runs only when you click "Kiểm tra cập nhật" and reads the
-  public GitHub release list.
+  update check reads the public GitHub release list (anonymous GET, no
+  IDs, no machine info): when you click "Kiểm tra cập nhật" and, unless
+  you turn off "Tự động kiểm tra cập nhật" (on by default), automatically
+  at most once per 24 hours. A newer version only shows a dot on
+  "Cập nhật", a line in the tray flyout and one quiet tray notification
+  per version; nothing is downloaded or installed automatically.
 
 Start with Windows:
   Enable "Khởi động cùng Windows" in Settings > Chung. VisKey writes the

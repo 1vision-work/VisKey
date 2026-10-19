@@ -19,6 +19,11 @@ add_executable(test_cpp_engine tests/test_cpp_engine.cpp)
 enable_testing()
 add_test(NAME VisKeyCoreTests COMMAND test_cpp_engine)
 
+# Pure logic of the Windows update check (24 h throttle, notify once per version). No Windows
+# headers, so it builds and runs on every platform.
+add_executable(test_update_policy windows/tests/test_update_policy.cpp)
+add_test(NAME VisKeyWindowsUpdatePolicyTests COMMAND test_update_policy)
+
 # 2. Native macOS App Bundle Target
 if(APPLE)
     enable_language(OBJCXX)

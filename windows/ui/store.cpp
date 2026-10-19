@@ -1,6 +1,7 @@
 // VisKey for Windows - settings persistence (HKCU\Software\VisKey), macro import/export,
-// version / system information and the manual update check (MIT License, 1VISION).
+// version / system information and the update check (MIT License, 1VISION).
 #include "common.h"
+#include "update_policy.h"
 
 #include <objbase.h>
 #include <shellapi.h>
@@ -259,6 +260,18 @@ void LoadModel(Model& m) {
         if (ReadDword(key, L"HotkeyPrimary", v)) m.hotkeys[kHotkeyPrimary] = Hotkey::Unpack(v);
         if (ReadDword(key, L"HotkeySecondary", v)) m.hotkeys[kHotkeySecondary] = Hotkey::Unpack(v);
         if (ReadDword(key, L"HotkeySwitchMethod", v)) m.hotkeys[kHotkeyMethod] = Hotkey::Unpack(v);
+        if (ReadDword(key, L"AutoUpdateCheck", v)) m.autoUpdateCheck = v != 0;
+        ULONGLONG q = 0;
+        DWORD type = 0, size = sizeof(q);
+        if (RegQueryValueExW(key, L"LastUpdateCheck", nullptr, &type, reinterpret_cast<LPBYTE>(&q), &size) == ERROR_SUCCESS && type == REG_QWORD &&
+            q < (1ull << 40)) {
+            m.lastUpdateCheck = (int64_t)q;
+        }
+        wchar_t ver[64] = {0};
+        size = sizeof(ver) - sizeof(wchar_t);
+        if (RegQueryValueExW(key, L"LastNotifiedVersion", nullptr, &type, reinterpret_cast<LPBYTE>(ver), &size) == ERROR_SUCCESS && type == REG_SZ) {
+            m.lastNotifiedVersion = ver;
+        }
         RegCloseKey(key);
     }
 
@@ -321,6 +334,7 @@ void SaveSettings(const Model& m) {
         WriteDword(key, L"HotkeyPrimary", m.hotkeys[kHotkeyPrimary].Pack());
         WriteDword(key, L"HotkeySecondary", m.hotkeys[kHotkeySecondary].Pack());
         WriteDword(key, L"HotkeySwitchMethod", m.hotkeys[kHotkeyMethod].Pack());
+        WriteDword(key, L"AutoUpdateCheck", m.autoUpdateCheck ? 1 : 0);
         RegCloseKey(key);
     }
 
@@ -367,6 +381,17 @@ void SaveRules(const Model& m) {
     RegCloseKey(key);
 }
 
+void SaveUpdateState(const Model& m) {
+    if (m.snapshot) return;
+    HKEY key = nullptr;
+    if (RegCreateKeyExW(HKEY_CURRENT_USER, kRoot, 0, nullptr, 0, KEY_WRITE, nullptr, &key, nullptr) != ERROR_SUCCESS) return;
+    ULONGLONG q = (ULONGLONG)std::max<int64_t>(0, m.lastUpdateCheck);
+    RegSetValueExW(key, L"LastUpdateCheck", 0, REG_QWORD, reinterpret_cast<const BYTE*>(&q), sizeof(q));
+    if (m.lastNotifiedVersion.empty()) RegDeleteValueW(key, L"LastNotifiedVersion");
+    else WriteString(key, L"LastNotifiedVersion", m.lastNotifiedVersion);
+    RegCloseKey(key);
+}
+
 void DeleteAllStoredSettings() {
     if (M().snapshot) return;
     RegDeleteTreeW(HKEY_CURRENT_USER, kRoot);
@@ -403,6 +428,16 @@ void FillDemoModel(Model& m) {
     add(L"zalo.exe", RuleMode::VI, RuleSource::User, true);
     add(L"msedge.exe", RuleMode::Remember, RuleSource::Auto, true);
     add(L"Code.exe", RuleMode::Remember, RuleSource::Auto, false);
+    // Update page: automatic check on, last checked this morning, already up to date.
+    m.autoUpdateCheck = true;
+    m.lastUpdateCheck = 1792403520;  // 2026-10-19 02:52 UTC (fixed so snapshots are reproducible)
+    m.lastNotifiedVersion.clear();
+    m.haveUpdateResult = true;
+    m.updateResultAuto = true;
+    m.update = UpdateResult();
+    m.update.ok = true;
+    m.update.latest = AppVersion();
+    m.update.tag = L"v" + AppVersion();
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -802,7 +837,38 @@ std::wstring SystemInfoText(const Model& m) {
 }
 
 // ---------------------------------------------------------------------------------------------
-// Manual update check (WinHTTP, loaded at runtime)
+// Update check (WinHTTP, loaded at runtime). The manual button and the automatic daily check
+// share FetchLatestRelease(): one anonymous GET of the public release list, nothing else.
+int64_t UnixNow() {
+    FILETIME ft;
+    GetSystemTimeAsFileTime(&ft);
+    ULARGE_INTEGER u;
+    u.LowPart = ft.dwLowDateTime;
+    u.HighPart = ft.dwHighDateTime;
+    const ULONGLONG kEpochDiff = 116444736000000000ull;  // 1601-01-01 -> 1970-01-01 in 100 ns
+    return u.QuadPart > kEpochDiff ? (int64_t)((u.QuadPart - kEpochDiff) / 10000000ull) : 0;
+}
+
+std::wstring FormatLocalTime(int64_t unixSeconds) {
+    if (unixSeconds <= 0) return std::wstring();
+    ULARGE_INTEGER u;
+    u.QuadPart = (ULONGLONG)unixSeconds * 10000000ull + 116444736000000000ull;
+    FILETIME ft;
+    ft.dwLowDateTime = u.LowPart;
+    ft.dwHighDateTime = u.HighPart;
+    SYSTEMTIME utc, local;
+    if (!FileTimeToSystemTime(&ft, &utc) || !SystemTimeToTzSpecificLocalTime(nullptr, &utc, &local)) return std::wstring();
+    wchar_t buf[40];
+    swprintf(buf, 40, L"%02u/%02u/%04u %02u:%02u", (unsigned)local.wDay, (unsigned)local.wMonth, (unsigned)local.wYear, (unsigned)local.wHour,
+             (unsigned)local.wMinute);
+    return buf;
+}
+
+std::wstring AvailableUpdateVersion(const Model& m) {
+    if (m.haveUpdateResult && m.update.ok) return m.update.newer ? m.update.latest : std::wstring();
+    return update::KnownNewerVersion(m.lastNotifiedVersion, AppVersion()) ? m.lastNotifiedVersion : std::wstring();
+}
+
 namespace {
 
 typedef HINTERNET(WINAPI* PfnOpen)(LPCWSTR, DWORD, LPCWSTR, LPCWSTR, DWORD);
@@ -815,31 +881,10 @@ typedef BOOL(WINAPI* PfnReadData)(HINTERNET, LPVOID, DWORD, LPDWORD);
 typedef BOOL(WINAPI* PfnCloseHandle)(HINTERNET);
 typedef BOOL(WINAPI* PfnSetTimeouts)(HINTERNET, int, int, int, int);
 
-bool ParseVersion(const std::wstring& s, int v[3]) {
-    v[0] = v[1] = v[2] = 0;
-    size_t i = 0;
-    if (i < s.size() && (s[i] == L'v' || s[i] == L'V')) ++i;
-    for (int part = 0; part < 3; ++part) {
-        if (i >= s.size() || !iswdigit(s[i])) return part > 0;
-        int n = 0;
-        while (i < s.size() && iswdigit(s[i])) n = n * 10 + (s[i++] - L'0');
-        v[part] = n;
-        if (i < s.size() && s[i] == L'.') ++i;
-        else return true;
-    }
-    return true;
-}
-
-int CompareVersion(const int a[3], const int b[3]) {
-    for (int i = 0; i < 3; ++i) {
-        if (a[i] != b[i]) return a[i] < b[i] ? -1 : 1;
-    }
-    return 0;
-}
-
-DWORD WINAPI UpdateThread(LPVOID param) {
-    HWND notify = static_cast<HWND>(param);
-    UpdateResult* res = new UpdateResult();
+// The request itself: same endpoint, headers, 8 s timeouts and version rule for both callers.
+// Anonymous: default User-Agent "VisKey/<version>", no cookies, no query beyond per_page.
+UpdateResult FetchLatestRelease() {
+    UpdateResult res;
     HMODULE mod = LoadLibraryW(L"winhttp.dll");
     auto pOpen = LoadProc<PfnOpen>(mod, "WinHttpOpen");
     auto pConnect = LoadProc<PfnConnect>(mod, "WinHttpConnect");
@@ -851,93 +896,88 @@ DWORD WINAPI UpdateThread(LPVOID param) {
     auto pClose = LoadProc<PfnCloseHandle>(mod, "WinHttpCloseHandle");
     auto pTimeouts = LoadProc<PfnSetTimeouts>(mod, "WinHttpSetTimeouts");
     if (!pOpen || !pConnect || !pOpenRequest || !pSend || !pReceive || !pQuery || !pRead || !pClose || !pTimeouts) {
-        res->error = L"Máy này thiếu thư viện WinHTTP của Windows.";
-    } else {
-        std::wstring agent = L"VisKey/" + AppVersion();
-        HINTERNET session = pOpen(agent.c_str(), 0 /* WINHTTP_ACCESS_TYPE_DEFAULT_PROXY */, nullptr, nullptr, 0);
-        HINTERNET conn = nullptr, req = nullptr;
-        std::string body;
-        DWORD status = 0, err = 0;
-        if (session) {
-            pTimeouts(session, 8000, 8000, 8000, 8000);
-            conn = pConnect(session, L"api.github.com", 443, 0);
-        }
-        if (conn) req = pOpenRequest(conn, L"GET", L"/repos/1vision-work/VisKey/releases?per_page=5", nullptr, nullptr, nullptr, WINHTTP_FLAG_SECURE);
-        DWORD start = GetTickCount();
-        if (req && pSend(req, L"Accept: application/vnd.github+json\r\n", (DWORD)-1, nullptr, 0, 0, 0) && pReceive(req, nullptr)) {
-            DWORD len = sizeof(status);
-            pQuery(req, WINHTTP_QUERY_STATUS_CODE | WINHTTP_QUERY_FLAG_NUMBER, nullptr, &status, &len, nullptr);
-            char buf[8192];
-            for (;;) {
-                DWORD got = 0;
-                if (!pRead(req, buf, sizeof(buf), &got)) {
-                    err = GetLastError();
-                    break;
-                }
-                if (!got) break;
-                body.append(buf, got);
-                if (body.size() > (2u << 20) || GetTickCount() - start > 8000) {
-                    err = ERROR_TIMEOUT;
-                    break;
-                }
-            }
-        } else {
-            err = GetLastError();
-        }
-        if (req) pClose(req);
-        if (conn) pClose(conn);
-        if (session) pClose(session);
-
-        wchar_t msg[160];
-        if (err && body.empty()) {
-            swprintf(msg, 160, L"Không kết nối được tới GitHub (mã lỗi %lu). Kiểm tra kết nối mạng rồi thử lại.", (unsigned long)err);
-            res->error = msg;
-        } else if (status != 200) {
-            swprintf(msg, 160, L"GitHub trả về mã %lu. Thử lại sau ít phút.", (unsigned long)status);
-            res->error = msg;
-        } else {
-            int best[3] = {-1, -1, -1};
-            size_t pos = 0;
-            while ((pos = body.find("\"tag_name\"", pos)) != std::string::npos) {
-                pos += 10;
-                size_t q1 = body.find('"', body.find(':', pos));
-                size_t q2 = (q1 == std::string::npos) ? q1 : body.find('"', q1 + 1);
-                if (q2 == std::string::npos) break;
-                std::wstring tag = Utf8ToWide(body.substr(q1 + 1, q2 - q1 - 1));
-                int v[3];
-                if (ParseVersion(tag, v) && CompareVersion(v, best) > 0) {
-                    std::memcpy(best, v, sizeof(best));
-                    res->tag = tag;
-                }
-                pos = q2;
-            }
-            if (best[0] < 0) {
-                res->error = L"Chưa tìm thấy bản phát hành nào trên GitHub.";
-            } else {
-                int cur[3];
-                ParseVersion(AppVersion(), cur);
-                res->ok = true;
-                res->newer = CompareVersion(best, cur) > 0;
-                wchar_t vbuf[48];
-                swprintf(vbuf, 48, L"%d.%d.%d", best[0], best[1], best[2]);
-                res->latest = vbuf;
-            }
-        }
+        res.error = L"Máy này thiếu thư viện WinHTTP của Windows.";
+        return res;
     }
-    if (!PostMessageW(notify, WM_VK_UPDATE, 0, reinterpret_cast<LPARAM>(res))) delete res;
+    std::wstring agent = L"VisKey/" + AppVersion();
+    HINTERNET session = pOpen(agent.c_str(), 0 /* WINHTTP_ACCESS_TYPE_DEFAULT_PROXY */, nullptr, nullptr, 0);
+    HINTERNET conn = nullptr, req = nullptr;
+    std::string body;
+    DWORD status = 0, err = 0;
+    if (session) {
+        pTimeouts(session, 8000, 8000, 8000, 8000);
+        conn = pConnect(session, L"api.github.com", 443, 0);
+    }
+    if (conn) req = pOpenRequest(conn, L"GET", L"/repos/1vision-work/VisKey/releases?per_page=5", nullptr, nullptr, nullptr, WINHTTP_FLAG_SECURE);
+    DWORD start = GetTickCount();
+    if (req && pSend(req, L"Accept: application/vnd.github+json\r\n", (DWORD)-1, nullptr, 0, 0, 0) && pReceive(req, nullptr)) {
+        DWORD len = sizeof(status);
+        pQuery(req, WINHTTP_QUERY_STATUS_CODE | WINHTTP_QUERY_FLAG_NUMBER, nullptr, &status, &len, nullptr);
+        char buf[8192];
+        for (;;) {
+            DWORD got = 0;
+            if (!pRead(req, buf, sizeof(buf), &got)) {
+                err = GetLastError();
+                break;
+            }
+            if (!got) break;
+            body.append(buf, got);
+            if (body.size() > (2u << 20) || GetTickCount() - start > 8000) {
+                err = ERROR_TIMEOUT;
+                break;
+            }
+        }
+    } else {
+        err = GetLastError();
+    }
+    if (req) pClose(req);
+    if (conn) pClose(conn);
+    if (session) pClose(session);
+
+    wchar_t msg[160];
+    if (err && body.empty()) {
+        swprintf(msg, 160, L"Không kết nối được tới GitHub (mã lỗi %lu). Kiểm tra kết nối mạng rồi thử lại.", (unsigned long)err);
+        res.error = msg;
+    } else if (status != 200) {
+        swprintf(msg, 160, L"GitHub trả về mã %lu. Thử lại sau ít phút.", (unsigned long)status);
+        res.error = msg;
+    } else if (!update::PickLatestRelease(body, res.tag, res.latest)) {
+        res.error = L"Chưa tìm thấy bản phát hành nào trên GitHub.";
+    } else {
+        res.ok = true;
+        res.newer = update::IsNewer(res.latest, AppVersion());
+    }
+    return res;
+}
+
+struct UpdateJob {
+    HWND notify;
+    bool automatic;
+};
+
+void PostUpdateResult(HWND notify, bool automatic, UpdateResult* res) {
+    if (!PostMessageW(notify, WM_VK_UPDATE, automatic ? 1 : 0, reinterpret_cast<LPARAM>(res))) delete res;
+}
+
+DWORD WINAPI UpdateThread(LPVOID param) {
+    UpdateJob job = *static_cast<UpdateJob*>(param);
+    delete static_cast<UpdateJob*>(param);
+    PostUpdateResult(job.notify, job.automatic, new UpdateResult(FetchLatestRelease()));
     return 0;
 }
 
 }  // namespace
 
-void StartUpdateCheck(HWND notify) {
-    HANDLE th = CreateThread(nullptr, 0, UpdateThread, notify, 0, nullptr);
+void StartUpdateCheck(HWND notify, bool automatic) {
+    UpdateJob* job = new UpdateJob{notify, automatic};
+    HANDLE th = CreateThread(nullptr, 0, UpdateThread, job, 0, nullptr);
     if (th) {
         CloseHandle(th);
     } else {
+        delete job;
         UpdateResult* res = new UpdateResult();
         res->error = L"Không khởi động được việc kiểm tra cập nhật.";
-        if (!PostMessageW(notify, WM_VK_UPDATE, 0, reinterpret_cast<LPARAM>(res))) delete res;
+        PostUpdateResult(notify, automatic, res);
     }
 }
 
