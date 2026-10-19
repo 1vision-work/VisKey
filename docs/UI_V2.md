@@ -18,8 +18,9 @@ lấy từ `design/tokens.json` và `design/icons/*.svg`, kích thước bố c�
   ngăn bởi đường kẻ `separator`.
 - **Tự lưu.** Không có nút "Lưu": mọi thay đổi được áp dụng và ghi xuống ngay ("Đã lưu tự động"; trên Linux là toast
   "Đã áp dụng — không cần khởi động lại IBus" kèm nút "Hoàn tác").
-- **Riêng tư.** VisKey không gửi phím gõ đi đâu, không có telemetry. Truy cập mạng duy nhất là khi người dùng tự bấm kiểm
-  tra cập nhật, và chỉ đọc metadata công khai của GitHub Releases.
+- **Riêng tư.** VisKey không gửi phím gõ đi đâu, không có telemetry. Truy cập mạng duy nhất là kiểm tra cập nhật (tự động
+  tối đa 1 lần mỗi 24 giờ khi bật "Tự động kiểm tra cập nhật", hoặc khi người dùng bấm): một yêu cầu GET ẩn danh, chỉ đọc
+  metadata công khai của GitHub Releases (mục 3.6).
 - **Viết mới hoàn toàn**, giấy phép MIT. Không dùng mã, tài nguyên hay ý tưởng triển khai của bộ gõ khác.
 
 ## 2. Danh mục màn hình theo nền tảng
@@ -108,7 +109,7 @@ Cửa sổ Cài đặt (ảnh 01, 03, 05, 06): sidebar trái rộng 224 pt, nộ
 | Hàng | "Phím tắt phụ" / "Dùng khi phím chính bị ứng dụng khác chiếm" · ô ghi phím đang ghi "Nhấn tổ hợp phím…" (chấm đỏ) · nút × | `settings.hotkeys.secondary` |
 | Hàng | "Đổi Telex ↔ VNI" · ô trống viền đứt "Ghi phím tắt" | `settings.hotkeys.toggle_method` |
 | Nhóm "KHÁC" — hàng | "Mở Bảng điều khiển" · `⌘` `,` | cố định (menu chuẩn macOS) |
-| Hàng | "Thêm gõ tắt từ chữ đang chọn" / "Bôi đen một cụm từ rồi nhấn để lưu nhanh" · `^` `⌥` `M` | **cần quyết định** (mục 8) — ẩn hoặc vô hiệu "Sắp có" |
+| Hàng | "Thêm gõ tắt từ chữ đang chọn" / "Bôi đen một cụm từ rồi nhấn để lưu nhanh" · `^` `⌥` `M` | **backlog** (mục 8) — hiển thị mờ, vô hiệu, nhãn "Sắp có" |
 
 #### Quyền & Bảo mật
 
@@ -211,8 +212,10 @@ lấy từ thông tin phiên bản của file), "Bật / tắt Tiếng Việt" (
 
 #### Cập nhật
 
-Không có ảnh Windows riêng. Nội dung: phiên bản hiện tại, nút "Kiểm tra cập nhật" (chỉ khi bấm), kết quả "Đã là phiên
-bản mới nhất" hoặc "Có phiên bản mới x.y.z" + nút mở trang Releases (không tự tải/cài). Xem mục 3.6.
+Không có ảnh Windows riêng. Nội dung: phiên bản hiện tại, toggle "Tự động kiểm tra cập nhật" (mặc định bật,
+`settings.update.auto_check`), nút "Kiểm tra cập nhật" (thủ công), "Lần kiểm tra cuối", kết quả "Đã là phiên bản mới
+nhất" hoặc "Có phiên bản mới x.y.z" + nút mở trang Releases (không tự tải/cài). Mục "Cập nhật" trong khung điều hướng có
+chấm khi có bản mới. Xem mục 3.6.
 
 #### Giới thiệu
 
@@ -222,6 +225,11 @@ dẫn khoá Registry `HKCU\Software\VisKey`.
 #### Flyout khay hệ thống (ảnh 08, dark)
 
 Rộng 360 epx, cao ≈ 388 epx, bo 8, neo trên biểu tượng khay ("• VI").
+
+Nền trong suốt thật: Windows 11 22H2+ dùng `DwmSetWindowAttribute(DWMWA_SYSTEMBACKDROP_TYPE, DWMSBT_TRANSIENTWINDOW)`
+(acrylic transient); bản cũ hơn dùng acrylic qua `SetWindowCompositionAttribute` (nạp động từ `user32.dll`). Dùng nền
+đặc bo góc khi tắt hiệu ứng trong suốt, bật tương phản cao, đang tiết kiệm pin, hoặc API lỗi. Vẫn một file exe portable,
+không thêm phụ thuộc.
 
 | Thành phần | Chữ | Ánh xạ |
 | :--- | :--- | :--- |
@@ -267,7 +275,7 @@ Không có ảnh Linux riêng. Dùng cùng nội dung với trang Gõ tắt macO
 | Thành phần | Chữ | Ánh xạ |
 | :--- | :--- | :--- |
 | Logo lớn, tên | "VisKey" / "Bộ gõ tiếng Việt cho macOS, Linux & Windows · 1VISION" | — |
-| Huy hiệu | "1.0.0" · "✓ Đã là phiên bản mới nhất" (màu ngọc) | phiên bản gói; trạng thái từ lần kiểm tra cập nhật thủ công gần nhất |
+| Huy hiệu | "1.0.0" · "✓ Đã là phiên bản mới nhất" (màu ngọc) | phiên bản gói; trạng thái từ lần kiểm tra cập nhật gần nhất (tự động hoặc thủ công) |
 | Nhóm "Liên kết" | "Mã nguồn ↗" · "Báo lỗi ↗" · "Bản phát hành & thay đổi ↗" · "Giấy phép" "MIT" | `https://github.com/1vision-work/VisKey`, `/issues`, `/releases`, file `LICENSE` |
 | Nhóm "Chẩn đoán" | chấm ngọc "Engine IBus" · `viskey · đang chạy` | trạng thái engine IBus |
 | | chấm ngọc "Phiên hiển thị" · `Wayland` | `XDG_SESSION_TYPE` |
@@ -276,7 +284,8 @@ Không có ảnh Linux riêng. Dùng cùng nội dung với trang Gõ tắt macO
 | Nút | "Sao chép thông tin hệ thống" | sao chép văn bản chẩn đoán (phiên bản, OS, phiên hiển thị, trạng thái) vào clipboard — không gửi đi đâu |
 | Nút phá huỷ | "Khôi phục toàn bộ cài đặt…" | hỏi xác nhận, rồi ghi lại cấu hình mặc định |
 
-Nút "Kiểm tra cập nhật" (thủ công) nằm cạnh huy hiệu trạng thái hoặc trong menu ☰; xem mục 3.6.
+Nút "Kiểm tra cập nhật" (thủ công) nằm cạnh huy hiệu trạng thái hoặc trong menu ☰; hàng switch "Tự động kiểm tra cập
+nhật" và dòng "Lần kiểm tra cuối" nằm dưới huy hiệu. Khi có bản mới, tab "Giới thiệu" có chấm. Xem mục 3.6.
 
 ## 3. Mô hình dữ liệu cài đặt dùng chung
 
@@ -314,7 +323,7 @@ Mọi nền tảng dùng cùng một mô hình logic. Biểu diễn chuẩn là 
     "secondary":     null,
     "toggle_method": null
   },
-  "update": { "last_checked": null, "latest_seen": null },
+  "update": { "auto_check": true, "last_checked": null, "latest_seen": null, "last_notified_version": null },
   "linux": { "no_underline_mode": true, "commit_method": "auto" }
 }
 ```
@@ -374,7 +383,7 @@ Quy tắc:
 | Trường | Mặc định macOS | Mặc định Windows | Ý nghĩa |
 | :--- | :--- | :--- | :--- |
 | `primary` | `^ Space` (`ctrl` + `space`) | `Ctrl + Space` | "Bật / tắt Tiếng Việt" — "Phím tắt chính" |
-| `secondary` | `⌘ ⇧ V` (bản 1.0 có sẵn) | `Alt + Z` (bản 1.0 có sẵn) | "Phím tắt phụ" |
+| `secondary` | không đặt (`null`; bản 1.0 có `⌘ ⇧ V`) | `Alt + Z` (bản 1.0 có sẵn) | "Phím tắt phụ" |
 | `toggle_method` | không đặt (`null`) | không đặt (`null`) | "Đổi Telex ↔ VNI" |
 
 Mỗi phím tắt: `{ "key": <tên phím>, "modifiers": [ "ctrl" | "alt" | "shift" | "cmd" | "win" ... ] }` hoặc `null` (chưa
@@ -382,6 +391,9 @@ Mỗi phím tắt: `{ "key": <tên phím>, "modifiers": [ "ctrl" | "alt" | "shif
 Phải có ít nhất một phím bổ trợ, trừ phím chức năng. Khi ghi phím, kiểm tra xung đột với phím tắt khác của VisKey và với
 phím hệ thống đã biết (macOS: "Chọn nguồn nhập trước đó" `^ Space`; Windows: `Win + Space`), hiển thị băng cảnh báo
 nhưng vẫn cho phép lưu. Linux: phím tắt do IBus quản lý, không có trang Phím tắt.
+
+macOS: chỉ `^ Space` là phím mặc định. Phím tắt chỉ kích hoạt khi tập phím bổ trợ đang nhấn khớp **đúng** với cấu hình
+(vd. `^ Space` không kích hoạt khi nhấn `^ ⇧ Space` hay `^ ⌥ Space`).
 
 ### 3.5 Bộ đếm gõ tắt (`macro_usage`)
 
@@ -391,16 +403,27 @@ nhưng vẫn cho phép lưu. Linux: phím tắt do IBus quản lý, không có t
 - Xoá gõ tắt thì xoá bộ đếm của nó; đổi nội dung thì giữ bộ đếm. Bộ đếm không được xuất ra file (mục 4).
 - Hiển thị: "N lần", nhóm nghìn bằng dấu chấm (`1.038 lần`). Sắp xếp "Hay dùng": giảm dần theo số lần, bằng nhau thì A → Z.
 
-### 3.6 Kiểm tra cập nhật — chỉ thủ công
+### 3.6 Kiểm tra cập nhật — tự động và thủ công
 
-- Chỉ chạy khi người dùng bấm "Kiểm tra cập nhật". Không kiểm tra định kỳ, không kiểm tra lúc khởi động.
-- Nguồn duy nhất: GitHub Releases của `1vision-work/VisKey`
+- Cài đặt "Tự động kiểm tra cập nhật" (`update.auto_check`, mặc định `true`, lưu bền) có trên cả ba nền tảng.
+- **Tự động:** tối đa 1 lần mỗi 24 giờ, tính từ lần thử gần nhất (thành công hay lỗi, tự động hay thủ công). macOS và
+  Windows kiểm tra khi khởi động và trong lúc chạy nền (khi đã đủ 24 giờ). Linux: chỉ trong ứng dụng cài đặt (khi mở),
+  **không** chạy trong engine IBus.
+- **Thủ công:** vẫn giữ nút "Kiểm tra cập nhật"; chạy ngay, không phụ thuộc `auto_check` hay mốc 24 giờ.
+- Cả hai dùng cùng một yêu cầu. Nguồn duy nhất: GitHub Releases của `1vision-work/VisKey`
   (`https://api.github.com/repos/1vision-work/VisKey/releases/latest`, hoặc danh sách `/releases` nếu cần tính cả bản
-  pre-release). Yêu cầu HTTPS GET không kèm thông tin người dùng, không cookie, không định danh máy.
+  pre-release). Yêu cầu HTTPS GET ẩn danh: không kèm thông tin người dùng, không cookie, không định danh máy, không
+  telemetry. Timeout 8 s.
 - So sánh `tag_name` (bỏ tiền tố `v`) với phiên bản hiện tại theo semver.
 - Kết quả: "Đã là phiên bản mới nhất" hoặc "Có phiên bản mới x.y.z" + nút mở trang release trong trình duyệt. Không tự
-  tải, không tự cài. Lỗi mạng: thông báo ngắn, không thử lại tự động.
-- `update.last_checked` (ISO 8601) và `update.latest_seen` chỉ để hiển thị trạng thái lần trước.
+  tải, không tự cài, không hộp thoại.
+- Khi lần kiểm tra tự động thấy bản mới: chỉ báo nhẹ — chấm/badge ở mục "Giới thiệu" (macOS, Linux) hoặc "Cập nhật"
+  (Windows), và một banner/dòng "Có phiên bản mới x.y.z" trong popover thanh menu (macOS) / flyout khay (Windows). Tối đa
+  1 thông báo cho mỗi phiên bản: sau khi báo, ghi `update.last_notified_version = x.y.z` và không báo lại phiên bản đó.
+- Lỗi: lần kiểm tra tự động lỗi thì im lặng, chỉ cập nhật "Lần kiểm tra cuối"; lần bấm thủ công lỗi thì thông báo ngắn,
+  không thử lại tự động.
+- `update.last_checked` (ISO 8601, thời điểm lần thử gần nhất — dùng cho mốc 24 giờ và dòng "Lần kiểm tra cuối"),
+  `update.latest_seen` (phiên bản mới nhất đã thấy) và `update.last_notified_version` (phiên bản đã báo, hoặc `null`).
 
 ## 4. Định dạng file nhập / xuất gõ tắt
 
@@ -463,32 +486,42 @@ Các kích thước đo từ ảnh (2x, quy về 1x, sai số ±2) nằm ở `de
 | Nhập / xuất gõ tắt (JSON + TAB) | kế hoạch | kế hoạch | kế hoạch |
 | Lưu gõ tắt xuống đĩa | kế hoạch (đã có `customMacros`) | kế hoạch | kế hoạch (đã có) |
 | Quick Telex tách khỏi gõ tắt | — | kế hoạch | — |
-| Luật theo ứng dụng được lưu (VI / EN / Nhớ, nguồn) | kế hoạch | kế hoạch | — |
-| Chính sách ứng dụng mới | kế hoạch | kế hoạch | — |
-| Phím tắt tuỳ chỉnh (chính / phụ / Telex↔VNI) + cảnh báo xung đột | kế hoạch | kế hoạch | — (IBus quản lý) |
+| Luật theo ứng dụng được lưu (VI / EN / Nhớ, nguồn) | kế hoạch | kế hoạch | — (bỏ) |
+| Chính sách ứng dụng mới | kế hoạch | kế hoạch | — (bỏ) |
+| Phím tắt tuỳ chỉnh (chính / phụ / Telex↔VNI) + cảnh báo xung đột | kế hoạch | kế hoạch | — (bỏ; IBus quản lý) |
+| Phím tắt khớp đúng phím bổ trợ, chỉ `^ Space` mặc định | kế hoạch | — | — |
 | Popover thanh menu / flyout khay | kế hoạch | kế hoạch | — |
+| Nền acrylic thật cho flyout khay (dự phòng nền đặc) | — | kế hoạch | — |
 | HUD khi đổi VI/EN | kế hoạch | — | — |
 | Onboarding 3 bước (quyền Trợ năng) | kế hoạch | — | — |
 | Trang Quyền & Bảo mật | kế hoạch | — | — |
 | Kiểm tra cập nhật thủ công | kế hoạch | kế hoạch | kế hoạch |
+| Tự động kiểm tra cập nhật (24 giờ, mặc định bật, báo nhẹ) | kế hoạch | kế hoạch | kế hoạch (chỉ ứng dụng cài đặt) |
 | Chẩn đoán + sao chép thông tin hệ thống | kế hoạch | kế hoạch | kế hoạch |
 | Khôi phục toàn bộ cài đặt | kế hoạch | kế hoạch | kế hoạch |
 | Toast "Hoàn tác" | — | — | kế hoạch |
-| "Thêm gõ tắt từ chữ đang chọn" | cần quyết định | cần quyết định | cần quyết định |
+| "Thêm gõ tắt từ chữ đang chọn" | backlog (mờ "Sắp có") | backlog (mờ "Sắp có") | backlog (mờ "Sắp có") |
 | `--ui-snapshot <outdir>` | kế hoạch | kế hoạch | kế hoạch |
 
-## 8. Cần quyết định về sản phẩm
+## 8. Quyết định CEO 19/10/2026
 
-1. **"Thêm gõ tắt từ chữ đang chọn"** (`^ ⌥ M` trên ảnh 06): phải đọc vùng chọn từ ứng dụng khác (Accessibility API hoặc
-   giả lập sao chép qua clipboard). Ảnh hưởng quyền riêng tư và có thể ghi đè clipboard. Đến khi có quyết định: ẩn hoặc
-   hiển thị vô hiệu kèm "Sắp có", không triển khai.
-2. **Kiểm tra cập nhật tự động**: hiện chỉ thủ công. Nếu muốn tự động cần một tuỳ chọn tắt mặc định, tần suất, và nội dung
-   rõ ràng trong ghi chú riêng tư.
-3. **Telemetry**: không có. Mọi đề xuất thu thập số liệu (kể cả ẩn danh) cần quyết định riêng; bộ đếm gõ tắt chỉ lưu cục bộ.
-4. **Bộ đếm gõ tắt có nên tắt được** (một tuỳ chọn "Không đếm số lần dùng") cho người dùng nhạy cảm về quyền riêng tư.
-5. **Linux "Phương thức"**: ngoài "Tự động (Surrounding Text)" có cho chọn phương thức khác (vd. preedit / forward
-   key) hay không, và tên hiển thị.
-6. **Trang Phím tắt/Theo ứng dụng trên Linux**: hiện không có (IBus quản lý phím tắt, Wayland không cho biết ứng dụng trước
-   mặt một cách ổn định).
-7. **Ô "Gõ thử" trên Windows/Linux**: ảnh chỉ có trên macOS.
-8. **Đổi mặc định phím tắt phụ macOS** `⌘ ⇧ V` (bản 1.0) — dễ trùng "Dán và khớp kiểu" của nhiều ứng dụng.
+1. **"Thêm gõ tắt từ chữ đang chọn"** (`^ ⌥ M` trên ảnh 06): làm sau — **backlog**. Mọi nền tảng hiển thị mờ, vô hiệu,
+   nhãn "Sắp có"; không triển khai (cần đọc vùng chọn từ ứng dụng khác, ảnh hưởng quyền riêng tư và clipboard).
+2. **Tự động kiểm tra cập nhật**: có, trên cả ba nền tảng. "Tự động kiểm tra cập nhật" mặc định bật; tối đa 1 lần mỗi
+   24 giờ; chỉ báo nhẹ, không hộp thoại, không tự tải/cài; lỗi tự động thì im lặng (mục 3.6).
+3. **Phím tắt macOS**: chỉ `^ Space` là phím mặc định (bỏ mặc định `⌘ ⇧ V` của bản 1.0); phím tắt phải khớp đúng phím bổ
+   trợ (mục 3.4) — đã chốt.
+4. **Quick Telex** là công tắc riêng (`quick_telex`, tách khỏi `enable_macros`) — đã chốt.
+5. **Khoá gõ tắt có chữ số**: giữ nguyên như hiện tại, không thêm giới hạn (mục 4) — đã chốt.
+6. **Trang Theo ứng dụng / Phím tắt trên Linux**: bỏ, chưa làm (IBus quản lý phím tắt, Wayland không cho biết ứng dụng
+   trước mặt một cách ổn định).
+7. **Flyout khay Windows**: nền Mica/acrylic thật, dự phòng nền đặc bo góc; vẫn một exe portable, không thêm phụ thuộc
+   (mục 2.2).
+8. **Telemetry**: không có — theo nguyên tắc không telemetry, không định danh của quyết định 2; bộ đếm gõ tắt chỉ lưu cục bộ.
+
+Còn mở:
+
+- **Linux "Phương thức"**: ngoài "Tự động (Surrounding Text)" có cho chọn phương thức khác (vd. preedit / forward
+  key) hay không, và tên hiển thị.
+- **Bộ đếm gõ tắt có nên tắt được** (một tuỳ chọn "Không đếm số lần dùng") cho người dùng nhạy cảm về quyền riêng tư.
+- **Ô "Gõ thử" trên Windows/Linux**: ảnh chỉ có trên macOS.
