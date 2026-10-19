@@ -25,6 +25,11 @@ jobs:
       - name: Design tokens check
         run: python3 tests/test_design_tokens.py
 
+      - name: Linux settings logic tests
+        run: |
+          python3 tests/test_linux_settings.py
+          python3 tests/test_linux_update_check.py
+
       - name: CMake build + ctest
         run: |
           cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
@@ -52,7 +57,7 @@ jobs:
       - name: Install .deb
         run: |
           sudo apt-get update
-          sudo apt-get install -y ibus python3-gi gir1.2-ibus-1.0 python3-tk
+          sudo apt-get install -y ibus python3-gi gir1.2-ibus-1.0 python3-tk gir1.2-gtk-4.0 gir1.2-adw-1 xvfb
           sudo dpkg -i ibus-viskey_*_all.deb
 
       - name: Verify installed files
@@ -64,23 +69,57 @@ jobs:
             /usr/share/viskey/ibus/ibus_viskey.py \
             /usr/share/viskey/ibus/viskey_settings.py \
             /usr/share/ibus/component/viskey.xml \
-            /usr/share/applications/viskey-settings.desktop; do
+            /usr/share/applications/viskey-settings.desktop \
+            /usr/share/viskey/ibus/viskey_settings_tk.py \
+            /usr/share/viskey/ibus/viskey_settings_model.py \
+            /usr/share/viskey/ibus/viskey_version.py \
+            /usr/share/viskey/icons/appicon-1024.svg \
+            /usr/share/viskey/icons/hicolor/scalable/actions/viskey-sliders-symbolic.svg \
+            /usr/share/viskey/icons/hicolor/scalable/actions/viskey-bolt-symbolic.svg \
+            /usr/share/viskey/icons/hicolor/scalable/actions/viskey-info-symbolic.svg \
+            /usr/share/icons/hicolor/scalable/apps/org.viskey.Settings.svg; do
             test -f "$f" || { echo "missing $f"; exit 1; }
             echo "ok $f"
           done
           test -x /usr/bin/viskey-settings
           test -x /usr/libexec/ibus-engine-viskey
+          grep -qx 'Icon=org.viskey.Settings' /usr/share/applications/viskey-settings.desktop
+          grep -qx 'Name=VisKey' /usr/share/applications/viskey-settings.desktop
 
-      # ibus_viskey only loads the IBus typelib at import time (no display or bus needed);
-      # viskey_settings is a Tk GUI, so it is only syntax-checked in memory
+      # ibus_viskey only loads the IBus typelib at import time (no display or bus needed).
+      # viskey_settings only builds GUI objects under main(), so it must import without a display;
+      # the Tk fallback is only syntax-checked in memory
       # (py_compile would try to write __pycache__ into the read-only /usr/share).
       - name: Import check (installed package)
         working-directory: /tmp
         env:
           PYTHONDONTWRITEBYTECODE: 1
         run: |
-          /usr/bin/python3 -c "import sys; sys.path.insert(0, '/usr/share/viskey/ibus'); import ibus_viskey; assert ibus_viskey.IBus is not None, 'IBus typelib not available'; print('ibus_viskey OK')"
-          /usr/bin/python3 -c "import sys; p = sys.argv[1]; compile(open(p, encoding='utf-8').read(), p, 'exec'); print('viskey_settings syntax OK')" /usr/share/viskey/ibus/viskey_settings.py
+          unset DISPLAY WAYLAND_DISPLAY
+          /usr/bin/python3 -c "import sys; sys.path.insert(0, '/usr/share/viskey/ibus'); import ibus_viskey; assert ibus_viskey.IBus is not None, 'IBus typelib not available'; assert ibus_viskey.settings_model is not None; print('ibus_viskey OK')"
+          /usr/bin/python3 -c "import sys; sys.path.insert(0, '/usr/share/viskey/ibus'); import viskey_settings as s, viskey_settings_model as m, viskey_version as v; assert s.HAVE_GTK, 'GTK4/libadwaita typelibs not available'; assert s.VERSION == v.VERSION; print('viskey_settings OK', v.VERSION)"
+          /usr/bin/python3 -c "import sys; p = sys.argv[1]; compile(open(p, encoding='utf-8').read(), p, 'exec'); print('viskey_settings_tk syntax OK')" /usr/share/viskey/ibus/viskey_settings_tk.py
+
+      # Renders every settings tab (light + dark) offscreen with demo data; no real config, no network.
+      - name: Settings UI screenshots (xvfb)
+        env:
+          GTK_A11Y: none
+        run: |
+          timeout 180 xvfb-run -a /usr/bin/python3 linux/ibus/viskey_settings.py --ui-snapshot "$RUNNER_TEMP/viskey-linux-screenshots"
+          ls -l "$RUNNER_TEMP/viskey-linux-screenshots"
+          for n in general macros about about-update; do
+            for s in light dark; do
+              test -s "$RUNNER_TEMP/viskey-linux-screenshots/linux-$n-$s.png" || { echo "missing linux-$n-$s.png"; exit 1; }
+            done
+          done
+
+      # Not on v* tags: the release job publishes every artifact of the run as release files.
+      - uses: actions/upload-artifact@v4
+        if: ${{ !startsWith(github.ref, 'refs/tags/v') }}
+        with:
+          name: viskey-linux-screenshots
+          path: ${{ runner.temp }}/viskey-linux-screenshots/*.png
+          if-no-files-found: error
 
       - uses: actions/upload-artifact@v4
         with:

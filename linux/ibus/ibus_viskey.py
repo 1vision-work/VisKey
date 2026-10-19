@@ -21,6 +21,16 @@ elif os.path.isdir("/usr/share/viskey/core"):
 from viskey_engine import EngineConfig, VisKeyEngine
 
 try:
+    import viskey_settings_model as settings_model
+except ImportError:  # the engine must keep working even without the settings helpers
+    settings_model = None
+
+try:
+    from viskey_version import VERSION
+except ImportError:
+    VERSION = "1.0.0"
+
+try:
     import gi
     gi.require_version("IBus", "1.0")
     from gi.repository import GLib, GObject, IBus
@@ -47,6 +57,13 @@ if IBus is not None:
             # Default to No-Underline (Surrounding Text / Fake Backspace) on X11;
             # on strict Wayland without Surrounding Text, seamlessly fall back to Preedit if needed.
             self.no_underline_mode = True
+            # "auto": Surrounding Text when the client supports it, else fake BackSpace;
+            # "backspace": always fake BackSpace (set from the settings app, "Phương thức").
+            self.direct_commit_method = "auto"
+            self.client_caps = 0
+            self._last_status = None
+            self._usage = settings_model.MacroUsageRecorder() if settings_model else None
+            self._usage_timer = 0
             self.is_wayland = "WAYLAND_DISPLAY" in os.environ
             self.config_path = os.path.expanduser("~/.config/viskey/config.json")
             self.config_mtime = 0.0
@@ -127,6 +144,9 @@ if IBus is not None:
                 self.vietnamese_enabled = bool(data.get("vietnamese_enabled", self.vietnamese_enabled))
                 self.config.input_method = str(data.get("input_method", self.config.input_method))
                 self.no_underline_mode = bool(data.get("no_underline_mode", self.no_underline_mode))
+                method = data.get("direct_commit_method", self.direct_commit_method)
+                if method in ("auto", "backspace"):
+                    self.direct_commit_method = method
                 self.config.auto_restore_english = bool(data.get("auto_restore_english", self.config.auto_restore_english))
                 self.config.modern_orthography = bool(data.get("modern_orthography", self.config.modern_orthography))
                 self.config.quick_telex = bool(data.get("quick_telex", self.config.quick_telex))
@@ -140,10 +160,67 @@ if IBus is not None:
             self._reload_json_config()
             self.register_properties(self.prop_list)
             self.request_surrounding_text()
+            self._write_status()
 
         def do_focus_out(self):
             self._commit_preedit_if_any()
             self.engine.reset()
+            self._flush_usage(force=True)
+
+        def do_set_capabilities(self, caps):
+            self.client_caps = caps
+            self._write_status()
+
+        def _supports_surrounding_text(self) -> bool:
+            caps = self.client_caps
+            if not caps:
+                try:
+                    caps = self.client_capabilities
+                except AttributeError:
+                    caps = 0
+            return bool(caps & IBus.Capabilite.SURROUNDING_TEXT)
+
+        def _write_status(self):
+            """~/.cache/viskey/status.json for the settings app's "Chẩn đoán" section.
+            Only engine state is written: no app names, no typed text."""
+            if settings_model is None:
+                return
+            surrounding = self._supports_surrounding_text()
+            now = GLib.get_monotonic_time() / 1e6
+            if self._last_status and self._last_status[0] == surrounding and now - self._last_status[1] < 60:
+                return
+            try:
+                settings_model.write_status(surrounding)
+                self._last_status = (surrounding, now)
+            except OSError:
+                pass
+
+        def _process_printable(self, ch: str):
+            """Run the engine on one character and count macro expansions. Detection happens
+            here in the adapter (the engine is untouched); only the macro key is recorded."""
+            raw_before = "".join(self.engine.raw_keys)
+            res = self.engine.process_key(ch)
+            if self._usage is not None:
+                key = settings_model.detect_macro_expansion(
+                    raw_before, ch, res.handled, res.commit_text,
+                    self.config.macros, self.config.enable_macros)
+                if key:
+                    self._usage.record(key)
+                    self._flush_usage()
+            return res
+
+        def _flush_usage(self, force: bool = False):
+            if self._usage is None or not self._usage.dirty:
+                return
+            if self._usage.flush(force=force):
+                return
+            if not self._usage_timer:
+                self._usage_timer = GLib.timeout_add_seconds(int(self._usage.min_interval) + 1, self._on_usage_timer)
+
+        def _on_usage_timer(self):
+            self._usage_timer = 0
+            self._flush_usage(force=True)
+            return False
 
         def do_reset(self):
             self._commit_preedit_if_any()
@@ -180,8 +257,9 @@ if IBus is not None:
             Sends replacement without preedit underline using Surrounding Text or Fake Backspaces.
             """
             if backspaces > 0:
-                # If client supports Surrounding Text deletion, use it first
-                if self.client_capabilities & IBus.Capabilite.SURROUNDING_TEXT:
+                # If client supports Surrounding Text deletion, use it first (unless the user
+                # chose "Phím xoá lùi giả lập (BackSpace)" in the settings app)
+                if self.direct_commit_method != "backspace" and self._supports_surrounding_text():
                     self.delete_surrounding_text(-backspaces, backspaces)
                 else:
                     for _ in range(backspaces):
@@ -242,14 +320,14 @@ if IBus is not None:
             if 32 <= keyval <= 126:
                 ch = chr(keyval)
                 if self.no_underline_mode:
-                    res = self.engine.process_key(ch)
+                    res = self._process_printable(ch)
                     if not res.handled:
                         return False
                     self._send_direct_replacement(res.backspaces, res.commit_text)
                     return True
                 else:
                     # Clean Preedit Mode (Wayland fallback)
-                    res = self.engine.process_key(ch)
+                    res = self._process_printable(ch)
                     cur = self.engine.get_displayed_word()
                     if cur:
                         self.update_preedit_text(IBus.Text.new_from_string(cur), len(cur), True)
@@ -284,10 +362,10 @@ def main():
         component = IBus.Component.new(
             "org.freedesktop.IBus.VisKey",
             "VisKey Vietnamese Input Method",
-            "1.0.0",
+            VERSION,
             "MIT",
             "VisKey Project",
-            "https://github.com/viskey/viskey",
+            "https://github.com/1vision-work/VisKey",
             "/usr/libexec/ibus-engine-viskey --ibus",
             "viskey",
         )
