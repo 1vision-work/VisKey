@@ -15,9 +15,13 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/core)
 # 1. Cross-platform CLI Simulator & Unit Test Suite
 add_executable(viskey_cli core/viskey_cli.cpp)
 add_executable(test_cpp_engine tests/test_cpp_engine.cpp)
+# Platform-stream typing regression (cases in tests/data/typing_regression.tsv)
+add_executable(test_typing_regression tests/test_typing_regression.cpp)
+target_compile_definitions(test_typing_regression PRIVATE VISKEY_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}")
 
 enable_testing()
 add_test(NAME VisKeyCoreTests COMMAND test_cpp_engine)
+add_test(NAME VisKeyTypingRegression COMMAND test_typing_regression)
 
 # 2. Native macOS App Bundle Target
 if(APPLE)

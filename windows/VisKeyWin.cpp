@@ -287,6 +287,10 @@ static LRESULT CALLBACK LowLevelKeyboardProc(int nCode, WPARAM wParam, LPARAM lP
     } else {
         BYTE keyState[256] = {0};
         GetKeyboardState(keyState);
+        // The LL hook thread's key state is stale: without this Shift+1 maps to '1'
+        // (a VNI tone / wrong restore suffix) instead of '!'.
+        keyState[VK_SHIFT] = shift ? 0x80 : 0;
+        keyState[VK_CAPITAL] = caps ? 0x01 : 0;
         wchar_t wbuf[4] = {0};
         int r = ToUnicode(kb->vkCode, kb->scanCode, keyState, wbuf, 4, 0);
         if (r == 1 && wbuf[0] >= 32 && wbuf[0] <= 126) {

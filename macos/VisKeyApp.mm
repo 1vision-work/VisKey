@@ -55,6 +55,7 @@ static void sendReplacementEvents(int backspaces, const std::string &commitText,
 
     auto postKey = [&](CGKeyCode keyCode, bool keyDown) {
         CGEventRef ev = CGEventCreateKeyboardEvent(source, keyCode, keyDown);
+        CGEventSetFlags(ev, 0); // a held Shift/Option must not turn Delete into another combo
         CGEventSetIntegerValueField(ev, kCGEventSourceUserData, kVisKeyEventMagic);
         CGEventPost(kCGSessionEventTap, ev);
         CFRelease(ev);
@@ -63,7 +64,9 @@ static void sendReplacementEvents(int backspaces, const std::string &commitText,
     auto postUnicode = [&](const UniChar *chars, UniCharCount len) {
         CGEventRef down = CGEventCreateKeyboardEvent(source, 0, true);
         CGEventRef up   = CGEventCreateKeyboardEvent(source, 0, false);
-        CGEventSetIntegerValueField(down, kVisKeyEventMagic ? kCGEventSourceUserData : kCGEventSourceUserData, kVisKeyEventMagic);
+        CGEventSetFlags(down, 0);
+        CGEventSetFlags(up, 0);
+        CGEventSetIntegerValueField(down, kCGEventSourceUserData, kVisKeyEventMagic);
         CGEventSetIntegerValueField(up,   kCGEventSourceUserData, kVisKeyEventMagic);
         CGEventKeyboardSetUnicodeString(down, len, chars);
         CGEventKeyboardSetUnicodeString(up,   len, chars);

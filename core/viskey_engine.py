@@ -74,7 +74,7 @@ VALID_VOWEL_NUCLEI_COMMITTED = {
 
 # Intermediate vowel clusters valid while actively typing a syllable
 VALID_VOWEL_NUCLEI_TYPING = VALID_VOWEL_NUCLEI_COMMITTED | {
-    "ie", "uo", "ưo", "ye", "uye", "uoi", "ưoi", "uou", "ưou", "ieu", "yeu", "uay"
+    "ie", "ue", "uo", "ưo", "ye", "uye", "uoi", "ưoi", "uou", "ưou", "ieu", "yeu", "uay"
 }
 
 # Vowel clusters valid right after applying a circumflex (^)
@@ -89,10 +89,16 @@ FORBIDDEN_OPEN_NUCLEI = {
     "ă", "â", "iê", "yê", "uô", "ươ", "oă", "uă", "uâ", "uyê"
 }
 
+# Nuclei ending in a glide (or ia/ưa/uya) never take a final consonant in committed words (during, music)
+NO_FINAL_NUCLEI = {
+    "ai", "ao", "au", "âu", "ay", "ây", "eo", "êu", "ia", "iu", "oi", "ôi", "ơi", "ui", "ưi", "ưa", "ưu",
+    "iêu", "yêu", "oai", "oao", "oay", "oeo", "uây", "uôi", "ươi", "ươu", "uya", "uyu"
+}
+
 # Common English words whose Telex sequences otherwise resemble valid Vietnamese syllables
 ENGLISH_COLLISION_WORDS = {
     "soon", "moon", "room", "noon", "spoon", "boom", "zoom", "loom", "bloom", "gloom", "broom", "groom",
-    "seen", "been", "teen", "green", "screen", "queen", "keen", "between",
+    "seen", "keen", "green", "screen", "between",
     "seem", "deem", "teem",
     "beer", "deer", "peer", "cheer", "steer", "sheer", "queer", "veer", "jeer", "sneer", "career", "engineer", "volunteer", "pioneer",
     "door", "poor", "floor", "moor", "boor",
@@ -105,9 +111,23 @@ ENGLISH_COLLISION_WORDS = {
     "care", "dare", "rare", "ware", "share", "spare", "square", "stare", "aware", "compare", "prepare", "declare", "software", "hardware", "firmware", "malware", "freeware", "middleware",
     "raw", "saw", "law", "jaw", "paw", "claw", "flaw", "draw", "straw", "thaw",
     "new", "few", "knew", "flew", "grew", "crew", "drew", "screw", "threw", "chew", "stew", "brew", "view", "review", "interview", "preview", "overview",
-    "box", "fox", "tax", "wax", "max", "fax", "fix", "mix", "six", "sex", "text", "next",
-    "test", "best", "rest", "west", "list", "cost", "lost", "most", "post", "host", "fast", "last", "past", "cast", "just", "must", "dust", "trust",
+    # Deliberately absent: words whose Telex reading is a common Vietnamese word
+    # (queen=quên, sex=sẽ, six=sĩ, max=mã, mix=mĩ, tax=tã, box=bõ, rest=rét, cast=cát, last=lát, lost=lót,
+    # list=lít, host=hót, must=mút, trust=trút, dust=dút, cost=cót, most=mót, been=bên, teen=tên).
+    "fox", "wax", "fax", "fix", "text", "next",
+    "test", "best", "west", "post", "fast", "past", "just",
     "auto", "audio", "video", "radio", "studio", "portfolio", "scenario", "ratio", "mode", "code", "node", "home", "some", "come", "done", "none", "gone", "tone", "zone", "bone", "cone", "line", "fine", "mine", "nine", "pine", "wine", "time", "lime", "dime", "mime", "name", "same", "game", "fame", "came", "tame", "lame", "frame", "blame", "flame", "shame",
+    # Doubled Telex keys (ss/ff/rr/xx/jj, ww/aa/ee/oo, dd) would otherwise escape to a single key: issue -> isue
+    "pass", "mass", "boss", "loss", "toss", "moss", "kiss", "miss", "less", "mess", "bless",
+    "assist", "assume", "assign", "assert", "asset", "essay", "possible", "lesson", "message", "session", "mission",
+    "passion", "passive", "passing", "missing", "massive", "messy", "assess", "dissolve",
+    "off", "offer", "office", "effect", "effort", "affect", "afford", "coffee", "differ", "buffer", "suffer", "offset",
+    "sorry", "error", "mirror", "carry", "marry", "hurry", "arrow", "narrow", "terror", "horror", "array", "arrive",
+    "added", "odd", "add", "diff", "tomorrow",
+    "assistant", "assignment", "assets", "assessment", "passed", "password", "missed", "essential", "necessary",
+    "lessons", "messages", "bass", "guess", "effective", "official", "officer", "difference", "different", "tariff",
+    "toffee", "errors", "worry", "berry", "cherry", "current", "correct", "correctly", "borrow", "sorrow", "arrange",
+    "barrel", "carrot", "parrot", "terrible", "referred", "merry", "ress", "isset", "buff",
 }
 
 
@@ -154,9 +174,23 @@ class VisKeyEngine:
         self.last_modifier_key: Optional[str] = None
 
     def get_displayed_word(self) -> str:
+        # Invariant: while disabled_for_word, `chars` holds exactly the literal text on screen
+        # and `tone` is 0, so rendering it is a no-op.
         if self.disabled_for_word:
-            return "".join(self.raw_keys)
+            return "".join(self.chars)
         return self._render_syllable()
+
+    def _disable_as_literal(self) -> None:
+        """Escape (double modifier key): freeze the rendered syllable as literal text."""
+        self.chars = list(self._render_syllable())
+        self.tone = 0
+        self.disabled_for_word = True
+
+    def _disable_as_raw(self) -> None:
+        """Not Vietnamese (e.g. 'windows', 'express'): fall back to the raw keystrokes."""
+        self.chars = list(self.raw_keys)
+        self.tone = 0
+        self.disabled_for_word = True
 
     def _split_syllable(self) -> Tuple[str, str, str, List[int]]:
         """
@@ -272,7 +306,8 @@ class VisKeyEngine:
         if vowel == "":
             if final != "":
                 return False
-            return not committed
+            # A lone 'đ' (dd) stays Vietnamese at commit, like UniKey
+            return not committed or initial == "đ"
 
         # Reject words with a second vowel cluster after the final consonant (e.g. 'update', 'service', 'mode')
         last_vowel_idx = vowel_indices[-1]
@@ -312,8 +347,16 @@ class VisKeyEngine:
             if committed and self.tone == 0:
                 return False
 
+        if committed and final != "":
+            if vowel in NO_FINAL_NUCLEI:
+                return False
+            # Vietnamese spells these 'inh' / 'ich' (things, kings)
+            if vowel == "i" and final in ("ng", "c"):
+                return False
+
         # Committed words cannot end with open short/diphthong vowels: ă, â, iê, yê, uô, ươ, oă, uă, uâ, uyê
-        if committed and final == "" and vowel in FORBIDDEN_OPEN_NUCLEI:
+        # (a bare vowel without initial consonant, e.g. 'ă', 'â', 'ươ', is kept as typed, like UniKey)
+        if committed and initial != "" and final == "" and vowel in FORBIDDEN_OPEN_NUCLEI:
             return False
 
         return True
@@ -339,11 +382,11 @@ class VisKeyEngine:
             return KeyProcessResult(False, 0, "", "", "")
 
         if self.disabled_for_word:
-            self.raw_keys.pop()
-            if self.chars:
-                self.chars.pop()
-            new_display = "".join(self.raw_keys)
-            if not self.raw_keys:
+            if self.raw_keys:
+                self.raw_keys.pop()
+            self.chars.pop()
+            new_display = "".join(self.chars)
+            if not self.chars:
                 self.reset()
             return KeyProcessResult(False, 0, "", new_display, new_display)
 
@@ -409,7 +452,7 @@ class VisKeyEngine:
                     elif self.chars[0].lower() == "đ" and self.last_modifier_key == ch_lower:
                         self.chars[0] = "D" if self.chars[0].isupper() else "d"
                         self.chars.append(ch)
-                        self.disabled_for_word = True
+                        self._disable_as_literal()
                         return True
 
         # 3. Handle Tone marks:
@@ -430,12 +473,12 @@ class VisKeyEngine:
                     if self.tone == new_tone and self.last_modifier_key == ch_lower:
                         self.tone = 0
                         self.chars.append(ch)
-                        self.disabled_for_word = True
+                        self._disable_as_literal()
                         return True
                     self.tone = new_tone
                     self.last_modifier_key = ch_lower
                     if self.config.auto_restore_english and not self.is_valid_vietnamese(committed=False):
-                        self.disabled_for_word = True
+                        self._disable_as_raw()
                     return True
 
         # 4. Handle Vowel Modifiers (Circumflex ^, Breve ă, Horn ơ/ư)
@@ -456,7 +499,11 @@ class VisKeyEngine:
                     # Special case: 'xoọc', 'boong' have valid double 'oo' in Vietnamese!
                     _, check_v, _, _ = self._split_syllable()
                     if check_v != "oo":
-                        self.disabled_for_word = True
+                        self._disable_as_literal()
+                    else:
+                        # Still composing (boong, xoọc): drop the escape key so raw_keys
+                        # matches the literal text if the word is later reverted to raw.
+                        self.raw_keys.pop()
                     self.last_modifier_key = None
                     return True
 
@@ -470,7 +517,7 @@ class VisKeyEngine:
                     if new_vowel in VALID_CIRCUMFLEX_NUCLEI:
                         self.last_modifier_key = ch_lower
                         if self.config.auto_restore_english and not self.is_valid_vietnamese(committed=False):
-                            self.disabled_for_word = True
+                            self._disable_as_raw()
                         return True
                     else:
                         # Revert if invalid (e.g. 'oe' + 'o' should be 'oeo' as in 'ngoèo', not 'ôe'!)
@@ -479,16 +526,24 @@ class VisKeyEngine:
         # 4b. Telex 'w' (ă, ơ, ư, ươ) or VNI '7' (ơ, ư, ươ) and '8' (ă)
         if (im == "telex" and ch_lower == "w") or (im == "vni" and ch in ("7", "8")):
             if im == "telex" and self.last_modifier_key == "w":
-                for idx in reversed(vowel_indices):
+                # 'ư' produced by a standalone 'w' (ww, tww) turns back into that literal 'w'
+                last = len(self.chars) - 1
+                standalone_w = (
+                    vowel_indices == [last]
+                    and self.chars[last] in ("ư", "Ư")
+                    and len(self.raw_keys) >= 2
+                    and self.raw_keys[-2].lower() == "w"
+                    and not (len(self.raw_keys) >= 3 and self.raw_keys[-3].lower() == "u")
+                )
+                if standalone_w:
+                    self.chars[last] = self.raw_keys[-2]
+                else:
                     unw_map = {"ă": "a", "Ă": "A", "ơ": "o", "Ơ": "O", "ư": "u", "Ư": "U"}
-                    if self.chars[idx] in unw_map:
-                        self.chars[idx] = unw_map[self.chars[idx]]
-                if len(self.raw_keys) >= 2 and self.raw_keys[-2].lower() == "w" and len(self.chars) == 1 and self.chars[0].lower() == "ư":
-                    self.chars[0] = self.raw_keys[-2]
-                    self.disabled_for_word = True
-                    return True
-                self.chars.append(ch)
-                self.disabled_for_word = True
+                    for idx in reversed(vowel_indices):
+                        if self.chars[idx] in unw_map:
+                            self.chars[idx] = unw_map[self.chars[idx]]
+                    self.chars.append(ch)
+                self._disable_as_literal()
                 return True
 
             if len(vowel_indices) > 0:
@@ -518,7 +573,7 @@ class VisKeyEngine:
                         self.chars[idx] = "Ă" if v_ch.isupper() else "ă"
                         self.last_modifier_key = ch_lower
                         if self.config.auto_restore_english and not self.is_valid_vietnamese(committed=False):
-                            self.disabled_for_word = True
+                            self._disable_as_raw()
                         return True
                     if v_low in ("o", "ô", "ơ") and (im == "telex" or ch == "7"):
                         self.chars[idx] = "Ơ" if v_ch.isupper() else "ơ"
@@ -528,13 +583,13 @@ class VisKeyEngine:
                             if self.chars[prev_idx].lower() == "u" and final != "":
                                 self.chars[prev_idx] = "Ư" if self.chars[prev_idx].isupper() else "ư"
                         if self.config.auto_restore_english and not self.is_valid_vietnamese(committed=False):
-                            self.disabled_for_word = True
+                            self._disable_as_raw()
                         return True
                     if v_low in ("u", "ư") and (im == "telex" or ch == "7"):
                         self.chars[idx] = "Ư" if v_ch.isupper() else "ư"
                         self.last_modifier_key = ch_lower
                         if self.config.auto_restore_english and not self.is_valid_vietnamese(committed=False):
-                            self.disabled_for_word = True
+                            self._disable_as_raw()
                         return True
 
             # Standalone 'w' in Telex at start of syllable -> 'ư'
@@ -558,7 +613,7 @@ class VisKeyEngine:
 
         # 7. Check Phonotactics validity during typing
         if self.config.auto_restore_english and not self.is_valid_vietnamese(committed=False):
-            self.disabled_for_word = True
+            self._disable_as_raw()
 
         return False
 
@@ -587,13 +642,17 @@ class VisKeyEngine:
                     )
 
             # 2. Check Word-Boundary Auto-Restore for English words
+            #    (after an escape the literal text is kept unless the raw keys spell a known English word)
             if (
                 self.config.auto_restore_english
-                and not self.disabled_for_word
                 and not self.has_backspaced
                 and raw_word
                 and old_display != raw_word
-                and not self.is_valid_vietnamese(committed=True)
+                and (
+                    raw_word.lower() in ENGLISH_COLLISION_WORDS
+                    if self.disabled_for_word
+                    else not self.is_valid_vietnamese(committed=True)
+                )
             ):
                 self.reset()
                 return KeyProcessResult(

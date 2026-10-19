@@ -22,6 +22,11 @@ jobs:
       - name: Python engine tests
         run: python3 tests/test_python_engine.py
 
+      - name: Python typing regression
+        run: |
+          python3 tests/gen_typing_regression.py --check
+          python3 tests/test_typing_regression.py
+
       - name: Design tokens check
         run: python3 tests/test_design_tokens.py
 
@@ -35,6 +40,8 @@ jobs:
         run: |
           g++ -std=c++17 -O2 -Wall -Wextra tests/test_cpp_engine.cpp -o /tmp/test_cpp_engine
           /tmp/test_cpp_engine
+          g++ -std=c++17 -O2 -Wall -Wextra -Werror tests/test_typing_regression.cpp -o /tmp/test_typing_regression
+          /tmp/test_typing_regression
 
       - name: CLI smoke test
         run: echo q | ./build/viskey_cli >/dev/null
@@ -100,7 +107,9 @@ jobs:
           /tmp/test_cpp_engine
 
       - name: Python engine tests
-        run: python3 tests/test_python_engine.py
+        run: |
+          python3 tests/test_python_engine.py
+          python3 tests/test_typing_regression.py
 
       - name: CMake build (VisKey.app) + ctest
         run: |
