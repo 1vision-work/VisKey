@@ -1,0 +1,151 @@
+# VisKey for Windows: VisKey64.exe, portable zip and optional installer. MIT License, 1VISION.
+# A v* tag also attaches the Windows files to the GitHub pre-release created by ci.yml (same tag).
+name: Windows
+
+on:
+  push:
+    branches: [main, master]
+    tags: ["v*"]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Windows (${{ matrix.arch }})
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: [x64, ARM64]
+    # ARM64 is best effort: it never blocks the x64 artifact or the release.
+    continue-on-error: ${{ matrix.arch == 'ARM64' }}
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - uses: actions/checkout@v4
+
+      # Developer environment of the newest installed Visual Studio (for dumpbin). Host x64 tools on
+      # both legs: dumpbin inspects ARM64 binaries just as well.
+      - name: Set up MSVC
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+
+      - name: Version
+        id: version
+        run: |
+          $m = Select-String -Path CMakeLists.txt -Pattern 'project\(VisKey VERSION ([0-9.]+)'
+          if (-not $m) { throw 'project(VisKey VERSION x.y.z) not found in CMakeLists.txt' }
+          $v = $m.Matches[0].Groups[1].Value
+          "version=$v" >> $env:GITHUB_OUTPUT
+          $arch = '${{ matrix.arch }}'.ToLower()
+          "zip=VisKey-$v-Windows-$arch-portable.zip" >> $env:GITHUB_OUTPUT
+          Write-Host "VisKey $v ($arch)"
+
+      # No -G: CMake defaults to the newest installed Visual Studio generator.
+      - name: Configure
+        run: |
+          cmake --version
+          cmake -S . -B build -A ${{ matrix.arch }}
+          if ($LASTEXITCODE -ne 0) { exit 1 }
+
+      - name: Build
+        run: cmake --build build --config Release --parallel
+
+      - name: Tests
+        if: matrix.arch == 'x64'
+        run: ctest --test-dir build -C Release --output-on-failure
+
+      - name: Verify VisKey64.exe
+        run: |
+          $exe = 'build\Release\VisKey64.exe'
+          if (-not (Test-Path $exe)) { throw "missing $exe" }
+          $expected = @{ x64 = '8664 machine (x64)'; ARM64 = 'AA64 machine (ARM64)' }['${{ matrix.arch }}']
+          $headers = dumpbin /nologo /headers $exe | Out-String
+          if ($headers -notmatch [regex]::Escape($expected)) { throw "not a ${{ matrix.arch }} PE: expected '$expected'" }
+          if ($headers -notmatch 'subsystem \(Windows GUI\)') { throw 'not a GUI subsystem executable' }
+          Write-Host "PE: $expected, Windows GUI"
+
+          $deps = dumpbin /nologo /dependents $exe | Select-String -Pattern '^\s+\S+\.dll\s*$' | ForEach-Object { $_.Line.Trim() }
+          Write-Host "Dependencies:`n  $($deps -join "`n  ")"
+          $bad = $deps | Where-Object { $_ -match '(?i)^(vcruntime|msvcp|ucrtbase|api-ms-win-crt|concrt|libstdc|libgcc|libwinpthread)' }
+          if ($bad) { throw "non-system DLL dependencies: $($bad -join ', ')" }
+          $allowed = 'kernel32.dll','user32.dll','gdi32.dll','shell32.dll','comctl32.dll','advapi32.dll','ole32.dll','shlwapi.dll','uxtheme.dll','imm32.dll'
+          $unknown = $deps | Where-Object { $allowed -notcontains $_.ToLower() }
+          if ($unknown) { throw "unexpected DLL dependencies: $($unknown -join ', ')" }
+
+          $info = (Get-Item $exe).VersionInfo
+          Write-Host "ProductName=$($info.ProductName) CompanyName=$($info.CompanyName) ProductVersion=$($info.ProductVersion)"
+          if ($info.ProductName -ne 'VisKey' -or $info.CompanyName -ne '1VISION') { throw 'bad version resource' }
+          if ($info.ProductVersion -ne '${{ steps.version.outputs.version }}') { throw 'version resource does not match CMake project version' }
+          Write-Host "Size: $((Get-Item $exe).Length) bytes"
+
+      - name: Portable zip
+        run: |
+          $stage = 'dist\stage'
+          New-Item -ItemType Directory -Force $stage | Out-Null
+          Copy-Item build\Release\VisKey64.exe $stage\
+          Copy-Item LICENSE $stage\LICENSE.txt
+          Copy-Item windows\VisKey_Windows_Portable.pyw $stage\
+          # CRLF so old Notepad versions show the text correctly.
+          (Get-Content windows\README-Windows.txt -Raw -Encoding utf8) -replace "`r?`n", "`r`n" |
+            Set-Content $stage\README-Windows.txt -Encoding utf8 -NoNewline
+          Compress-Archive -Path "$stage\*" -DestinationPath "dist\${{ steps.version.outputs.zip }}" -Force
+          Remove-Item -Recurse $stage
+          Get-ChildItem dist
+
+      - name: Installer (optional, Inno Setup)
+        if: matrix.arch == 'x64'
+        continue-on-error: true
+        run: |
+          $iscc = (Get-Command iscc.exe -ErrorAction SilentlyContinue).Source
+          if (-not $iscc) {
+            foreach ($p in "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe", "$env:ProgramFiles\Inno Setup 6\ISCC.exe") {
+              if (Test-Path $p) { $iscc = $p }
+            }
+          }
+          if (-not $iscc) {
+            choco install innosetup -y --no-progress | Out-Null
+            $iscc = "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe"
+          }
+          if (-not (Test-Path $iscc)) { throw 'Inno Setup not available; skipping installer' }
+          & $iscc /Q "/DAppVersion=${{ steps.version.outputs.version }}" "/DSourceExe=$PWD\build\Release\VisKey64.exe" "/DRepoRoot=$PWD" "/O$PWD\dist" windows\installer\VisKey.iss
+          if ($LASTEXITCODE -ne 0) { throw "iscc failed ($LASTEXITCODE)" }
+          Get-ChildItem dist
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.arch == 'x64' && 'viskey-windows' || 'viskey-windows-arm64' }}
+          path: dist/*
+          if-no-files-found: error
+
+  release:
+    name: Pre-release (Windows files)
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    # Same repo-wide group as the release job in ci.yml: whichever runs second appends to the
+    # release the first one created, so one tag yields one pre-release.
+    concurrency:
+      group: release-${{ github.ref_name }}
+      cancel-in-progress: false
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: viskey-windows*
+          path: dist
+          merge-multiple: true
+
+      - run: ls -l dist
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          prerelease: true
+          files: dist/*
+          fail_on_unmatched_files: true

@@ -1,0 +1,172 @@
+# VisKey CI: Linux (.deb) and macOS (.app/.dmg). MIT License, 1VISION.
+# A v* tag also publishes a GitHub pre-release; windows.yml appends the Windows files to the same release.
+name: CI
+
+on:
+  push:
+    branches: ["**"]
+    tags: ["v*"]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  linux:
+    name: Linux
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Python engine tests
+        run: python3 tests/test_python_engine.py
+
+      - name: CMake build + ctest
+        run: |
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+          cmake --build build -j
+          ctest --test-dir build --output-on-failure
+
+      - name: C++ engine tests (g++ -Wall -Wextra)
+        run: |
+          g++ -std=c++17 -O2 -Wall -Wextra tests/test_cpp_engine.cpp -o /tmp/test_cpp_engine
+          /tmp/test_cpp_engine
+
+      - name: CLI smoke test
+        run: echo q | ./build/viskey_cli >/dev/null
+
+      - name: Build .deb
+        run: |
+          bash scripts/build_linux_deb.sh
+          ls -l ibus-viskey_*_all.deb
+
+      - name: Inspect .deb
+        run: |
+          dpkg-deb --info ibus-viskey_*_all.deb
+          dpkg-deb --contents ibus-viskey_*_all.deb
+
+      - name: Install .deb
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ibus python3-gi gir1.2-ibus-1.0 python3-tk
+          sudo dpkg -i ibus-viskey_*_all.deb
+
+      - name: Verify installed files
+        run: |
+          for f in \
+            /usr/bin/viskey-settings \
+            /usr/libexec/ibus-engine-viskey \
+            /usr/share/viskey/core/viskey_engine.py \
+            /usr/share/viskey/ibus/ibus_viskey.py \
+            /usr/share/viskey/ibus/viskey_settings.py \
+            /usr/share/ibus/component/viskey.xml \
+            /usr/share/applications/viskey-settings.desktop; do
+            test -f "$f" || { echo "missing $f"; exit 1; }
+            echo "ok $f"
+          done
+          test -x /usr/bin/viskey-settings
+          test -x /usr/libexec/ibus-engine-viskey
+
+      # ibus_viskey only loads the IBus typelib at import time (no display or bus needed);
+      # viskey_settings is a Tk GUI, so it is only syntax-checked in memory
+      # (py_compile would try to write __pycache__ into the read-only /usr/share).
+      - name: Import check (installed package)
+        working-directory: /tmp
+        env:
+          PYTHONDONTWRITEBYTECODE: 1
+        run: |
+          /usr/bin/python3 -c "import sys; sys.path.insert(0, '/usr/share/viskey/ibus'); import ibus_viskey; assert ibus_viskey.IBus is not None, 'IBus typelib not available'; print('ibus_viskey OK')"
+          /usr/bin/python3 -c "import sys; p = sys.argv[1]; compile(open(p, encoding='utf-8').read(), p, 'exec'); print('viskey_settings syntax OK')" /usr/share/viskey/ibus/viskey_settings.py
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: viskey-linux-deb
+          path: ibus-viskey_*_all.deb
+          if-no-files-found: error
+
+  macos:
+    name: macOS
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: C++ engine tests (clang++)
+        run: |
+          clang++ -std=c++17 -O2 -Wall -Wextra tests/test_cpp_engine.cpp -o /tmp/test_cpp_engine
+          /tmp/test_cpp_engine
+
+      - name: Python engine tests
+        run: python3 tests/test_python_engine.py
+
+      - name: CMake build (VisKey.app) + ctest
+        run: |
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+          cmake --build build -j
+          test -d build/VisKey.app
+          ctest --test-dir build --output-on-failure
+
+      # The script ends with an interactive "install now?" prompt: answer n.
+      - name: Build installer (.app + .dmg)
+        run: echo n | bash scripts/build_macos_installer.sh
+
+      - name: Verify VisKey.app and .dmg
+        run: |
+          app=build_macos/VisKey.app
+          lipo -archs "$app/Contents/MacOS/VisKey"
+          lipo -archs "$app/Contents/MacOS/VisKey" | grep -q arm64
+          codesign -v --deep --strict --verbose=2 "$app"
+          plutil -lint "$app/Contents/Info.plist"
+          test -f VisKey-macOS-Installer.dmg
+          hdiutil imageinfo VisKey-macOS-Installer.dmg >/dev/null
+          ls -l VisKey-macOS-Installer.dmg
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: viskey-macos
+          path: VisKey-macOS-Installer.dmg
+          if-no-files-found: error
+
+  release:
+    name: Pre-release
+    needs: [linux, macos]
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    # Repo-wide group shared with windows.yml: the two release jobs run one after the other,
+    # so the second one appends its files to the release the first one created.
+    concurrency:
+      group: release-${{ github.ref_name }}
+      cancel-in-progress: false
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+
+      - run: ls -l dist
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          prerelease: true
+          files: dist/*
+          fail_on_unmatched_files: true
+          body: |
+            VisKey ${{ github.ref_name }} - bộ gõ tiếng Việt Telex/VNI (Vietnamese input method). MIT License, by 1VISION.
+
+            **Windows** (x64 / ARM64)
+            - Portable: unzip `VisKey-*-Windows-*-portable.zip` and run `VisKey64.exe`. Toggle Vietnamese with Ctrl+Space or Alt+Z.
+            - Or run `VisKey-*-Windows-Setup.exe` (x64, per-user install, no admin needed).
+            - The binaries are unsigned: on the SmartScreen prompt click "More info" -> "Run anyway".
+
+            **macOS** (Apple Silicon + Intel)
+            - Open `VisKey-macOS-Installer.dmg` and drag VisKey.app into Applications.
+            - The app is ad-hoc signed: right-click VisKey.app -> Open the first time (or `xattr -cr /Applications/VisKey.app`).
+            - Grant Accessibility: System Settings -> Privacy & Security -> Accessibility -> VisKey.
+
+            **Linux** (IBus, Debian/Ubuntu)
+            - `sudo apt install ./ibus-viskey_*_all.deb`
+            - `ibus restart`, then add "VisKey" in your input sources. Settings: `viskey-settings`.
+
+            Windows files are attached by a separate workflow and may appear a few minutes later.

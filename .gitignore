@@ -1,0 +1,27 @@
+# Build outputs
+build/
+build_*/
+dist/
+*.o
+*.obj
+*.exe
+*.pdb
+*.a
+__pycache__/
+*.pyc
+.DS_Store
+test_cpp_engine
+viskey_cli
+
+# Packaged binaries are published in GitHub Releases, never committed
+*.deb
+*.dmg
+*.pkg
+*.zip
+
+# Secrets — never commit
+*.p12
+*.cer
+*.pem
+*.key
+.env

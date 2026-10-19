@@ -1,0 +1,51 @@
+// VisKey for Windows - resources (MIT License, 1VISION).
+// The version defines are passed in by CMake (see the root CMakeLists.txt).
+#pragma code_page(65001)
+
+#include <winresrc.h>
+
+#ifndef VISKEY_VERSION_MAJOR
+#define VISKEY_VERSION_MAJOR 0
+#endif
+#ifndef VISKEY_VERSION_MINOR
+#define VISKEY_VERSION_MINOR 0
+#endif
+#ifndef VISKEY_VERSION_PATCH
+#define VISKEY_VERSION_PATCH 0
+#endif
+#ifndef VISKEY_VERSION_STR
+#define VISKEY_VERSION_STR "0.0.0"
+#endif
+
+// Lowest icon ID: Explorer uses it as the application icon.
+1 ICON "VisKey.ico"
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION    VISKEY_VERSION_MAJOR, VISKEY_VERSION_MINOR, VISKEY_VERSION_PATCH, 0
+ PRODUCTVERSION VISKEY_VERSION_MAJOR, VISKEY_VERSION_MINOR, VISKEY_VERSION_PATCH, 0
+ FILEFLAGSMASK  VS_FFI_FILEFLAGSMASK
+ FILEFLAGS      0x0L
+ FILEOS         VOS_NT_WINDOWS32
+ FILETYPE       VFT_APP
+ FILESUBTYPE    VFT2_UNKNOWN
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904B0"
+        BEGIN
+            VALUE "CompanyName",      "1VISION"
+            VALUE "FileDescription",  "VisKey - Vietnamese input method"
+            VALUE "FileVersion",      VISKEY_VERSION_STR
+            VALUE "InternalName",     "VisKey64"
+            VALUE "LegalCopyright",   "MIT License"
+            VALUE "OriginalFilename", "VisKey64.exe"
+            VALUE "ProductName",      "VisKey"
+            VALUE "ProductVersion",   VISKEY_VERSION_STR
+            VALUE "Comments",         "https://github.com/1vision-work/VisKey"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x0409, 1200
+    END
+END
