@@ -26,6 +26,7 @@ CONFIG_PATH = os.path.join(CONFIG_DIR, "config.json")
 CONFIG_PATH_DISPLAY = "~/.config/viskey/config.json"
 USAGE_PATH = os.path.expanduser("~/.local/share/viskey/macro_usage.json")
 STATUS_PATH = os.path.expanduser("~/.cache/viskey/status.json")
+UPDATE_STATE_PATH = os.path.expanduser("~/.local/state/viskey/update_check.json")
 
 REPO_URL = "https://github.com/1vision-work/VisKey"
 ISSUES_URL = REPO_URL + "/issues"
@@ -59,6 +60,9 @@ DEFAULT_CONFIG = {
     #   "auto"      -> Surrounding Text when the app supports it, otherwise fake BackSpace
     #   "backspace" -> always fake BackSpace key events
     "direct_commit_method": "auto",
+    # Added in UI v2: let the settings app check GitHub releases at most once per 24 h.
+    # Only read by the settings app; the IBus engine never touches the network.
+    "auto_check_updates": True,
 }
 
 ENUM_VALUES = {
@@ -404,7 +408,7 @@ def pid_alive(pid) -> bool:
 
 
 # ---------------------------------------------------------------------------
-# Versions & update check (manual, user-initiated only)
+# Versions & update check (manual button + optional automatic check, same request)
 # ---------------------------------------------------------------------------
 def parse_version(text):
     """"v1.2.3" / "1.2" / "1.2.3-beta" -> (1, 2, 3); None if not a version."""
@@ -491,6 +495,150 @@ def check_for_update(current_version: str, fetch=fetch_releases) -> UpdateResult
     except OSError:
         return UpdateResult("error", message="Không kết nối được tới GitHub")
     return evaluate_releases(current_version, releases)
+
+
+# Automatic check: throttle + "notify once per version" state.
+# Stored apart from config.json so recording an attempt never makes the IBus engine reload.
+AUTO_CHECK_INTERVAL = 24 * 3600      # never more often than this since the last attempt
+AUTO_CHECK_TICK = 3 * 3600           # how often a running settings app re-evaluates
+
+
+def default_update_state() -> dict:
+    return {
+        "last_attempt": 0,             # unix time of the last attempt (success or failure)
+        "last_status": "",             # "latest" | "newer" | "error" | ""
+        "last_message": "",            # Vietnamese error text for "error"
+        "latest_version": "",          # newest release seen, if newer than the running build
+        "latest_url": "",
+        "last_notified_version": "",   # newest version the user was already told about
+    }
+
+
+def load_update_state(path: str = UPDATE_STATE_PATH) -> dict:
+    state = default_update_state()
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+    except (OSError, ValueError):
+        return state
+    if not isinstance(data, dict):
+        return state
+    for key, default in state.items():
+        value = data.get(key)
+        if isinstance(default, int):
+            if isinstance(value, (int, float)) and not isinstance(value, bool) and value >= 0:
+                state[key] = int(value)
+        elif isinstance(value, str):
+            state[key] = value
+    return state
+
+
+def save_update_state(state: dict, path: str = UPDATE_STATE_PATH) -> None:
+    if path is not None:
+        atomic_write_json(path, state, indent=None)
+
+
+def auto_check_due(enabled, last_attempt, now, interval: float = AUTO_CHECK_INTERVAL) -> bool:
+    """True when the automatic check may run: enabled and >= interval since the last attempt.
+    A last_attempt in the future (clock moved back) counts as due so it cannot block forever."""
+    if not enabled:
+        return False
+    try:
+        last = float(last_attempt or 0)
+    except (TypeError, ValueError):
+        last = 0.0
+    if last <= 0 or last > now:
+        return True
+    return now - last >= interval
+
+
+def version_to_notify(state: dict, current_version: str):
+    """The newer version the user still has to be told about, or None (notify once per version)."""
+    latest = state.get("latest_version") or ""
+    if parse_version(latest) is None or parse_version(current_version) is None:
+        return None
+    if compare_versions(latest, current_version) <= 0:
+        return None
+    notified = state.get("last_notified_version") or ""
+    if parse_version(notified) is not None and compare_versions(latest, notified) <= 0:
+        return None
+    return latest
+
+
+def known_newer_version(state: dict, current_version: str):
+    """(version, url) of a newer release recorded by the last successful check, else None."""
+    latest = state.get("latest_version") or ""
+    if parse_version(latest) is None or parse_version(current_version) is None:
+        return None
+    if compare_versions(latest, current_version) <= 0:
+        return None
+    return latest, state.get("latest_url") or RELEASES_PAGE_URL
+
+
+def record_update_result(state: dict, result: UpdateResult) -> dict:
+    """Return a copy of state updated with a finished check. Errors keep the last known
+    newer version so a flaky network does not hide an available update."""
+    state = dict(state)
+    state["last_status"] = result.status
+    state["last_message"] = (result.message or "") if result.status == "error" else ""
+    if result.status == "newer":
+        state["latest_version"] = result.version or ""
+        state["latest_url"] = result.url or RELEASES_PAGE_URL
+    elif result.status == "latest":
+        state["latest_version"] = ""
+        state["latest_url"] = ""
+    return state
+
+
+def run_update_check(current_version: str, state: dict, state_path=UPDATE_STATE_PATH,
+                     now=None, check=check_for_update):
+    """The one update-check routine used by the manual button and the automatic check.
+
+    Records the attempt time *before* the request (so a crash or kill still counts towards the
+    24 h throttle), performs the same anonymous GET as always, then stores the outcome.
+    Blocking: call it from a worker thread. Returns (result, new_state).
+    """
+    state = dict(state)
+    state["last_attempt"] = int(time.time() if now is None else now)
+    try:
+        save_update_state(state, state_path)
+    except OSError:
+        pass
+    result = check(current_version)
+    state = record_update_result(state, result)
+    try:
+        save_update_state(state, state_path)
+    except OSError:
+        pass
+    return result, state
+
+
+def format_last_check(state: dict, now=None) -> str:
+    """"Lần kiểm tra cuối: hôm nay, 09:12 · đã là bản mới nhất" (local time)."""
+    ts = state.get("last_attempt") or 0
+    if not ts:
+        return "Lần kiểm tra cuối: chưa kiểm tra"
+    now = time.time() if now is None else now
+    t, today = time.localtime(ts), time.localtime(now)
+    yesterday = time.localtime(time.mktime((today.tm_year, today.tm_mon, today.tm_mday - 1,
+                                            12, 0, 0, 0, 0, -1)))
+    day = (t.tm_year, t.tm_yday)
+    if day == (today.tm_year, today.tm_yday):
+        when = "hôm nay, %02d:%02d" % (t.tm_hour, t.tm_min)
+    elif day == (yesterday.tm_year, yesterday.tm_yday):
+        when = "hôm qua, %02d:%02d" % (t.tm_hour, t.tm_min)
+    else:
+        when = "%02d/%02d/%d, %02d:%02d" % (t.tm_mday, t.tm_mon, t.tm_year, t.tm_hour, t.tm_min)
+    status = state.get("last_status")
+    if status == "latest":
+        tail = "đã là bản mới nhất"
+    elif status == "newer":
+        tail = "có bản mới %s" % (state.get("latest_version") or "")
+    elif status == "error":
+        tail = "không kiểm tra được" + (": %s" % state["last_message"] if state.get("last_message") else "")
+    else:
+        tail = ""
+    return "Lần kiểm tra cuối: %s%s" % (when, " · " + tail if tail else "")
 
 
 # ---------------------------------------------------------------------------

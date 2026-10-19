@@ -15,6 +15,12 @@ viskey_settings_tk.py when GTK 4 / libadwaita are not installed.
                                             uses in-memory defaults + demo data only (never
                                             reads/writes the real config, no network)
 
+Update check: the "Kiểm tra cập nhật" button and the optional automatic check (setting
+"auto_check_updates", default on) share model.run_update_check(): one anonymous GET to the
+GitHub releases API, at most once per 24 h for the automatic path (on start and every few
+hours while the window is open), always on a worker thread. A newer version only shows a
+banner + tab badge, and one toast per version; nothing is downloaded or installed.
+
 Importing this module never creates any GUI object (all of that happens under main()).
 MIT License, 1VISION.
 """
@@ -22,6 +28,7 @@ import os
 import platform
 import sys
 import threading
+import time
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 if SCRIPT_DIR not in sys.path:
@@ -47,6 +54,8 @@ TOAST_APPLIED = "Đã áp dụng — không cần khởi động lại IBus"
 QUICK_TELEX_HINT = "cc=ch gg=gi kk=kh nn=ng qq=qu pp=ph tt=th"
 CASE_HINT = "Tự giữ kiểu chữ: ko → không · Ko → Không · KO → KHÔNG"
 METHOD_VALUES = ("auto", "backspace")
+AUTO_UPDATE_HINT = "Tối đa một lần mỗi 24 giờ, chỉ hỏi GitHub phiên bản mới nhất — không gửi thông tin nào về máy"
+AUTO_CHECK_START_DELAY = 5  # seconds after the window opens
 
 # Demo data for --ui-snapshot (never written anywhere).
 DEMO_MACROS = {
@@ -61,6 +70,8 @@ DEMO_USAGE = {
     "bt": 212, "dc": 1038, "ko": 2417, "mn": 386, "ntn": 154, "uh": 97, "vn": 640,
     "cty": 75, "tks": 58, "j": 433, "ng": 301, "kh": 64, "sp": 41, "hn": 22,
 }
+_v = model.parse_version(VERSION) or (1, 0, 0)
+DEMO_NEWER_VERSION = "%d.%d.0" % (_v[0], _v[1] + 1)
 
 # Brand colours from design/tokens.json (light / dark).
 BRAND = {
@@ -108,6 +119,7 @@ toast .viskey-toast-check, .viskey-toast-check { color: $jade; }
 .viskey-add-card { padding: 12px; }
 .viskey-macro-row { padding: 2px 8px 2px 12px; min-height: 40px; }
 .viskey-app-name { font-weight: 800; }
+.viskey-update-card { padding: 10px 14px; background-color: alpha(@accent_bg_color, 0.14); }
 """
 
 
@@ -311,6 +323,15 @@ if HAVE_GTK:
             self.probe = probe
             self.demo = probe.demo
             self.usage = dict(DEMO_USAGE) if self.demo else model.load_usage()
+            if self.demo:
+                self.update_state = model.default_update_state()
+                self.update_state.update(last_attempt=int(time.time()) - 2 * 3600, last_status="latest")
+                self._update_state_path = None
+            else:
+                self.update_state = model.load_update_state()
+                self._update_state_path = model.UPDATE_STATE_PATH
+            self._checking = False
+            self._manual_waiting = False
             self._syncing = False
             self._current_toast = None
             self._chooser = None
@@ -322,7 +343,7 @@ if HAVE_GTK:
             self.stack = Adw.ViewStack(vexpand=True)
             self._add_page(self._build_general(), "general", "Chung", "viskey-sliders-symbolic")
             self._add_page(self._build_macros(), "macros", "Gõ tắt", "viskey-bolt-symbolic")
-            self._add_page(self._build_about(), "about", "Giới thiệu", "viskey-info-symbolic")
+            self.about_page = self._add_page(self._build_about(), "about", "Giới thiệu", "viskey-info-symbolic")
 
             self.toast_overlay = Adw.ToastOverlay()
             self.toast_overlay.set_child(self.stack)
@@ -361,10 +382,15 @@ if HAVE_GTK:
             self.stack.connect("notify::visible-child-name", self._on_page_changed)
             self.sync_ui()
             self.refresh_status()
+            self.refresh_update_notice()
+            if not self.demo:
+                GLib.timeout_add_seconds(AUTO_CHECK_START_DELAY, self._on_auto_start)
+                GLib.timeout_add_seconds(model.AUTO_CHECK_TICK, self._on_auto_tick)
 
         def _add_page(self, child, name, title, icon):
             page = self.stack.add_titled(child, name, title)
             page.set_icon_name(icon)
+            return page
 
         def _set_narrow(self, narrow):
             self.switcher.set_visible(not narrow)
@@ -753,6 +779,23 @@ if HAVE_GTK:
             scrolled, box = self._scrolled(820)
             box.set_spacing(10)
 
+            # Shown only while a newer release is known (Adw.Banner needs libadwaita 1.3+).
+            if hasattr(Adw, "Banner"):
+                self.update_banner = Adw.Banner(button_label="Mở trang tải về", revealed=False)
+                self.update_banner.connect("button-clicked", self._on_update_banner)
+                self._banner_label = None
+            else:
+                self.update_banner = Gtk.Box(spacing=12, visible=False)
+                self.update_banner.add_css_class("card")
+                self.update_banner.add_css_class("viskey-update-card")
+                self._banner_label = Gtk.Label(xalign=0, hexpand=True, wrap=True)
+                self.update_banner.append(self._banner_label)
+                open_btn = Gtk.Button(label="Mở trang tải về", valign=Gtk.Align.CENTER)
+                open_btn.add_css_class("suggested-action")
+                open_btn.connect("clicked", self._on_update_banner)
+                self.update_banner.append(open_btn)
+            box.append(self.update_banner)
+
             icon = None
             path = app_icon_path()
             if path:
@@ -798,6 +841,17 @@ if HAVE_GTK:
             badges.append(self.update_retry)
             self._update_url = None
             box.append(badges)
+
+            g = Adw.PreferencesGroup(title="Cập nhật", margin_bottom=8)
+            self.auto_update_row = SwitchRowCompat("Tự động kiểm tra cập nhật", AUTO_UPDATE_HINT)
+            self.auto_update_row.on_changed(self._on_auto_update_toggled)
+            g.add(self.auto_update_row.row)
+            row = Adw.ActionRow(title=_esc("Lần kiểm tra cuối"))
+            self.last_check_label = Gtk.Label(xalign=1, ellipsize=Pango.EllipsizeMode.END)
+            self.last_check_label.add_css_class("dim-label")
+            row.add_suffix(self.last_check_label)
+            g.add(row)
+            box.append(g)
 
             self.about_columns = Gtk.Box(spacing=24, homogeneous=True)
             links = Adw.PreferencesGroup(title="Liên kết", hexpand=True)
@@ -960,22 +1014,116 @@ if HAVE_GTK:
             else:
                 d.present(self)
 
-        # update check (manual only)
+        # update check: the button and the automatic check both go through _start_update_check()
         def _on_check_update(self, *_):
+            self._start_update_check(manual=True)
+
+        def _start_update_check(self, manual):
             if self.demo:
                 return
-            self.update_btn.set_visible(False)
-            self.update_pill.set_visible(False)
-            self.update_retry.set_visible(False)
-            self.update_spinner.set_visible(True)
-            if isinstance(self.update_spinner, Gtk.Spinner):
-                self.update_spinner.start()
+            if manual:
+                self._manual_waiting = True
+                self.update_btn.set_visible(False)
+                self.update_pill.set_visible(False)
+                self.update_retry.set_visible(False)
+                self.update_spinner.set_visible(True)
+                if isinstance(self.update_spinner, Gtk.Spinner):
+                    self.update_spinner.start()
+            if self._checking:
+                return  # the check already running reports to the button too
+            self._checking = True
+            state = dict(self.update_state)
+            state_path = self._update_state_path
 
             def worker():
-                result = model.check_for_update(VERSION)
-                GLib.idle_add(self.show_update_result, result)
+                result, new_state = model.run_update_check(VERSION, state, state_path)
+                GLib.idle_add(self._on_update_finished, result, new_state)
 
             threading.Thread(target=worker, daemon=True).start()
+
+        def _on_update_finished(self, result, state):
+            self._checking = False
+            notified = self.update_state.get("last_notified_version", "")
+            self.update_state = state
+            if state.get("last_notified_version", "") != notified:
+                self._mark_notified(notified)  # changed while the worker was running
+            if self._manual_waiting:
+                self._manual_waiting = False
+                self.show_update_result(result)
+                if result.status == "newer":
+                    self._mark_notified(result.version)  # the pill already told the user
+            elif result.status == "error":
+                print("viskey-settings: automatic update check failed: %s" % result.message, file=sys.stderr)
+            self.refresh_update_notice()
+            self._notify_new_version()
+            return False
+
+        def _auto_check_if_due(self):
+            if self.demo or self._checking:
+                return False
+            if model.auto_check_due(self.store.get("auto_check_updates"),
+                                    self.update_state.get("last_attempt"), time.time()):
+                self._start_update_check(manual=False)
+            return False
+
+        def _on_auto_start(self):
+            self._notify_new_version()  # newer version found by an earlier run but not shown yet
+            return self._auto_check_if_due()
+
+        def _on_auto_tick(self):
+            self._auto_check_if_due()
+            return True
+
+        def _on_auto_update_toggled(self, value):
+            msg = "Đã bật tự động kiểm tra cập nhật" if value else "Đã tắt tự động kiểm tra cập nhật"
+            if self._apply("auto_check_updates", value, msg) and value:
+                GLib.idle_add(self._auto_check_if_due)
+
+        def refresh_update_notice(self):
+            text = model.format_last_check(self.update_state)
+            self.last_check_label.set_label(text.split(": ", 1)[1])
+            newer = model.known_newer_version(self.update_state, VERSION)
+            title = "Đã có VisKey %s — bạn đang dùng %s" % (newer[0], VERSION) if newer else ""
+            if self._banner_label is None:
+                self.update_banner.set_title(_esc(title))
+                self.update_banner.set_revealed(bool(newer))
+            else:
+                self._banner_label.set_label(title)
+                self.update_banner.set_visible(bool(newer))
+            if not newer:
+                self.about_page.set_needs_attention(False)
+
+        def _mark_notified(self, version):
+            self.update_state = dict(self.update_state, last_notified_version=version or "")
+            try:
+                model.save_update_state(self.update_state, self._update_state_path)
+            except OSError:
+                pass
+
+        def _notify_new_version(self):
+            """Badge on "Giới thiệu" + one toast, at most once per new version."""
+            version = model.version_to_notify(self.update_state, VERSION)
+            if version is None:
+                return
+            self._mark_notified(version)
+            if self.stack.get_visible_child_name() != "about":
+                self.about_page.set_needs_attention(True)
+            self._toast("Đã có VisKey %s" % version, timeout=8, icon="viskey-download-symbolic",
+                        button=("Mở trang tải về", self._on_update_banner))
+
+        def show_demo_update(self, version):
+            """--ui-snapshot only: pretend the automatic check found `version` (in memory)."""
+            result = model.UpdateResult("newer", version=version, url=model.RELEASES_PAGE_URL)
+            self.update_state = dict(model.record_update_result(self.update_state, result),
+                                     last_notified_version="")
+            self.show_update_result(result)
+            self.refresh_update_notice()
+            self._notify_new_version()
+            self.about_page.set_needs_attention(True)
+
+        def _on_update_banner(self, *_):
+            newer = model.known_newer_version(self.update_state, VERSION)
+            self._open_uri(newer[1] if newer else model.RELEASES_PAGE_URL)
 
         def show_update_result(self, result):
             self.update_spinner.set_visible(False)
@@ -1013,6 +1161,8 @@ if HAVE_GTK:
                 self.refresh_macro_list()
             if name in ("general", "about"):
                 self.refresh_status()
+            if name == "about":
+                self.about_page.set_needs_attention(False)
 
         def refresh_status(self):
             running = self.probe.ibus_running()
@@ -1067,6 +1217,7 @@ if HAVE_GTK:
                 self.restore_row.set_active(cfg.get("auto_restore_english"))
                 self.macros_row.set_active(cfg.get("enable_macros"))
                 self.macros_row2.set_active(cfg.get("enable_macros"))
+                self.auto_update_row.set_active(cfg.get("auto_check_updates"))
                 self.macro_count_label.set_label("%d cụm từ" % len(cfg.get("macros")))
                 self.refresh_macro_list()
             finally:
@@ -1102,7 +1253,7 @@ if HAVE_GTK:
                 self.sync_ui()
                 self._toast("Đã hoàn tác")
 
-        def _toast(self, message, undo=None, timeout=4):
+        def _toast(self, message, undo=None, timeout=4, icon="viskey-check-symbolic", button=None):
             if self._current_toast is not None:
                 try:
                     self._current_toast.dismiss()
@@ -1111,7 +1262,7 @@ if HAVE_GTK:
             toast = Adw.Toast.new(_esc(message))
             if hasattr(toast, "set_custom_title"):
                 row = Gtk.Box(spacing=10)
-                check = Gtk.Image.new_from_icon_name("viskey-check-symbolic")
+                check = Gtk.Image.new_from_icon_name(icon)
                 check.add_css_class("viskey-toast-check")
                 row.append(check)
                 row.append(Gtk.Label(label=message))
@@ -1120,6 +1271,9 @@ if HAVE_GTK:
             if undo is not None:
                 toast.set_button_label("Hoàn tác")
                 toast.connect("button-clicked", lambda *_: undo())
+            elif button is not None:
+                toast.set_button_label(button[0])
+                toast.connect("button-clicked", lambda *_: button[1]())
             self._current_toast = toast
             self.toast_overlay.add_toast(toast)
             return toast
@@ -1275,9 +1429,14 @@ if HAVE_GTK:
             self.window = window
             self.outdir = outdir
             self.steps = []
-            for scheme_name, scheme in (("light", Adw.ColorScheme.FORCE_LIGHT), ("dark", Adw.ColorScheme.FORCE_DARK)):
+            schemes = (("light", Adw.ColorScheme.FORCE_LIGHT), ("dark", Adw.ColorScheme.FORCE_DARK))
+            for scheme_name, scheme in schemes:
                 for page, base in self.PAGES:
                     self.steps.append((scheme, page, os.path.join(outdir, "%s-%s.png" % (base, scheme_name))))
+            # Extra shots: the non-intrusive "newer version" notice (banner, badge, toast).
+            for scheme_name, scheme in schemes:
+                self.steps.append((scheme, "about-update",
+                                   os.path.join(outdir, "linux-about-update-%s.png" % scheme_name)))
             self.index = 0
             self.failed = []
 
@@ -1301,11 +1460,13 @@ if HAVE_GTK:
                 return False
             scheme, page, _path = self.steps[self.index]
             Adw.StyleManager.get_default().set_color_scheme(scheme)
-            self.window.stack.set_visible_child_name(page)
+            self.window.stack.set_visible_child_name("about" if page == "about-update" else page)
             if page == "general":
                 self.window._toast(TOAST_APPLIED, undo=lambda: None, timeout=0)
             else:
                 self.window.dismiss_toast()
+            if page == "about-update":
+                self.window.show_demo_update(DEMO_NEWER_VERSION)
             GLib.timeout_add(700, self._capture)
             return False
 

@@ -23,7 +23,9 @@ jobs:
         run: python3 tests/test_python_engine.py
 
       - name: Linux settings logic tests
-        run: python3 tests/test_linux_settings.py
+        run: |
+          python3 tests/test_linux_settings.py
+          python3 tests/test_linux_update_check.py
 
       - name: CMake build + ctest
         run: |
@@ -102,7 +104,7 @@ jobs:
         run: |
           timeout 180 xvfb-run -a /usr/bin/python3 linux/ibus/viskey_settings.py --ui-snapshot "$RUNNER_TEMP/viskey-linux-screenshots"
           ls -l "$RUNNER_TEMP/viskey-linux-screenshots"
-          for n in general macros about; do
+          for n in general macros about about-update; do
             for s in light dark; do
               test -s "$RUNNER_TEMP/viskey-linux-screenshots/linux-$n-$s.png" || { echo "missing linux-$n-$s.png"; exit 1; }
             done

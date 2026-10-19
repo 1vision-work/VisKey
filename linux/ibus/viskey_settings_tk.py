@@ -8,12 +8,15 @@ Saves configuration to ~/.config/viskey/config.json, which is automatically read
 """
 import os
 import sys
+import threading
 import tkinter as tk
+import webbrowser
 from tkinter import messagebox, ttk
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 import viskey_settings_model as model  # noqa: E402
+from viskey_version import VERSION  # noqa: E402
 
 CONFIG_PATH = model.CONFIG_PATH
 DEFAULT_CONFIG = model.DEFAULT_CONFIG
@@ -31,7 +34,7 @@ class VisKeySettingsApp:
     def __init__(self, root: tk.Tk):
         self.root = root
         self.root.title("VisKey — Bảng Điều Khiển Bộ Gõ Tiếng Việt (Linux)")
-        self.root.geometry("540x480")
+        self.root.geometry("540x560")
         self.cfg = load_config()
 
         main = ttk.Frame(root, padding=16)
@@ -112,8 +115,21 @@ class VisKeySettingsApp:
         ttk.Button(add_frame, text="Thêm / Sửa", command=self.on_add_macro).pack(side=tk.LEFT, padx=4)
         ttk.Button(add_frame, text="Xóa mục chọn", command=self.on_del_macro).pack(side=tk.LEFT, padx=4)
 
+        # Update check (manual; the automatic check runs in the GTK settings app)
+        self.auto_update_var = tk.BooleanVar(value=self.cfg.get("auto_check_updates", True))
+        ttk.Checkbutton(
+            main,
+            text="Tự động kiểm tra cập nhật (tối đa một lần mỗi 24 giờ)",
+            variable=self.auto_update_var,
+        ).pack(anchor=tk.W, pady=3)
+        self.update_state = model.load_update_state()
+        self.update_label = ttk.Label(main, text=model.format_last_check(self.update_state))
+        self.update_label.pack(anchor=tk.W)
+
         btn_frame = ttk.Frame(main)
         btn_frame.pack(fill=tk.X, pady=(8, 0))
+        self.update_btn = ttk.Button(btn_frame, text="Kiểm tra cập nhật", command=self.on_check_update)
+        self.update_btn.pack(side=tk.LEFT)
         ttk.Button(btn_frame, text="Lưu cấu hình & Áp dụng", command=self.on_save).pack(side=tk.RIGHT)
 
     def _refresh_macro_tree(self):
@@ -141,6 +157,41 @@ class VisKeySettingsApp:
                 self.cfg["macros"].pop(str(vals[0]), None)
         self._refresh_macro_tree()
 
+    def on_check_update(self):
+        self.update_btn.state(["disabled"])
+        self.update_label.configure(text="Đang kiểm tra cập nhật…")
+        box = {}
+        state = dict(self.update_state)
+
+        def worker():
+            box["done"] = model.run_update_check(VERSION, state)
+
+        thread = threading.Thread(target=worker, daemon=True)
+        thread.start()
+
+        def poll():
+            if thread.is_alive():
+                self.root.after(200, poll)
+                return
+            result, self.update_state = box["done"]
+            self.update_btn.state(["!disabled"])
+            self.update_label.configure(text=model.format_last_check(self.update_state))
+            if result.status == "newer":
+                self.update_state["last_notified_version"] = result.version or ""
+                try:
+                    model.save_update_state(self.update_state)
+                except OSError:
+                    pass
+                if messagebox.askyesno("VisKey", "Đã có VisKey %s (bạn đang dùng %s).\nMở trang tải về?"
+                                       % (result.version, VERSION)):
+                    webbrowser.open(result.url or model.RELEASES_PAGE_URL)
+            elif result.status == "latest":
+                messagebox.showinfo("VisKey", "Bạn đang dùng phiên bản mới nhất (%s)." % VERSION)
+            else:
+                messagebox.showwarning("VisKey", "Không kiểm tra được: %s" % result.message)
+
+        self.root.after(200, poll)
+
     def on_save(self):
         self.cfg["input_method"] = self.im_var.get()
         self.cfg["no_underline_mode"] = self.no_ul_var.get()
@@ -148,6 +199,7 @@ class VisKeySettingsApp:
         self.cfg["modern_orthography"] = self.ortho_var.get()
         self.cfg["enable_macros"] = self.macro_var.get()
         self.cfg["quick_telex"] = self.quick_var.get()
+        self.cfg["auto_check_updates"] = self.auto_update_var.get()
         try:
             save_config(self.cfg)
         except OSError as e:
