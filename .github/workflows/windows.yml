@@ -106,7 +106,8 @@ jobs:
           $pngs | ForEach-Object { Write-Host "$($_.Name) $($_.Length) bytes" }
 
       - uses: actions/upload-artifact@v4
-        if: matrix.arch == 'x64'
+        # Not on v* tags: the release job publishes the viskey-windows* artifacts as release files.
+        if: ${{ matrix.arch == 'x64' && !startsWith(github.ref, 'refs/tags/v') }}
         with:
           name: viskey-windows-screenshots
           path: ${{ runner.temp }}/shots/
