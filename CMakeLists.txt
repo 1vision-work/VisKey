@@ -15,9 +15,12 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/core)
 # 1. Cross-platform CLI Simulator & Unit Test Suite
 add_executable(viskey_cli core/viskey_cli.cpp)
 add_executable(test_cpp_engine tests/test_cpp_engine.cpp)
+# Pure C++ policy of the macOS automatic update check (header-only, builds on every platform).
+add_executable(test_update_policy tests/test_update_policy.cpp)
 
 enable_testing()
 add_test(NAME VisKeyCoreTests COMMAND test_cpp_engine)
+add_test(NAME VisKeyUpdatePolicyTests COMMAND test_update_policy)
 
 # Pure logic of the Windows update check (24 h throttle, notify once per version). No Windows
 # headers, so it builds and runs on every platform.
@@ -28,11 +31,31 @@ add_test(NAME VisKeyWindowsUpdatePolicyTests COMMAND test_update_policy)
 if(APPLE)
     enable_language(OBJCXX)
     set(CMAKE_OBJCXX_STANDARD 17)
-    add_executable(VisKey MACOSX_BUNDLE macos/VisKeyApp.mm)
+    # Keep this list in sync with scripts/build_macos_installer.sh.
+    set(VISKEY_MACOS_SOURCES
+        macos/VisKeyApp.mm
+        macos/ui/VKUIKit.mm
+        macos/ui/VKModel.mm
+        macos/ui/VKPageBase.mm
+        macos/ui/VKPageGeneral.mm
+        macos/ui/VKPageMacros.mm
+        macos/ui/VKPageApps.mm
+        macos/ui/VKPageShortcuts.mm
+        macos/ui/VKPageInfo.mm
+        macos/ui/VKSettingsWindow.mm
+        macos/ui/VKPopover.mm
+        macos/ui/VKHUD.mm
+        macos/ui/VKOnboarding.mm
+        macos/ui/VKUpdate.mm
+    )
+    add_executable(VisKey MACOSX_BUNDLE ${VISKEY_MACOS_SOURCES})
     set_target_properties(VisKey PROPERTIES
         MACOSX_BUNDLE_INFO_PLIST "${CMAKE_CURRENT_SOURCE_DIR}/macos/Info.plist"
         COMPILE_FLAGS "-fobjc-arc"
     )
+    # Match LSMinimumSystemVersion (11.0) in macos/Info.plist.
+    target_compile_options(VisKey PRIVATE -mmacosx-version-min=11.0 -Wall)
+    target_link_options(VisKey PRIVATE -mmacosx-version-min=11.0)
     target_link_libraries(VisKey
         "-framework Cocoa"
         "-framework ApplicationServices"
