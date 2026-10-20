@@ -193,7 +193,9 @@ jobs:
           path: VisKey-macOS-Installer.dmg
           if-no-files-found: error
 
+      # Not on v* tags: the release job publishes every artifact of the run as release files.
       - uses: actions/upload-artifact@v4
+        if: ${{ !startsWith(github.ref, 'refs/tags/v') }}
         with:
           name: viskey-macos-screenshots
           path: ${{ runner.temp }}/shots/*.png
