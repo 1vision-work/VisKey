@@ -3,51 +3,102 @@
 // Features:
 //  - CGEventTap Low-Level Keyboard & Mouse Hook (Zero Preedit Underline)
 //  - Spotlight / Chrome / Safari / Arc Omnibox Autocomplete Fix (U+202F injection)
-//  - Smart Per-App Mode (Remembers VI/EN per Bundle ID, defaults EN in Terminals)
+//  - Per-app VI/EN rules (persisted; terminals default to EN) + policy for new apps
+//  - Configurable hotkeys (toggle VI/EN, secondary toggle, Telex <-> VNI)
 //  - EventTap Timeout Watchdog & SecureEventInput (Password field) protection
-//  - Native Cocoa Preferences Window (NSWindow) + Custom Macro Editor + NSUserDefaults persistence
+//  - Settings window, menu-bar popover, VI/EN HUD and onboarding (macos/ui/*)
 //  - Launch at Login (LaunchAgents plist generator)
+//  - `--ui-snapshot <dir>`: renders the UI offscreen to PNG files and exits (no event tap, no real settings)
 
 #import <Cocoa/Cocoa.h>
 #import <ApplicationServices/ApplicationServices.h>
 #import <Carbon/Carbon.h>
+#include <cctype>
+#include <cstdio>
+#include <cstring>
+#include <string>
+#include <vector>
 #include "../core/viskey_engine.hpp"
+#import "ui/VKUIKit.h"
+#import "ui/VKModel.h"
+#import "ui/VKSettingsWindow.h"
+#import "ui/VKPopover.h"
+#import "ui/VKHUD.h"
+#import "ui/VKOnboarding.h"
+#import "ui/VKUpdate.h"
 
 static const int64_t kVisKeyEventMagic = 0x564B5821; // 'VKX!' synthetic event marker
 
-@interface VisKeyController : NSObject <NSApplicationDelegate, NSTableViewDataSource, NSTableViewDelegate>
+@interface VisKeyController : NSObject <NSApplicationDelegate, NSPopoverDelegate, VKAppActions>
 @property (strong, nonatomic) NSStatusItem *statusItem;
-@property (strong, nonatomic) NSWindow *settingsWindow;
+@property (strong, nonatomic) VKModel *model;
+@property (strong, nonatomic) VKSettingsWindowController *settings;
+@property (strong, nonatomic) VKOnboardingWindowController *onboarding;
+@property (strong, nonatomic) NSPopover *popover;
+@property (strong, nonatomic) VKPopoverController *popoverController;
+@property (strong, nonatomic) VKHUDController *hud;
+@property (strong, nonatomic) id popoverMonitor;
+@property (strong, nonatomic) NSTimer *permissionTimer;
+@property (strong, nonatomic) VKUpdateChecker *updater;
 @property (assign, nonatomic) CFMachPortRef eventTap;
 @property (assign, nonatomic) CFRunLoopSourceRef runLoopSource;
-@property (assign, nonatomic) BOOL vietnameseEnabled;
-@property (assign, nonatomic) BOOL smartPerAppMode;
-@property (assign, nonatomic) BOOL launchAtLogin;
-@property (strong, nonatomic) NSMutableDictionary<NSString *, NSNumber *> *appModes;
 @property (strong, nonatomic) NSSet<NSString *> *autocompleteBundles;
-@property (strong, nonatomic) NSSet<NSString *> *defaultEnglishBundles;
-
-// UI Controls for Preferences Window
-@property (strong, nonatomic) NSPopUpButton *methodPopup;
-@property (strong, nonatomic) NSButton *orthoCheckbox;
-@property (strong, nonatomic) NSButton *restoreCheckbox;
-@property (strong, nonatomic) NSButton *acFixCheckbox;
-@property (strong, nonatomic) NSButton *perAppCheckbox;
-@property (strong, nonatomic) NSButton *macroCheckbox;
-@property (strong, nonatomic) NSButton *loginCheckbox;
-@property (strong, nonatomic) NSTextField *macroKeyInput;
-@property (strong, nonatomic) NSTextField *macroValInput;
-@property (strong, nonatomic) NSTableView *macroTable;
-@property (strong, nonatomic) NSMutableArray<NSDictionary<NSString *, NSString *> *> *macroList;
+@property (copy, nonatomic) NSString *snapshotDir;
+@property (assign, nonatomic) BOOL snapshotMode;
+@property (assign, nonatomic) BOOL lastTrusted;
+@property (assign, nonatomic) BOOL loggedTapFailure;
 
 - (void)toggleVietnameseMode:(id)sender;
+- (void)toggleInputMethod:(id)sender;
 - (void)openSettingsWindow:(id)sender;
-- (void)savePreferences;
-- (void)loadPreferences;
+- (void)recordMacroUse:(NSString *)key;
 @end
 
 static VisKeyController *gController = nil;
 static viskey::VisKeyEngine gEngine;
+
+// Hotkeys honoured by the event tap (mirrors VKModel, updated on the main thread).
+struct VKHotkeyBinding {
+    long keyCode;          // -1 = none
+    unsigned long mods;    // NSEventModifierFlagControl | Option | Shift | Command
+};
+static VKHotkeyBinding gHotPrimary = {kVK_Space, (unsigned long)NSEventModifierFlagControl};
+static VKHotkeyBinding gHotSecondary = {-1, 0};
+static VKHotkeyBinding gHotMethod = {-1, 0};
+static bool gHotkeyRecording = false;
+// Raw keys of the word the engine is currently composing (used to detect macro expansions).
+static std::string gLastRawWord;
+
+static void resetEngine() {
+    gEngine.reset();
+    gLastRawWord.clear();
+}
+
+static unsigned long VKModsFromCGFlags(CGEventFlags flags) {
+    unsigned long m = 0;
+    if (flags & kCGEventFlagMaskControl) m |= NSEventModifierFlagControl;
+    if (flags & kCGEventFlagMaskAlternate) m |= NSEventModifierFlagOption;
+    if (flags & kCGEventFlagMaskShift) m |= NSEventModifierFlagShift;
+    if (flags & kCGEventFlagMaskCommand) m |= NSEventModifierFlagCommand;
+    return m;
+}
+
+static bool VKHotkeyMatches(const VKHotkeyBinding &hk, CGKeyCode keyCode, unsigned long mods) {
+    return hk.keyCode >= 0 && hk.keyCode == (long)keyCode && hk.mods == mods;
+}
+
+static VKHotkeyBinding VKBindingFromHotkey(VKHotkey *hk) {
+    VKHotkeyBinding b;
+    b.keyCode = (hk && !hk.isEmpty) ? (long)hk.keyCode : -1;
+    b.mods = (hk && !hk.isEmpty) ? (unsigned long)hk.modifiers : 0;
+    return b;
+}
+
+static std::string VKAsciiLower(const std::string &s) {
+    std::string r = s;
+    for (auto &c : r) c = (char)std::tolower((unsigned char)c);
+    return r;
+}
 
 static void sendReplacementEvents(int backspaces, const std::string &commitText, bool needAutocompleteFix) {
     CGEventSourceRef source = CGEventSourceCreate(kCGEventSourceStateHIDSystemState);
@@ -105,12 +156,12 @@ static CGEventRef VisKeyEventCallback(CGEventTapProxy /*proxy*/, CGEventType typ
         if (gController && gController.eventTap) {
             CGEventTapEnable(gController.eventTap, true);
         }
-        gEngine.reset();
+        resetEngine();
         return event;
     }
 
     if (type == kCGEventLeftMouseDown || type == kCGEventRightMouseDown || type == kCGEventOtherMouseDown) {
-        gEngine.reset();
+        resetEngine();
         return event;
     }
 
@@ -122,8 +173,14 @@ static CGEventRef VisKeyEventCallback(CGEventTapProxy /*proxy*/, CGEventType typ
         return event;
     }
 
+    // While the user records a hotkey in Settings, let every key through untouched.
+    if (gHotkeyRecording) {
+        resetEngine();
+        return event;
+    }
+
     if (IsSecureEventInputEnabled()) {
-        gEngine.reset();
+        resetEngine();
         return event;
     }
 
@@ -133,27 +190,33 @@ static CGEventRef VisKeyEventCallback(CGEventTapProxy /*proxy*/, CGEventType typ
     bool ctrlPressed  = (flags & kCGEventFlagMaskControl) != 0;
     bool cmdPressed   = (flags & kCGEventFlagMaskCommand) != 0;
     bool optPressed   = (flags & kCGEventFlagMaskAlternate) != 0;
-    bool shiftPressed = (flags & kCGEventFlagMaskShift) != 0;
+    unsigned long mods = VKModsFromCGFlags(flags);
 
-    if ((ctrlPressed && !cmdPressed && !optPressed && keyCode == kVK_Space) ||
-        (cmdPressed && shiftPressed && !ctrlPressed && !optPressed && keyCode == kVK_ANSI_V)) {
+    if (VKHotkeyMatches(gHotPrimary, keyCode, mods) || VKHotkeyMatches(gHotSecondary, keyCode, mods)) {
         dispatch_async(dispatch_get_main_queue(), ^{
             [gController toggleVietnameseMode:nil];
         });
         return NULL;
     }
+    if (VKHotkeyMatches(gHotMethod, keyCode, mods)) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [gController toggleInputMethod:nil];
+        });
+        return NULL;
+    }
 
     if (cmdPressed || ctrlPressed || optPressed) {
-        gEngine.reset();
+        resetEngine();
         return event;
     }
 
-    if (!gController || !gController.vietnameseEnabled) {
+    if (!gController || !gController.model.vietnameseEnabled) {
         return event;
     }
 
     if (keyCode == kVK_Delete) {
         auto res = gEngine.process_backspace();
+        gLastRawWord = res.raw_word;
         if (res.handled) {
             sendReplacementEvents(res.backspaces, res.commit_text, res.autocomplete_fix_needed);
             return NULL;
@@ -167,7 +230,7 @@ static CGEventRef VisKeyEventCallback(CGEventTapProxy /*proxy*/, CGEventType typ
         keyCode == kVK_PageUp    || keyCode == kVK_PageDown   ||
         keyCode == kVK_Escape    || keyCode == kVK_Tab        ||
         keyCode == kVK_Return    || keyCode == kVK_ANSI_KeypadEnter) {
-        gEngine.reset();
+        resetEngine();
         return event;
     }
 
@@ -175,12 +238,32 @@ static CGEventRef VisKeyEventCallback(CGEventTapProxy /*proxy*/, CGEventType typ
     UniCharCount actualLen = 0;
     CGEventKeyboardGetUnicodeString(event, 4, &actualLen, chars);
     if (actualLen != 1 || chars[0] > 127) {
-        gEngine.reset();
+        resetEngine();
         return event;
     }
 
     char ch = static_cast<char>(chars[0]);
+    const std::string prevRaw = gLastRawWord;
     auto res = gEngine.process_key(ch);
+    gLastRawWord = res.raw_word;
+
+    // Macro usage counter: the engine expands a macro when a non-word key ends a word whose
+    // raw keys match a macro. Mirror that condition here without touching the engine.
+    const auto &cfg = gEngine.config();
+    bool isWordKey = std::isalpha((unsigned char)ch) != 0 ||
+                     (cfg.input_method == "vni" && std::isdigit((unsigned char)ch) != 0 && !prevRaw.empty());
+    if (res.handled && !isWordKey && cfg.enable_macros && !prevRaw.empty()) {
+        std::string lower = VKAsciiLower(prevRaw);
+        if (cfg.macros.find(lower) != cfg.macros.end()) {
+            NSString *key = [NSString stringWithUTF8String:lower.c_str()];
+            if (key) {
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    [gController recordMacroUse:key];
+                });
+            }
+        }
+    }
+
     if (!res.handled) {
         return event;
     }
@@ -195,10 +278,31 @@ static CGEventRef VisKeyEventCallback(CGEventTapProxy /*proxy*/, CGEventType typ
 
 @implementation VisKeyController
 
+- (NSDictionary<NSString *, NSString *> *)engineDefaultMacros {
+    NSMutableDictionary *d = [NSMutableDictionary dictionary];
+    viskey::EngineConfig defaults;
+    for (const auto &kv : defaults.macros) {
+        NSString *k = [NSString stringWithUTF8String:kv.first.c_str()];
+        NSString *v = [NSString stringWithUTF8String:kv.second.c_str()];
+        if (k && v) d[k] = v;
+    }
+    return d;
+}
+
+- (NSString *)ownBundleId {
+    return [NSBundle mainBundle].bundleIdentifier ?: @"org.viskey.inputmethod";
+}
+
 - (void)applicationDidFinishLaunching:(NSNotification *)notification {
     gController = self;
-    self.appModes = [NSMutableDictionary dictionary];
-    self.macroList = [NSMutableArray array];
+
+    if (self.snapshotDir) {
+        self.snapshotMode = YES;
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [self runSnapshotsInto:self.snapshotDir];
+        });
+        return;
+    }
 
     self.autocompleteBundles = [NSSet setWithArray:@[
         @"com.apple.Spotlight",
@@ -211,317 +315,100 @@ static CGEventRef VisKeyEventCallback(CGEventTapProxy /*proxy*/, CGEventType typ
         @"com.microsoft.Excel"
     ]];
 
-    self.defaultEnglishBundles = [NSSet setWithArray:@[
-        @"com.apple.Terminal",
-        @"com.googlecode.iterm2",
-        @"dev.warp.Warp-Stable",
-        @"io.alacritty",
-        @"net.kovidgoyal.kitty"
-    ]];
+    self.model = [[VKModel alloc] initPersistent:YES defaultMacros:[self engineDefaultMacros]];
+    [self.model load];
+    self.model.actions = self;
+    [VKModel setShared:self.model];
+    NSRunningApplication *front = NSWorkspace.sharedWorkspace.frontmostApplication;
+    if (front.bundleIdentifier && ![front.bundleIdentifier isEqualToString:[self ownBundleId]]) {
+        self.model.currentAppBundleId = front.bundleIdentifier;
+        self.model.currentAppName = front.localizedName;
+    }
+    [self applyModelToEngine];
 
-    [self loadPreferences];
-    [self checkAccessibilityPermissions];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(modelDidChange:)
+                                                 name:VKModelDidChangeNotification object:self.model];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(environmentDidChange:)
+                                                 name:VKEnvironmentDidChangeNotification object:self.model];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(environmentDidChange:)
+                                                 name:VKUpdateStateDidChangeNotification object:self.model];
+
+    self.hud = [[VKHUDController alloc] init];
+    [self setupMainMenu];
     [self setupStatusBar];
-    [self buildSettingsWindow];
     [self setupEventTap];
+
+    self.lastTrusted = AXIsProcessTrusted() ? YES : NO;
+    __weak VisKeyController *weakSelf = self;
+    self.permissionTimer = [NSTimer scheduledTimerWithTimeInterval:1.5 repeats:YES block:^(NSTimer *timer) {
+        [weakSelf permissionTick];
+    }];
 
     [[[NSWorkspace sharedWorkspace] notificationCenter]
         addObserver:self
            selector:@selector(handleActiveAppChanged:)
                name:NSWorkspaceDidActivateApplicationNotification
              object:nil];
-}
 
-- (void)loadPreferences {
-    NSUserDefaults *defs = [NSUserDefaults standardUserDefaults];
-    if ([defs objectForKey:@"vietnameseEnabled"] == nil) {
-        self.vietnameseEnabled = YES;
-        self.smartPerAppMode = YES;
-        self.launchAtLogin = NO;
-        gEngine.config().input_method = "telex";
-        gEngine.config().modern_orthography = false;
-        gEngine.config().auto_restore_english = true;
-        gEngine.config().fix_autocomplete = true;
-        gEngine.config().enable_macros = true;
-        gEngine.config().quick_telex = false;
-    } else {
-        self.vietnameseEnabled = [defs boolForKey:@"vietnameseEnabled"];
-        self.smartPerAppMode   = [defs boolForKey:@"smartPerAppMode"];
-        self.launchAtLogin     = [defs boolForKey:@"launchAtLogin"];
-        NSString *im = [defs stringForKey:@"inputMethod"] ?: @"telex";
-        gEngine.config().input_method = [im UTF8String];
-        gEngine.config().modern_orthography   = [defs boolForKey:@"modernOrthography"];
-        gEngine.config().auto_restore_english = [defs boolForKey:@"autoRestoreEnglish"];
-        gEngine.config().fix_autocomplete     = [defs boolForKey:@"fixAutocomplete"];
-        gEngine.config().enable_macros        = [defs boolForKey:@"enableMacros"];
-        gEngine.config().quick_telex          = [defs boolForKey:@"quickTelex"];
-
-        NSDictionary *savedMacros = [defs dictionaryForKey:@"customMacros"];
-        if (savedMacros) {
-            gEngine.config().macros.clear();
-            for (NSString *k in savedMacros) {
-                NSString *v = savedMacros[k];
-                gEngine.config().macros[[k UTF8String]] = [v UTF8String];
-            }
-        }
+    if (!self.model.onboardingDone || !self.lastTrusted) {
+        [self showOnboarding];
     }
-    [self syncMacroListFromEngine];
+
+    // Automatic update check: main-run-loop timers, the request itself runs on a background session.
+    self.updater = [[VKUpdateChecker alloc] initWithModel:self.model];
+    [self.updater start];
 }
 
-- (void)syncMacroListFromEngine {
-    [self.macroList removeAllObjects];
-    for (const auto &kv : gEngine.config().macros) {
-        NSString *k = [NSString stringWithUTF8String:kv.first.c_str()];
-        NSString *v = [NSString stringWithUTF8String:kv.second.c_str()];
-        if (k && v) {
-            [self.macroList addObject:@{@"key": k, @"val": v}];
-        }
+- (BOOL)applicationShouldHandleReopen:(NSApplication *)sender hasVisibleWindows:(BOOL)flag {
+    if (!self.snapshotMode) [self openSettingsWindow:nil];
+    return YES;
+}
+
+#pragma mark Model <-> engine
+
+- (void)applyModelToEngine {
+    VKModel *m = self.model;
+    auto &cfg = gEngine.config();
+    std::string im = [m isTelex] ? "telex" : "vni";
+    bool methodChanged = cfg.input_method != im;
+    cfg.input_method = im;
+    cfg.modern_orthography = m.modernOrthography;
+    cfg.auto_restore_english = m.autoRestoreEnglish;
+    cfg.fix_autocomplete = m.fixAutocomplete;
+    cfg.enable_macros = m.enableMacros;
+    cfg.quick_telex = m.quickTelex;
+    cfg.macros.clear();
+    for (NSString *k in m.macros) {
+        NSString *v = m.macros[k];
+        const char *ck = k.UTF8String;
+        const char *cv = v.UTF8String;
+        if (ck && cv) cfg.macros[ck] = cv;
     }
+    if (methodChanged) resetEngine();
+
+    gHotPrimary = VKBindingFromHotkey(m.primaryHotkey);
+    gHotSecondary = VKBindingFromHotkey(m.secondaryHotkey);
+    gHotMethod = VKBindingFromHotkey(m.methodHotkey);
 }
 
-- (void)savePreferences {
-    NSUserDefaults *defs = [NSUserDefaults standardUserDefaults];
-    [defs setBool:self.vietnameseEnabled forKey:@"vietnameseEnabled"];
-    [defs setBool:self.smartPerAppMode forKey:@"smartPerAppMode"];
-    [defs setBool:self.launchAtLogin forKey:@"launchAtLogin"];
-    [defs setObject:[NSString stringWithUTF8String:gEngine.config().input_method.c_str()] forKey:@"inputMethod"];
-    [defs setBool:gEngine.config().modern_orthography forKey:@"modernOrthography"];
-    [defs setBool:gEngine.config().auto_restore_english forKey:@"autoRestoreEnglish"];
-    [defs setBool:gEngine.config().fix_autocomplete forKey:@"fixAutocomplete"];
-    [defs setBool:gEngine.config().enable_macros forKey:@"enableMacros"];
-    [defs setBool:gEngine.config().quick_telex forKey:@"quickTelex"];
-
-    NSMutableDictionary *mDict = [NSMutableDictionary dictionary];
-    for (const auto &kv : gEngine.config().macros) {
-        NSString *k = [NSString stringWithUTF8String:kv.first.c_str()];
-        NSString *v = [NSString stringWithUTF8String:kv.second.c_str()];
-        if (k && v) mDict[k] = v;
-    }
-    [defs setObject:mDict forKey:@"customMacros"];
-    [defs synchronize];
+- (void)modelDidChange:(NSNotification *)n {
+    [self applyModelToEngine];
+    [self syncStatusItem];
+    if (self.popover.shown) [self.popoverController reload];
 }
 
-- (void)checkAccessibilityPermissions {
-    NSDictionary *options = @{(__bridge id)kAXTrustedCheckOptionPrompt: @YES};
-    Boolean trusted = AXIsProcessTrustedWithOptions((__bridge CFDictionaryRef)options);
-    if (!trusted) {
-        NSLog(@"[VisKey] Prompting user for Accessibility permissions.");
-    }
+- (void)environmentDidChange:(NSNotification *)n {
+    if (self.popover.shown) [self.popoverController reload];
 }
 
-- (void)setupStatusBar {
-    self.statusItem = [[NSStatusBar systemStatusBar] statusItemWithLength:NSVariableStatusItemLength];
-    NSMenu *menu = [[NSMenu alloc] initWithTitle:@"VisKey"];
-
-    NSMenuItem *toggleItem = [[NSMenuItem alloc] initWithTitle:@"Bật Tiếng Việt (Ctrl+Space)"
-                                                        action:@selector(toggleVietnameseMode:)
-                                                 keyEquivalent:@""];
-    toggleItem.target = self;
-    toggleItem.tag = 100;
-    [menu addItem:toggleItem];
-
-    NSMenuItem *prefsItem = [[NSMenuItem alloc] initWithTitle:@"Bảng điều khiển VisKey..."
-                                                       action:@selector(openSettingsWindow:)
-                                                keyEquivalent:@","];
-    prefsItem.target = self;
-    [menu addItem:prefsItem];
-
-    [menu addItem:[NSMenuItem separatorItem]];
-
-    NSMenuItem *telexItem = [[NSMenuItem alloc] initWithTitle:@"Kiểu gõ Telex"
-                                                       action:@selector(selectTelex:)
-                                                keyEquivalent:@""];
-    telexItem.target = self;
-    telexItem.tag = 201;
-    [menu addItem:telexItem];
-
-    NSMenuItem *vniItem = [[NSMenuItem alloc] initWithTitle:@"Kiểu gõ VNI"
-                                                     action:@selector(selectVNI:)
-                                              keyEquivalent:@""];
-    vniItem.target = self;
-    vniItem.tag = 202;
-    [menu addItem:vniItem];
-
-    [menu addItem:[NSMenuItem separatorItem]];
-
-    NSMenuItem *orthoItem = [[NSMenuItem alloc] initWithTitle:@"Đặt dấu kiểu mới (hoà, thuý)"
-                                                       action:@selector(toggleOrthography:)
-                                                keyEquivalent:@""];
-    orthoItem.target = self;
-    orthoItem.tag = 301;
-    [menu addItem:orthoItem];
-
-    NSMenuItem *restoreItem = [[NSMenuItem alloc] initWithTitle:@"Tự khôi phục từ tiếng Anh (Auto-Restore)"
-                                                         action:@selector(toggleAutoRestore:)
-                                                  keyEquivalent:@""];
-    restoreItem.target = self;
-    restoreItem.tag = 302;
-    [menu addItem:restoreItem];
-
-    NSMenuItem *acFixItem = [[NSMenuItem alloc] initWithTitle:@"Sửa lỗi mất chữ Spotlight & Trình duyệt"
-                                                       action:@selector(toggleAutocompleteFix:)
-                                                keyEquivalent:@""];
-    acFixItem.target = self;
-    acFixItem.tag = 303;
-    [menu addItem:acFixItem];
-
-    NSMenuItem *perAppItem = [[NSMenuItem alloc] initWithTitle:@"Ghi nhớ Anh/Việt theo từng ứng dụng"
-                                                        action:@selector(togglePerAppMode:)
-                                                 keyEquivalent:@""];
-    perAppItem.target = self;
-    perAppItem.tag = 304;
-    [menu addItem:perAppItem];
-
-    NSMenuItem *macroItem = [[NSMenuItem alloc] initWithTitle:@"Bật Gõ tắt (Macro & Quick Telex)"
-                                                       action:@selector(toggleMacros:)
-                                                keyEquivalent:@""];
-    macroItem.target = self;
-    macroItem.tag = 305;
-    [menu addItem:macroItem];
-
-    [menu addItem:[NSMenuItem separatorItem]];
-
-    NSMenuItem *quitItem = [[NSMenuItem alloc] initWithTitle:@"Thoát VisKey"
-                                                      action:@selector(terminate:)
-                                               keyEquivalent:@"q"];
-    [menu addItem:quitItem];
-
-    self.statusItem.menu = menu;
-    [self syncUIStates];
+- (void)recordMacroUse:(NSString *)key {
+    [self.model recordMacroUse:key];
 }
 
-- (void)buildSettingsWindow {
-    NSRect frame = NSMakeRect(0, 0, 480, 460);
-    NSUInteger style = NSWindowStyleMaskTitled | NSWindowStyleMaskClosable | NSWindowStyleMaskMiniaturizable;
-    self.settingsWindow = [[NSWindow alloc] initWithContentRect:frame
-                                                      styleMask:style
-                                                        backing:NSBackingStoreBuffered
-                                                          defer:NO];
-    self.settingsWindow.title = @"VisKey — Bảng Điều Khiển Bộ Gõ Tiếng Việt";
-    [self.settingsWindow center];
-    self.settingsWindow.releasedWhenClosed = NO;
-
-    NSView *content = self.settingsWindow.contentView;
-
-    NSTextField *titleLabel = [NSTextField labelWithString:@"Cấu hình Bộ gõ VisKey (macOS)"];
-    titleLabel.font = [NSFont boldSystemFontOfSize:16];
-    titleLabel.frame = NSMakeRect(24, 412, 400, 26);
-    [content addSubview:titleLabel];
-
-    NSTextField *methodLabel = [NSTextField labelWithString:@"Kiểu gõ:"];
-    methodLabel.frame = NSMakeRect(24, 372, 100, 22);
-    [content addSubview:methodLabel];
-
-    self.methodPopup = [[NSPopUpButton alloc] initWithFrame:NSMakeRect(130, 368, 200, 28) pullsDown:NO];
-    [self.methodPopup addItemsWithTitles:@[@"Telex (Chuẩn)", @"VNI"]];
-    self.methodPopup.target = self;
-    self.methodPopup.action = @selector(onMethodPopupChanged:);
-    [content addSubview:self.methodPopup];
-
-    self.restoreCheckbox = [NSButton checkboxWithTitle:@"Tự động khôi phục từ tiếng Anh khi gõ song ngữ (window, software...)"
-                                                target:self
-                                                action:@selector(toggleAutoRestore:)];
-    self.restoreCheckbox.frame = NSMakeRect(24, 332, 430, 22);
-    [content addSubview:self.restoreCheckbox];
-
-    self.acFixCheckbox = [NSButton checkboxWithTitle:@"Sửa lỗi mất/nhân đôi chữ trên Spotlight, Chrome, Safari, Arc"
-                                              target:self
-                                              action:@selector(toggleAutocompleteFix:)];
-    self.acFixCheckbox.frame = NSMakeRect(24, 302, 430, 22);
-    [content addSubview:self.acFixCheckbox];
-
-    self.orthoCheckbox = [NSButton checkboxWithTitle:@"Đặt dấu kiểu mới (hoà, thuý thay vì hòa, thúy)"
-                                              target:self
-                                              action:@selector(toggleOrthography:)];
-    self.orthoCheckbox.frame = NSMakeRect(24, 272, 430, 22);
-    [content addSubview:self.orthoCheckbox];
-
-    self.perAppCheckbox = [NSButton checkboxWithTitle:@"Ghi nhớ chế độ Anh/Việt theo từng ứng dụng (Tự tắt ở Terminal)"
-                                               target:self
-                                               action:@selector(togglePerAppMode:)];
-    self.perAppCheckbox.frame = NSMakeRect(24, 242, 430, 22);
-    [content addSubview:self.perAppCheckbox];
-
-    self.macroCheckbox = [NSButton checkboxWithTitle:@"Bật bảng Gõ tắt (Macro) & Quick Telex (cc=ch, gg=gi, nn=ng...)"
-                                              target:self
-                                              action:@selector(toggleMacros:)];
-    self.macroCheckbox.frame = NSMakeRect(24, 212, 430, 22);
-    [content addSubview:self.macroCheckbox];
-
-    self.loginCheckbox = [NSButton checkboxWithTitle:@"Tự khởi động VisKey cùng hệ điều hành macOS"
-                                              target:self
-                                              action:@selector(toggleLaunchAtLogin:)];
-    self.loginCheckbox.frame = NSMakeRect(24, 182, 430, 22);
-    [content addSubview:self.loginCheckbox];
-
-    // Macro Table & Inputs
-    NSTextField *macroHeader = [NSTextField labelWithString:@"Quản lý từ Gõ tắt (Macro):"];
-    macroHeader.font = [NSFont boldSystemFontOfSize:13];
-    macroHeader.frame = NSMakeRect(24, 148, 300, 20);
-    [content addSubview:macroHeader];
-
-    NSScrollView *scroll = [[NSScrollView alloc] initWithFrame:NSMakeRect(24, 56, 432, 86)];
-    scroll.hasVerticalScroller = YES;
-    scroll.borderType = NSBezelBorder;
-
-    self.macroTable = [[NSTableView alloc] initWithFrame:scroll.bounds];
-    NSTableColumn *colKey = [[NSTableColumn alloc] initWithIdentifier:@"key"];
-    colKey.title = @"Từ viết tắt";
-    colKey.width = 120;
-    NSTableColumn *colVal = [[NSTableColumn alloc] initWithIdentifier:@"val"];
-    colVal.title = @"Nội dung thay thế";
-    colVal.width = 290;
-    [self.macroTable addTableColumn:colKey];
-    [self.macroTable addTableColumn:colVal];
-    self.macroTable.dataSource = self;
-    self.macroTable.delegate = self;
-    scroll.documentView = self.macroTable;
-    [content addSubview:scroll];
-
-    self.macroKeyInput = [[NSTextField alloc] initWithFrame:NSMakeRect(24, 18, 90, 26)];
-    self.macroKeyInput.placeholderString = @"Ví dụ: vn";
-    [content addSubview:self.macroKeyInput];
-
-    self.macroValInput = [[NSTextField alloc] initWithFrame:NSMakeRect(122, 18, 190, 26)];
-    self.macroValInput.placeholderString = @"Ví dụ: Việt Nam";
-    [content addSubview:self.macroValInput];
-
-    NSButton *addBtn = [NSButton buttonWithTitle:@"Thêm / Cập nhật" target:self action:@selector(addMacroItem:)];
-    addBtn.frame = NSMakeRect(320, 16, 136, 30);
-    [content addSubview:addBtn];
-
-    [self syncUIStates];
-}
-
-- (NSInteger)numberOfRowsInTableView:(NSTableView *)tableView {
-    return (NSInteger)self.macroList.count;
-}
-
-- (id)tableView:(NSTableView *)tableView objectValueForTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row {
-    if (row < 0 || row >= (NSInteger)self.macroList.count) return @"";
-    return self.macroList[row][tableColumn.identifier] ?: @"";
-}
-
-- (void)addMacroItem:(id)sender {
-    NSString *k = [[self.macroKeyInput.stringValue stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]] lowercaseString];
-    NSString *v = [self.macroValInput.stringValue stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
-    if (k.length == 0 || v.length == 0) return;
-
-    gEngine.config().macros[[k UTF8String]] = [v UTF8String];
-    [self syncMacroListFromEngine];
-    [self.macroTable reloadData];
-    self.macroKeyInput.stringValue = @"";
-    self.macroValInput.stringValue = @"";
-    [self savePreferences];
-}
-
-- (void)openSettingsWindow:(id)sender {
-    [self syncUIStates];
-    [NSApp activateIgnoringOtherApps:YES];
-    [self.settingsWindow makeKeyAndOrderFront:nil];
-}
+#pragma mark Event tap & permission
 
 - (void)setupEventTap {
+    if (self.eventTap) return;
     CGEventMask mask = CGEventMaskBit(kCGEventKeyDown) |
                        CGEventMaskBit(kCGEventFlagsChanged) |
                        CGEventMaskBit(kCGEventLeftMouseDown) |
@@ -535,113 +422,240 @@ static CGEventRef VisKeyEventCallback(CGEventTapProxy /*proxy*/, CGEventType typ
                                      VisKeyEventCallback,
                                      NULL);
     if (!self.eventTap) {
-        NSLog(@"[VisKey] Failed to create CGEventTap. Grant Accessibility permission in System Settings.");
+        if (!self.loggedTapFailure) {
+            NSLog(@"[VisKey] Failed to create CGEventTap. Grant Accessibility permission in System Settings.");
+            self.loggedTapFailure = YES;
+        }
         return;
     }
 
     self.runLoopSource = CFMachPortCreateRunLoopSource(kCFAllocatorDefault, self.eventTap, 0);
-    CFRunLoopAddSource(CFRunLoopGetCurrent(), self.runLoopSource, kCFRunLoopCommonModes);
+    CFRunLoopAddSource(CFRunLoopGetMain(), self.runLoopSource, kCFRunLoopCommonModes);
     CGEventTapEnable(self.eventTap, true);
+    NSLog(@"[VisKey] Event tap installed.");
 }
 
-- (void)syncUIStates {
-    if (self.statusItem && self.statusItem.button) {
-        self.statusItem.button.title = self.vietnameseEnabled ? @"🇻🇳 VI" : @"🇬🇧 EN";
+- (void)permissionTick {
+    BOOL trusted = AXIsProcessTrusted() ? YES : NO;
+    if (trusted && !self.eventTap) [self setupEventTap];
+    if (trusted != self.lastTrusted) {
+        self.lastTrusted = trusted;
+        [self.model notifyEnvironmentChanged];
     }
-    NSMenu *m = self.statusItem.menu;
-    if (m) {
-        [m itemWithTag:100].state = self.vietnameseEnabled ? NSControlStateValueOn : NSControlStateValueOff;
-        bool isTelex = (gEngine.config().input_method == "telex");
-        [m itemWithTag:201].state = isTelex ? NSControlStateValueOn : NSControlStateValueOff;
-        [m itemWithTag:202].state = !isTelex ? NSControlStateValueOn : NSControlStateValueOff;
-        [m itemWithTag:301].state = gEngine.config().modern_orthography ? NSControlStateValueOn : NSControlStateValueOff;
-        [m itemWithTag:302].state = gEngine.config().auto_restore_english ? NSControlStateValueOn : NSControlStateValueOff;
-        [m itemWithTag:303].state = gEngine.config().fix_autocomplete ? NSControlStateValueOn : NSControlStateValueOff;
-        [m itemWithTag:304].state = self.smartPerAppMode ? NSControlStateValueOn : NSControlStateValueOff;
-        [m itemWithTag:305].state = gEngine.config().enable_macros ? NSControlStateValueOn : NSControlStateValueOff;
+}
+
+#pragma mark Menus & status item
+
+- (void)setupMainMenu {
+    NSMenu *main = [[NSMenu alloc] initWithTitle:@""];
+    NSMenuItem *appItem = [[NSMenuItem alloc] initWithTitle:@"VisKey" action:nil keyEquivalent:@""];
+    NSMenu *appMenu = [[NSMenu alloc] initWithTitle:@"VisKey"];
+    NSMenuItem *prefs = [appMenu addItemWithTitle:@"Bảng điều khiển…" action:@selector(openSettingsWindow:) keyEquivalent:@","];
+    prefs.target = self;
+    [appMenu addItem:[NSMenuItem separatorItem]];
+    [appMenu addItemWithTitle:@"Thoát VisKey" action:@selector(terminate:) keyEquivalent:@"q"];
+    appItem.submenu = appMenu;
+    [main addItem:appItem];
+
+    NSMenuItem *editItem = [[NSMenuItem alloc] initWithTitle:@"Sửa" action:nil keyEquivalent:@""];
+    NSMenu *edit = [[NSMenu alloc] initWithTitle:@"Sửa"];
+    [edit addItemWithTitle:@"Hoàn tác" action:@selector(undo:) keyEquivalent:@"z"];
+    [edit addItemWithTitle:@"Làm lại" action:@selector(redo:) keyEquivalent:@"Z"];
+    [edit addItem:[NSMenuItem separatorItem]];
+    [edit addItemWithTitle:@"Cắt" action:@selector(cut:) keyEquivalent:@"x"];
+    [edit addItemWithTitle:@"Sao chép" action:@selector(copy:) keyEquivalent:@"c"];
+    [edit addItemWithTitle:@"Dán" action:@selector(paste:) keyEquivalent:@"v"];
+    [edit addItemWithTitle:@"Chọn tất cả" action:@selector(selectAll:) keyEquivalent:@"a"];
+    editItem.submenu = edit;
+    [main addItem:editItem];
+    NSApp.mainMenu = main;
+}
+
+- (void)setupStatusBar {
+    self.statusItem = [[NSStatusBar systemStatusBar] statusItemWithLength:NSVariableStatusItemLength];
+    NSStatusBarButton *button = self.statusItem.button;
+    button.image = VKStatusMarkImage(16);
+    button.imagePosition = NSImageLeft;
+    button.font = [NSFont systemFontOfSize:13 weight:NSFontWeightSemibold];
+    button.target = self;
+    button.action = @selector(statusItemClicked:);
+    [button sendActionOn:(NSEventMaskLeftMouseUp | NSEventMaskRightMouseUp)];
+
+    self.popoverController = [[VKPopoverController alloc] initWithModel:self.model];
+    self.popover = [[NSPopover alloc] init];
+    self.popover.behavior = NSPopoverBehaviorTransient;
+    self.popover.animates = YES;
+    self.popover.contentViewController = self.popoverController;
+    self.popover.delegate = self;
+    [self syncStatusItem];
+}
+
+- (void)syncStatusItem {
+    NSStatusBarButton *button = self.statusItem.button;
+    if (!button) return;
+    BOOL vi = self.model.vietnameseEnabled;
+    button.title = vi ? @" VI" : @" EN";
+    button.toolTip = vi ? @"VisKey — đang gõ Tiếng Việt" : @"VisKey — đang gõ Tiếng Anh";
+}
+
+- (void)statusItemClicked:(id)sender {
+    NSEvent *event = NSApp.currentEvent;
+    BOOL secondary = event.type == NSEventTypeRightMouseUp || (event.modifierFlags & NSEventModifierFlagControl) != 0;
+    if (secondary) {
+        [self.popover performClose:nil];
+        NSMenu *menu = [[NSMenu alloc] initWithTitle:@"VisKey"];
+        NSMenuItem *prefs = [menu addItemWithTitle:@"Bảng điều khiển…" action:@selector(openSettingsWindow:) keyEquivalent:@","];
+        prefs.target = self;
+        [menu addItem:[NSMenuItem separatorItem]];
+        [menu addItemWithTitle:@"Thoát VisKey" action:@selector(terminate:) keyEquivalent:@"q"];
+        self.statusItem.menu = menu;
+        [self.statusItem.button performClick:nil];
+        self.statusItem.menu = nil;
+        return;
     }
-    if (self.methodPopup) {
-        [self.methodPopup selectItemAtIndex:(gEngine.config().input_method == "telex" ? 0 : 1)];
-        self.orthoCheckbox.state   = gEngine.config().modern_orthography ? NSControlStateValueOn : NSControlStateValueOff;
-        self.restoreCheckbox.state = gEngine.config().auto_restore_english ? NSControlStateValueOn : NSControlStateValueOff;
-        self.acFixCheckbox.state   = gEngine.config().fix_autocomplete ? NSControlStateValueOn : NSControlStateValueOff;
-        self.perAppCheckbox.state  = self.smartPerAppMode ? NSControlStateValueOn : NSControlStateValueOff;
-        self.macroCheckbox.state   = gEngine.config().enable_macros ? NSControlStateValueOn : NSControlStateValueOff;
-        self.loginCheckbox.state   = self.launchAtLogin ? NSControlStateValueOn : NSControlStateValueOff;
+    if (self.popover.shown) {
+        [self.popover performClose:nil];
+        return;
+    }
+    [self.popoverController reload];
+    [self.popover showRelativeToRect:self.statusItem.button.bounds ofView:self.statusItem.button preferredEdge:NSRectEdgeMinY];
+    __weak VisKeyController *weakSelf = self;
+    if (!self.popoverMonitor) {
+        self.popoverMonitor = [NSEvent addGlobalMonitorForEventsMatchingMask:(NSEventMaskLeftMouseDown | NSEventMaskRightMouseDown)
+                                                                     handler:^(NSEvent *e) {
+            [weakSelf.popover performClose:nil];
+        }];
+    }
+}
+
+- (void)popoverDidClose:(NSNotification *)notification {
+    if (self.popoverMonitor) {
+        [NSEvent removeMonitor:self.popoverMonitor];
+        self.popoverMonitor = nil;
+    }
+}
+
+#pragma mark Windows
+
+- (void)activateApp {
+    if (@available(macOS 14.0, *)) {
+        [NSApp activate];
+    } else {
+        [NSApp activateIgnoringOtherApps:YES];
+    }
+}
+
+- (void)openSettingsWindow:(id)sender {
+    [self vk_openSettingsPage:VKSettingsPageGeneral];
+}
+
+- (void)showOnboarding {
+    if (!self.onboarding) {
+        self.onboarding = [[VKOnboardingWindowController alloc] initWithModel:self.model snapshot:NO];
+        __weak VisKeyController *weakSelf = self;
+        self.onboarding.onPermissionGranted = ^{
+            [weakSelf setupEventTap];
+        };
+    }
+    [self.onboarding showStep:self.model.onboardingDone ? 2 : 1];
+    [self activateApp];
+    [self.onboarding.window makeKeyAndOrderFront:nil];
+}
+
+#pragma mark VI / EN switching
+
+/// Frontmost app the VI/EN choice should be remembered for (never VisKey itself).
+- (NSString *)targetAppBundleId {
+    NSString *front = NSWorkspace.sharedWorkspace.frontmostApplication.bundleIdentifier;
+    if (front && ![front isEqualToString:[self ownBundleId]]) return front;
+    if (self.popover.shown) return self.model.currentAppBundleId;
+    return nil;
+}
+
+- (void)rememberStateForCurrentApp {
+    if (!self.model.smartPerAppMode) return;
+    NSString *bundleId = [self targetAppBundleId];
+    if (!bundleId) return;
+    VKAppRule *rule = [self.model ruleForBundle:bundleId];
+    if (!rule) {
+        rule = [VKAppRule ruleWithBundleId:bundleId name:nil mode:VKAppModeRemember source:VKRuleSourceAuto];
+        [self.model setRule:rule];
+    }
+    rule.lastVietnamese = @(self.model.vietnameseEnabled);
+}
+
+- (void)setVietnamese:(BOOL)vietnamese showHUD:(BOOL)showHUD {
+    BOOL changed = (vietnamese != self.model.vietnameseEnabled);
+    self.model.vietnameseEnabled = vietnamese;
+    resetEngine();
+    [self rememberStateForCurrentApp];
+    [self.model commit];
+    if (showHUD && changed && self.model.showHUD && !self.snapshotMode) {
+        [self.hud showVietnamese:vietnamese hint:[self.model hudHint]];
     }
 }
 
 - (void)toggleVietnameseMode:(id)sender {
-    self.vietnameseEnabled = !self.vietnameseEnabled;
-    gEngine.reset();
-    NSString *bundleId = NSWorkspace.sharedWorkspace.frontmostApplication.bundleIdentifier;
-    if (self.smartPerAppMode && bundleId) {
-        self.appModes[bundleId] = @(self.vietnameseEnabled);
+    [self setVietnamese:!self.model.vietnameseEnabled showHUD:YES];
+}
+
+- (void)toggleInputMethod:(id)sender {
+    self.model.inputMethod = [self.model isTelex] ? @"vni" : @"telex";
+    resetEngine();
+    [self.model commit];
+}
+
+- (void)handleActiveAppChanged:(NSNotification *)notification {
+    resetEngine();
+    NSRunningApplication *app = notification.userInfo[NSWorkspaceApplicationKey];
+    NSString *bundleId = app.bundleIdentifier;
+    if (!bundleId || [bundleId isEqualToString:[self ownBundleId]]) return;
+    self.model.currentAppBundleId = bundleId;
+    self.model.currentAppName = app.localizedName;
+    [self.model notifyEnvironmentChanged];
+    if (!self.model.smartPerAppMode) return;
+
+    VKAppRule *rule = [self.model ruleForBundle:bundleId];
+    NSNumber *target = nil;
+    if (rule) {
+        target = [rule effectiveVietnamese];
+    } else if (self.model.unknownAppPolicy == VKNewAppPolicyVI) {
+        target = @YES;
+    } else if (self.model.unknownAppPolicy == VKNewAppPolicyEN) {
+        target = @NO;
     }
-    [self syncUIStates];
-    [self savePreferences];
+    if (target && target.boolValue != self.model.vietnameseEnabled) {
+        self.model.vietnameseEnabled = target.boolValue;
+        [self.model commit];
+    }
 }
 
-- (void)onMethodPopupChanged:(NSPopUpButton *)sender {
-    gEngine.config().input_method = (sender.indexOfSelectedItem == 0) ? "telex" : "vni";
-    gEngine.reset();
-    [self syncUIStates];
-    [self savePreferences];
+#pragma mark VKAppActions
+
+- (void)vk_setVietnamese:(BOOL)vietnamese {
+    if (self.snapshotMode) return;
+    [self setVietnamese:vietnamese showHUD:YES];
 }
 
-- (void)selectTelex:(id)sender {
-    gEngine.config().input_method = "telex";
-    gEngine.reset();
-    [self syncUIStates];
-    [self savePreferences];
+- (void)vk_openSettingsPage:(VKSettingsPage)page {
+    if (self.snapshotMode) return;
+    [self.popover performClose:nil];
+    if (!self.settings) {
+        self.settings = [[VKSettingsWindowController alloc] initWithModel:self.model snapshot:NO];
+    }
+    [self.settings showPage:page];
+    [self activateApp];
+    [self.settings.window makeKeyAndOrderFront:nil];
 }
 
-- (void)selectVNI:(id)sender {
-    gEngine.config().input_method = "vni";
-    gEngine.reset();
-    [self syncUIStates];
-    [self savePreferences];
-}
-
-- (void)toggleOrthography:(id)sender {
-    gEngine.config().modern_orthography = !gEngine.config().modern_orthography;
-    [self syncUIStates];
-    [self savePreferences];
-}
-
-- (void)toggleAutoRestore:(id)sender {
-    gEngine.config().auto_restore_english = !gEngine.config().auto_restore_english;
-    [self syncUIStates];
-    [self savePreferences];
-}
-
-- (void)toggleAutocompleteFix:(id)sender {
-    gEngine.config().fix_autocomplete = !gEngine.config().fix_autocomplete;
-    [self syncUIStates];
-    [self savePreferences];
-}
-
-- (void)togglePerAppMode:(id)sender {
-    self.smartPerAppMode = !self.smartPerAppMode;
-    [self syncUIStates];
-    [self savePreferences];
-}
-
-- (void)toggleMacros:(id)sender {
-    bool next = !gEngine.config().enable_macros;
-    gEngine.config().enable_macros = next;
-    gEngine.config().quick_telex = next;
-    [self syncUIStates];
-    [self savePreferences];
-}
-
-- (void)toggleLaunchAtLogin:(id)sender {
-    self.launchAtLogin = !self.launchAtLogin;
+- (void)vk_setLaunchAtLogin:(BOOL)on {
+    if (self.snapshotMode) return;
+    self.model.launchAtLogin = on;
     NSString *agentsDir = [NSHomeDirectory() stringByAppendingPathComponent:@"Library/LaunchAgents"];
     NSString *plistPath = [agentsDir stringByAppendingPathComponent:@"org.viskey.inputmethod.plist"];
     NSFileManager *fm = [NSFileManager defaultManager];
 
-    if (self.launchAtLogin) {
+    if (on) {
         [fm createDirectoryAtPath:agentsDir withIntermediateDirectories:YES attributes:nil error:nil];
         NSString *execPath = [[NSBundle mainBundle] executablePath] ?: @"/Applications/VisKey.app/Contents/MacOS/VisKey";
         NSDictionary *plist = @{
@@ -654,35 +668,245 @@ static CGEventRef VisKeyEventCallback(CGEventTapProxy /*proxy*/, CGEventType typ
     } else {
         [fm removeItemAtPath:plistPath error:nil];
     }
-    [self syncUIStates];
-    [self savePreferences];
+    [self.model commit];
 }
 
-- (void)handleActiveAppChanged:(NSNotification *)notification {
-    gEngine.reset();
-    if (!self.smartPerAppMode) return;
-
-    NSRunningApplication *app = notification.userInfo[NSWorkspaceApplicationKey];
-    NSString *bundleId = app.bundleIdentifier;
-    if (!bundleId) return;
-
-    NSNumber *savedMode = self.appModes[bundleId];
-    if (savedMode != nil) {
-        self.vietnameseEnabled = savedMode.boolValue;
-    } else if ([self.defaultEnglishBundles containsObject:bundleId]) {
-        self.vietnameseEnabled = NO;
-        self.appModes[bundleId] = @NO;
+- (void)vk_setRuleForCurrentApp:(VKAppMode)mode {
+    if (self.snapshotMode) return;
+    NSString *bundleId = self.model.currentAppBundleId;
+    if (!bundleId.length) return;
+    VKAppRule *rule = [self.model ruleForBundle:bundleId];
+    if (!rule) {
+        rule = [VKAppRule ruleWithBundleId:bundleId name:nil mode:mode source:VKRuleSourceUser];
+        [self.model setRule:rule];
     }
-    [self syncUIStates];
+    rule.mode = mode;
+    rule.source = VKRuleSourceUser;
+    if (mode == VKAppModeVI || mode == VKAppModeEN) {
+        [self setVietnamese:(mode == VKAppModeVI) showHUD:YES];
+    } else {
+        [self.model commit];
+    }
+}
+
+- (void)vk_requestAccessibility {
+    if (self.snapshotMode) return;
+    NSDictionary *options = @{(__bridge id)kAXTrustedCheckOptionPrompt: @YES};
+    AXIsProcessTrustedWithOptions((__bridge CFDictionaryRef)options);
+    NSURL *url = [NSURL URLWithString:@"x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility"];
+    if (url) [[NSWorkspace sharedWorkspace] openURL:url];
+}
+
+- (void)vk_hotkeyRecordingChanged:(BOOL)recording {
+    gHotkeyRecording = recording;
+    resetEngine();
+}
+
+- (void)vk_closePopover {
+    [self.popover performClose:nil];
+}
+
+- (void)vk_quit {
+    if (self.snapshotMode) return;
+    [NSApp terminate:nil];
+}
+
+- (void)vk_checkForUpdates {
+    if (self.snapshotMode) return;
+    [self.updater checkNow];
+}
+
+- (void)vk_openUpdateDownload {
+    if (self.snapshotMode) return;
+    NSString *u = self.model.availableUpdateURL;
+    if (!u.length) u = [VKRepoURL stringByAppendingString:@"/releases"];
+    NSURL *url = [NSURL URLWithString:u];
+    if (url) [[NSWorkspace sharedWorkspace] openURL:url];
+    [self.popover performClose:nil];
+    if (self.model.updateNoticePending) {
+        self.model.updateNoticePending = NO;
+        [self.model notifyUpdateStateChanged];
+    }
+}
+
+#pragma mark Snapshot mode
+
+- (NSWindow *)hostWindowForView:(NSView *)view {
+    NSWindow *w = [[NSWindow alloc] initWithContentRect:view.bounds
+                                              styleMask:NSWindowStyleMaskBorderless
+                                                backing:NSBackingStoreBuffered
+                                                  defer:NO];
+    w.releasedWhenClosed = NO;
+    w.opaque = NO;
+    w.backgroundColor = [NSColor clearColor];
+    w.contentView = view;
+    return w;
+}
+
+- (BOOL)renderView:(NSView *)view window:(NSWindow *)window appearance:(NSAppearance *)appearance path:(NSString *)path {
+    window.appearance = appearance;
+    window.alphaValue = 0.0;            // on screen for layout (tables load rows) but invisible
+    window.ignoresMouseEvents = YES;
+    [window orderFrontRegardless];
+    [window.contentView layoutSubtreeIfNeeded];
+    [window displayIfNeeded];
+    [[NSRunLoop currentRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:0.25]];
+
+    __block BOOL ok = NO;
+    [appearance performAsCurrentDrawingAppearance:^{
+        NSRect r = view.bounds;
+        NSBitmapImageRep *rep = [view bitmapImageRepForCachingDisplayInRect:r];
+        if (!rep || rep.pixelsWide < (NSInteger)(r.size.width * 2.0)) {
+            // Force 2x even on a 1x screen (CI runners).
+            rep = [[NSBitmapImageRep alloc] initWithBitmapDataPlanes:NULL
+                                                          pixelsWide:(NSInteger)(r.size.width * 2.0)
+                                                          pixelsHigh:(NSInteger)(r.size.height * 2.0)
+                                                       bitsPerSample:8
+                                                     samplesPerPixel:4
+                                                            hasAlpha:YES
+                                                            isPlanar:NO
+                                                      colorSpaceName:NSDeviceRGBColorSpace
+                                                         bytesPerRow:0
+                                                        bitsPerPixel:0];
+            rep.size = r.size;
+        }
+        if (!rep) return;
+        [view cacheDisplayInRect:r toBitmapImageRep:rep];
+        NSData *png = [rep representationUsingType:NSBitmapImageFileTypePNG properties:@{}];
+        ok = png && [png writeToFile:path atomically:YES];
+    }];
+    [window orderOut:nil];
+    return ok;
+}
+
+/// Demo "new version found" state for the update snapshots (in memory only, nothing is fetched).
+- (void)setDemoUpdate:(BOOL)on model:(VKModel *)m {
+    NSString *current = [m versionString];
+    if (on) {
+        m.availableUpdateVersion = @"1.1.0";
+        m.availableUpdateURL = [VKRepoURL stringByAppendingString:@"/releases"];
+        m.updateNoticePending = YES;
+        m.lastUpdateResult = [VKUpdateResult resultWithStatus:VKUpdateStatusAvailable currentVersion:current
+                                                latestVersion:@"1.1.0" releaseURL:m.availableUpdateURL httpCode:200];
+    } else {
+        m.availableUpdateVersion = nil;
+        m.availableUpdateURL = nil;
+        m.updateNoticePending = NO;
+        m.lastUpdateResult = [VKUpdateResult resultWithStatus:VKUpdateStatusUpToDate currentVersion:current
+                                                latestVersion:nil releaseURL:nil httpCode:200];
+    }
+}
+
+- (void)runSnapshotsInto:(NSString *)dir {
+    NSString *outDir = [dir stringByStandardizingPath];
+    NSError *err = nil;
+    if (![[NSFileManager defaultManager] createDirectoryAtPath:outDir withIntermediateDirectories:YES attributes:nil error:&err]) {
+        fprintf(stderr, "VisKey: cannot create %s: %s\n", outDir.UTF8String, err.localizedDescription.UTF8String ?: "?");
+        fflush(stderr);
+        exit(1);
+    }
+
+    // In-memory model only: defaults + demo data, never the real NSUserDefaults domain.
+    VKModel *m = [[VKModel alloc] initPersistent:NO defaultMacros:[self engineDefaultMacros]];
+    [m loadDemoData];
+    m.actions = self;
+    [VKModel setShared:m];
+    self.model = m;
+
+    NSAppearance *light = [NSAppearance appearanceNamed:NSAppearanceNameAqua];
+    NSAppearance *dark = [NSAppearance appearanceNamed:NSAppearanceNameDarkAqua];
+    NSMutableArray<NSString *> *written = [NSMutableArray array];
+    NSInteger failures = 0;
+
+    struct Shot { VKSettingsPage page; BOOL dark; BOOL update; const char *name; };
+    const Shot shots[] = {
+        {VKSettingsPageGeneral, NO, NO, "macos-general-light.png"},
+        {VKSettingsPageGeneral, YES, NO, "macos-general-dark.png"},
+        {VKSettingsPageMacros, YES, NO, "macos-macros-dark.png"},
+        {VKSettingsPageApps, NO, NO, "macos-perapp-light.png"},
+        {VKSettingsPageShortcuts, NO, NO, "macos-shortcuts-light.png"},
+        {VKSettingsPagePrivacy, NO, NO, "macos-privacy-light.png"},
+        {VKSettingsPageAbout, NO, NO, "macos-about-light.png"},
+        {VKSettingsPageAbout, NO, YES, "macos-about-update-light.png"},
+    };
+    for (const Shot &s : shots) {
+        @autoreleasepool {
+            [self setDemoUpdate:s.update model:m];
+            // A fresh window per shot so every view resolves colors for its own appearance.
+            VKSettingsWindowController *wc = [[VKSettingsWindowController alloc] initWithModel:m snapshot:YES];
+            NSAppearance *app = s.dark ? dark : light;
+            wc.window.appearance = app;
+            [wc showPage:s.page];
+            NSString *path = [outDir stringByAppendingPathComponent:[NSString stringWithUTF8String:s.name]];
+            if ([self renderView:wc.window.contentView window:wc.window appearance:app path:path]) [written addObject:path];
+            else failures++;
+            [wc close];
+        }
+    }
+
+    for (int variant = 0; variant < 2; variant++) {
+        @autoreleasepool {
+            [self setDemoUpdate:(variant == 1) model:m];
+            VKPopoverController *pc = [[VKPopoverController alloc] initWithModel:m];
+            NSView *pv = pc.view;
+            [pc reload];
+            NSWindow *w = [self hostWindowForView:pv];
+            NSString *path = [outDir stringByAppendingPathComponent:
+                                         (variant == 1 ? @"macos-popover-update-light.png" : @"macos-popover-light.png")];
+            if ([self renderView:pv window:w appearance:light path:path]) [written addObject:path];
+            else failures++;
+            [w close];
+        }
+    }
+    [self setDemoUpdate:NO model:m];
+
+    @autoreleasepool {
+        NSView *hv = [VKHUDController hudViewVietnamese:YES hint:[m hudHint]];
+        NSWindow *w = [self hostWindowForView:hv];
+        NSString *path = [outDir stringByAppendingPathComponent:@"macos-hud-dark.png"];
+        if ([self renderView:hv window:w appearance:dark path:path]) [written addObject:path];
+        else failures++;
+        [w close];
+    }
+
+    @autoreleasepool {
+        VKOnboardingWindowController *oc = [[VKOnboardingWindowController alloc] initWithModel:m snapshot:YES];
+        oc.window.appearance = light;
+        [oc showStep:2];
+        NSString *path = [outDir stringByAppendingPathComponent:@"macos-onboarding-light.png"];
+        if ([self renderView:oc.window.contentView window:oc.window appearance:light path:path]) [written addObject:path];
+        else failures++;
+        [oc close];
+    }
+
+    for (NSString *p in written) printf("%s\n", p.UTF8String);
+    fflush(stdout);
+    if (failures > 0) {
+        fprintf(stderr, "VisKey: %ld snapshot(s) failed\n", (long)failures);
+        fflush(stderr);
+    }
+    exit(failures > 0 ? 1 : 0);
 }
 
 @end
 
 int main(int argc, const char * argv[]) {
     @autoreleasepool {
+        NSString *snapshotDir = nil;
+        for (int i = 1; i < argc; i++) {
+            if (strcmp(argv[i], "--ui-snapshot") == 0) {
+                if (i + 1 >= argc) {
+                    fprintf(stderr, "usage: VisKey --ui-snapshot <outdir>\n");
+                    return 2;
+                }
+                snapshotDir = [NSString stringWithUTF8String:argv[i + 1]];
+                break;
+            }
+        }
         NSApplication *app = [NSApplication sharedApplication];
         [app setActivationPolicy:NSApplicationActivationPolicyAccessory];
         VisKeyController *delegate = [[VisKeyController alloc] init];
+        delegate.snapshotDir = snapshotDir;
         app.delegate = delegate;
         [app run];
     }

@@ -133,10 +133,31 @@ jobs:
           hdiutil imageinfo VisKey-macOS-Installer.dmg >/dev/null
           ls -l VisKey-macOS-Installer.dmg
 
+      # Offscreen UI screenshots: no event tap, no Accessibility prompt, in-memory demo settings.
+      # macOS has no `timeout`; perl's alarm kills the app if it hangs.
+      - name: UI snapshots (--ui-snapshot)
+        run: |
+          shots="$RUNNER_TEMP/shots"
+          rm -rf "$shots"
+          status=0
+          perl -e 'alarm shift; exec @ARGV' 120 \
+            build_macos/VisKey.app/Contents/MacOS/VisKey --ui-snapshot "$shots" || status=$?
+          echo "VisKey --ui-snapshot exit status: $status"
+          ls -l "$shots" || true
+          count=$(find "$shots" -name '*.png' -size +1k | wc -l | tr -d ' ')
+          echo "PNG files: $count"
+          test "$count" -gt 0
+
       - uses: actions/upload-artifact@v4
         with:
           name: viskey-macos
           path: VisKey-macOS-Installer.dmg
+          if-no-files-found: error
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: viskey-macos-screenshots
+          path: ${{ runner.temp }}/shots/*.png
           if-no-files-found: error
 
   release:

@@ -4,14 +4,15 @@
 //  - Low-Level Keyboard & Mouse Hook (WH_KEYBOARD_LL, WH_MOUSE_LL) - Zero Preedit Underline
 //  - Atomic SendInput() with KEYEVENTF_UNICODE & synthetic event marker (kVisKeyEventMagic)
 //  - Browser / Windows Search / Excel Autocomplete Fix (U+202F injection)
-//  - Smart Per-App Mode (Remembers VI/EN per process .exe, defaults EN in cmd/powershell/WindowsTerminal)
-//  - System Tray Icon (Shell_NotifyIconW) with context menu & live VI/EN indicator
-//  - Native Win32 Settings & Macro Manager Window + Windows Registry persistence + Launch at Startup
+//  - Per-app rules (VI / EN / remember, persisted), defaults EN in cmd/powershell/WindowsTerminal
+//  - Configurable hotkeys (primary / secondary VI-EN toggle, Telex <-> VNI)
+//  - System tray icon with a Fluent flyout (left click) and a small classic menu (right click)
+//  - Custom-drawn Direct2D settings window (windows/ui/*), registry persistence, launch at startup
+//  - Update check: manual button + optional automatic check (at most once per 24 h, tray timer,
+//    quiet notice: nav dot, flyout line, one balloon per new version; never downloads anything)
+//  - "--ui-snapshot <dir>" renders every screen to PNG without hooks, tray or registry access
 //
-// Compile with MinGW-w64 (g++):
-//   g++ -std=c++17 -O2 -mwindows -municode windows/VisKeyWin.cpp -luser32 -lgdi32 -lshell32 -ladvapi32 -lcomctl32 -o VisKey64.exe
-// Compile with MSVC (Developer Command Prompt):
-//   cl /std:c++17 /O2 /EHsc /utf-8 /DUNICODE /D_UNICODE windows\VisKeyWin.cpp user32.lib gdi32.lib shell32.lib advapi32.lib comctl32.lib /link /SUBSYSTEM:WINDOWS /OUT:VisKey64.exe
+// Build: see CMakeLists.txt (MSVC) or windows/README-Windows.txt (MinGW-w64).
 
 #ifndef UNICODE
 #define UNICODE
@@ -25,69 +26,54 @@
 #endif
 
 #include <windows.h>
+#include <objbase.h>
 #include <shellapi.h>
-#include <commctrl.h>
-#include <psapi.h>
 #include <string>
 #include <vector>
 #include <map>
 #include <set>
 #include "../core/viskey_engine.hpp"
+#include "ui/common.h"
+#include "ui/views.h"
+#include "ui/update_policy.h"
 
 static const ULONG_PTR kVisKeyEventMagic = 0x564B5821;
-static const UINT WM_TRAYICON = WM_USER + 100;
+static const UINT kTrayId = 1;
+static const UINT_PTR kSaveTimer = 1;
+static const UINT_PTR kUpdateTimer = 2;
+static const UINT kUpdateFirstDelayMs = 30 * 1000;             // after startup, off the critical path
+static const UINT kUpdateRecheckMs = 3 * 60 * 60 * 1000;       // re-evaluate; the 24 h rule decides
+#ifndef NIIF_RESPECT_QUIET_TIME
+#define NIIF_RESPECT_QUIET_TIME 0x00000080
+#endif
+#ifndef NIN_BALLOONUSERCLICK
+#define NIN_BALLOONUSERCLICK (WM_USER + 5)
+#endif
 
 enum ControlID {
     ID_TRAY_TOGGLE = 1001,
     ID_TRAY_SETTINGS,
-    ID_TRAY_TELEX,
-    ID_TRAY_VNI,
-    ID_TRAY_ORTHO,
-    ID_TRAY_RESTORE,
-    ID_TRAY_ACFIX,
-    ID_TRAY_PERAPP,
-    ID_TRAY_MACROS,
-    ID_TRAY_EXIT,
-
-    ID_CMB_METHOD = 2001,
-    ID_CHK_RESTORE,
-    ID_CHK_ACFIX,
-    ID_CHK_ORTHO,
-    ID_CHK_PERAPP,
-    ID_CHK_MACRO,
-    ID_CHK_STARTUP,
-    ID_LST_MACROS,
-    ID_EDT_MACRO_KEY,
-    ID_EDT_MACRO_VAL,
-    ID_BTN_ADD_MACRO,
-    ID_BTN_DEL_MACRO,
-    ID_BTN_SAVE
+    ID_TRAY_EXIT
 };
 
 static HINSTANCE g_hInst = nullptr;
-static HWND g_hMainWnd = nullptr;
+static HWND g_hHostWnd = nullptr;  // hidden window owning the tray icon
 static HHOOK g_hKeyboardHook = nullptr;
 static HHOOK g_hMouseHook = nullptr;
 static NOTIFYICONDATAW g_nid = {};
+static HICON g_iconVi = nullptr;
+static HICON g_iconEn = nullptr;
+static UINT g_taskbarCreatedMsg = 0;
+static bool g_uiAvailable = false;
+static bool g_ignoreNextTrayUp = false;
 
 static viskey::VisKeyEngine g_engine;
-static bool g_vietnameseEnabled = true;
-static bool g_smartPerAppMode = true;
-static bool g_launchAtStartup = false;
-static std::map<std::wstring, bool> g_appModes;
-static std::wstring g_lastExeName;
-
-// UI Handles
-static HWND g_hCmbMethod = nullptr;
-static HWND g_hChkRestore = nullptr;
-static HWND g_hChkAcFix = nullptr;
-static HWND g_hChkOrtho = nullptr;
-static HWND g_hChkPerApp = nullptr;
-static HWND g_hChkMacro = nullptr;
-static HWND g_hChkStartup = nullptr;
-static HWND g_hListMacros = nullptr;
-static HWND g_hEdtKey = nullptr;
-static HWND g_hEdtVal = nullptr;
+static vk::Model g_model;
+static std::wstring g_lastExeName;     // lower-case
+static std::wstring g_lastExeDisplay;  // as on disk
+static std::string g_lastRawWord;      // raw keys of the word being typed (macro usage counters)
+static HWND g_recordTarget = nullptr;  // settings window while recording a hotkey
+static unsigned g_pendingSave = 0;
 
 static const std::set<std::wstring> kDefaultEnglishExes = {
     L"cmd.exe", L"powershell.exe", L"pwsh.exe", L"windowsterminal.exe", L"mintty.exe", L"conhost.exe"
@@ -97,76 +83,252 @@ static const std::set<std::wstring> kAutocompleteExes = {
     L"chrome.exe", L"msedge.exe", L"brave.exe", L"firefox.exe", L"arc.exe", L"searchhost.exe", L"excel.exe"
 };
 
-static std::wstring utf8_to_wide(const std::string& str) {
-    if (str.empty()) return L"";
-    int sz = MultiByteToWideChar(CP_UTF8, 0, str.c_str(), (int)str.size(), nullptr, 0);
-    std::wstring out(sz, 0);
-    MultiByteToWideChar(CP_UTF8, 0, str.c_str(), (int)str.size(), &out[0], sz);
-    return out;
-}
+// ---------------------------------------------------------------------------------------------
+// Model <-> engine
+namespace vk {
 
-static std::string wide_to_utf8(const std::wstring& wstr) {
-    if (wstr.empty()) return "";
-    int sz = WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), (int)wstr.size(), nullptr, 0, nullptr, nullptr);
-    std::string out(sz, 0);
-    WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), (int)wstr.size(), &out[0], sz, nullptr, nullptr);
-    return out;
-}
+Model& M() { return g_model; }
 
-static std::wstring GetForegroundExeName() {
-    HWND hwnd = GetForegroundWindow();
-    if (!hwnd) return L"";
-    DWORD pid = 0;
-    GetWindowThreadProcessId(hwnd, &pid);
-    if (!pid) return L"";
+std::map<std::string, std::string> DefaultMacros() { return viskey::EngineConfig().macros; }
 
-    std::wstring exeName;
-    HANDLE hProc = OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, FALSE, pid);
-    if (hProc) {
-        wchar_t buf[MAX_PATH] = {0};
-        DWORD sz = MAX_PATH;
-        if (QueryFullProcessImageNameW(hProc, 0, buf, &sz)) {
-            std::wstring full(buf);
-            size_t pos = full.find_last_of(L"\\/");
-            exeName = (pos == std::wstring::npos) ? full : full.substr(pos + 1);
-            for (auto& c : exeName) c = (wchar_t)towlower(c);
-        }
-        CloseHandle(hProc);
+std::vector<AppRule> DefaultRules() {
+    static const wchar_t* display[] = {L"cmd.exe", L"powershell.exe", L"pwsh.exe", L"WindowsTerminal.exe", L"mintty.exe", L"conhost.exe"};
+    std::vector<AppRule> rules;
+    for (const wchar_t* d : display) {
+        AppRule r;
+        r.display = d;
+        r.exe = LowerW(d);
+        if (!kDefaultEnglishExes.count(r.exe)) continue;
+        r.mode = RuleMode::EN;
+        r.source = RuleSource::Default;
+        r.lastVi = false;
+        rules.push_back(r);
     }
-    return exeName;
+    return rules;
+}
+
+void ResetModelToDefaults(Model& m) {
+    viskey::EngineConfig def;
+    m.vietnamese = true;
+    m.vni = def.input_method == "vni";
+    m.modernOrthography = def.modern_orthography;
+    m.autoRestore = def.auto_restore_english;
+    m.fixAutocomplete = def.fix_autocomplete;
+    m.smartPerApp = true;
+    m.macrosEnabled = def.enable_macros;
+    // Fresh install: engine default. (Existing installs without a "QuickTelex" value keep
+    // following "EnableMacros", see LoadModel.)
+    m.quickTelex = def.quick_telex;
+    m.launchAtStartup = false;
+    m.policy = NewAppPolicy::RememberLast;
+    Hotkey primary;
+    primary.vk = VK_SPACE;
+    primary.ctrl = true;
+    Hotkey secondary;
+    secondary.vk = 'Z';
+    secondary.alt = true;
+    m.hotkeys[kHotkeyPrimary] = primary;
+    m.hotkeys[kHotkeySecondary] = secondary;
+    m.hotkeys[kHotkeyMethod] = Hotkey();
+    m.macros = def.macros;
+    m.usage.clear();
+    m.rules = DefaultRules();
+    m.autoUpdateCheck = true;  // LastUpdateCheck / LastNotifiedVersion are bookkeeping, not options: kept
+}
+
+}  // namespace vk
+
+static void ApplyModelToEngine() {
+    viskey::EngineConfig& cfg = g_engine.config();
+    cfg.input_method = g_model.vni ? "vni" : "telex";
+    cfg.modern_orthography = g_model.modernOrthography;
+    cfg.auto_restore_english = g_model.autoRestore;
+    cfg.fix_autocomplete = g_model.fixAutocomplete;
+    cfg.enable_macros = g_model.macrosEnabled;
+    cfg.quick_telex = g_model.quickTelex;
+    cfg.macros = g_model.macros;
+}
+
+static void ResetEngine() {
+    g_engine.reset();
+    g_lastRawWord.clear();
+}
+
+// ---------------------------------------------------------------------------------------------
+// Tray icon
+static HICON MakeGrayIcon(HICON src) {
+    ICONINFO ii = {};
+    if (!src || !GetIconInfo(src, &ii)) return nullptr;
+    HICON result = nullptr;
+    BITMAP bm = {};
+    if (ii.hbmColor && GetObjectW(ii.hbmColor, sizeof(bm), &bm)) {
+        int w = bm.bmWidth, h = bm.bmHeight;
+        BITMAPINFO bi = {};
+        bi.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
+        bi.bmiHeader.biWidth = w;
+        bi.bmiHeader.biHeight = -h;
+        bi.bmiHeader.biPlanes = 1;
+        bi.bmiHeader.biBitCount = 32;
+        bi.bmiHeader.biCompression = BI_RGB;
+        std::vector<DWORD> px((size_t)w * h);
+        HDC dc = GetDC(nullptr);
+        if (GetDIBits(dc, ii.hbmColor, 0, (UINT)h, px.data(), &bi, DIB_RGB_COLORS)) {
+            for (DWORD& p : px) {
+                DWORD a = p >> 24, r = (p >> 16) & 0xFF, g = (p >> 8) & 0xFF, b = p & 0xFF;
+                DWORD gray = (r * 30 + g * 59 + b * 11) / 100;
+                gray = (gray + 0x90) / 2;  // lighter grey reads as "off" on light and dark taskbars
+                p = (a << 24) | (gray << 16) | (gray << 8) | gray;
+            }
+            void* bits = nullptr;
+            HBITMAP color = CreateDIBSection(dc, &bi, DIB_RGB_COLORS, &bits, nullptr, 0);
+            if (color && bits) {
+                memcpy(bits, px.data(), px.size() * sizeof(DWORD));
+                ICONINFO ni = {};
+                ni.fIcon = TRUE;
+                ni.hbmMask = ii.hbmMask;
+                ni.hbmColor = color;
+                result = CreateIconIndirect(&ni);
+            }
+            if (color) DeleteObject(color);
+        }
+        ReleaseDC(nullptr, dc);
+    }
+    if (ii.hbmColor) DeleteObject(ii.hbmColor);
+    if (ii.hbmMask) DeleteObject(ii.hbmMask);
+    return result;
+}
+
+static void LoadTrayIcons() {
+    int cx = GetSystemMetrics(SM_CXSMICON), cy = GetSystemMetrics(SM_CYSMICON);
+    g_iconVi = static_cast<HICON>(LoadImageW(g_hInst, MAKEINTRESOURCEW(1), IMAGE_ICON, cx, cy, 0));
+    if (!g_iconVi) g_iconVi = LoadIconW(nullptr, IDI_APPLICATION);
+    g_iconEn = MakeGrayIcon(g_iconVi);
+    if (!g_iconEn) g_iconEn = g_iconVi;
 }
 
 static void UpdateTrayTooltip() {
-    wcscpy_s(g_nid.szTip, g_vietnameseEnabled ? L"VisKey - Tiếng Việt (VI) [Ctrl+Space]" : L"VisKey - Tiếng Anh (EN) [Ctrl+Space]");
-    g_nid.hIcon = LoadIconW(nullptr, g_vietnameseEnabled ? IDI_APPLICATION : IDI_INFORMATION);
+    if (g_model.snapshot || !g_nid.hWnd) return;
+    std::wstring tip = g_model.vietnamese ? (g_model.vni ? L"VisKey — Tiếng Việt (VNI)" : L"VisKey — Tiếng Việt (Telex)") : L"VisKey — Tiếng Anh";
+    wcsncpy_s(g_nid.szTip, tip.c_str(), _TRUNCATE);
+    g_nid.hIcon = g_model.vietnamese ? g_iconVi : g_iconEn;
     Shell_NotifyIconW(NIM_MODIFY, &g_nid);
 }
 
-static void CheckForegroundAppChange() {
-    std::wstring curExe = GetForegroundExeName();
-    if (curExe.empty() || curExe == g_lastExeName) return;
-    g_lastExeName = curExe;
-    g_engine.reset();
-
-    if (!g_smartPerAppMode) return;
-    auto it = g_appModes.find(curExe);
-    if (it != g_appModes.end()) {
-        g_vietnameseEnabled = it->second;
-    } else if (kDefaultEnglishExes.count(curExe)) {
-        g_vietnameseEnabled = false;
-        g_appModes[curExe] = false;
-    }
+static void AddTrayIcon() {
+    g_nid.cbSize = sizeof(NOTIFYICONDATAW);
+    g_nid.hWnd = g_hHostWnd;
+    g_nid.uID = kTrayId;
+    g_nid.uFlags = NIF_ICON | NIF_MESSAGE | NIF_TIP;
+    g_nid.uCallbackMessage = vk::WM_VK_TRAYICON;
+    g_nid.hIcon = g_model.vietnamese ? g_iconVi : g_iconEn;
+    wcscpy_s(g_nid.szTip, L"VisKey");
+    Shell_NotifyIconW(NIM_ADD, &g_nid);
     UpdateTrayTooltip();
 }
 
+static void RefreshWindows() {
+    vk::RefreshSettingsWindow();
+    vk::RefreshFlyout();
+}
+
+// Persist later (used from the keyboard hook so it never waits on the registry).
+static void ScheduleSave(unsigned flags) {
+    g_pendingSave |= flags;
+    if (g_hHostWnd) SetTimer(g_hHostWnd, kSaveTimer, 400, nullptr);
+}
+
+static void FlushSaves() {
+    unsigned f = g_pendingSave;
+    g_pendingSave = 0;
+    if (f & (vk::kChangeSettings | vk::kChangeHotkeys)) vk::SaveSettings(g_model);
+    if (f & vk::kChangeMacros) vk::SaveMacros(g_model);
+    if (f & vk::kChangeUsage) vk::SaveUsage(g_model);
+    if (f & vk::kChangeRules) vk::SaveRules(g_model);
+    if (f & vk::kChangeUpdateState) vk::SaveUpdateState(g_model);
+}
+
+// ---------------------------------------------------------------------------------------------
+// Per-app memory
+static vk::AppRule* FindRule(const std::wstring& exe) {
+    for (auto& r : g_model.rules) {
+        if (r.exe == exe) return &r;
+    }
+    return nullptr;
+}
+
+// Records the current VI/EN state for the app that was last in the foreground.
+static void RememberModeForCurrentApp() {
+    if (!g_model.smartPerApp || g_lastExeName.empty()) return;
+    if (vk::AppRule* r = FindRule(g_lastExeName)) {
+        r->lastVi = g_model.vietnamese;
+        return;
+    }
+    vk::AppRule r;
+    r.exe = g_lastExeName;
+    r.display = g_lastExeDisplay;
+    r.mode = vk::RuleMode::Remember;
+    r.source = vk::RuleSource::Auto;
+    r.lastVi = g_model.vietnamese;
+    g_model.rules.push_back(r);
+}
+
+static bool GetForegroundExe(std::wstring& lower, std::wstring& display) {
+    HWND hwnd = GetForegroundWindow();
+    if (!hwnd) return false;
+    DWORD pid = 0;
+    GetWindowThreadProcessId(hwnd, &pid);
+    if (!pid || pid == GetCurrentProcessId()) return false;  // VisKey's own windows keep the previous app
+
+    HANDLE hProc = OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, FALSE, pid);
+    if (!hProc) return false;
+    wchar_t buf[MAX_PATH] = {0};
+    DWORD sz = MAX_PATH;
+    bool ok = false;
+    if (QueryFullProcessImageNameW(hProc, 0, buf, &sz)) {
+        std::wstring full(buf);
+        size_t pos = full.find_last_of(L"\\/");
+        display = (pos == std::wstring::npos) ? full : full.substr(pos + 1);
+        lower = vk::LowerW(display);
+        ok = !lower.empty();
+    }
+    CloseHandle(hProc);
+    return ok;
+}
+
+static void CheckForegroundAppChange() {
+    std::wstring curExe, curDisplay;
+    if (!GetForegroundExe(curExe, curDisplay) || curExe == g_lastExeName) return;
+    g_lastExeName = curExe;
+    g_lastExeDisplay = curDisplay;
+    ResetEngine();
+
+    if (!g_model.smartPerApp) return;
+    bool before = g_model.vietnamese;
+    if (const vk::AppRule* r = FindRule(curExe)) {
+        if (r->mode == vk::RuleMode::VI) g_model.vietnamese = true;
+        else if (r->mode == vk::RuleMode::EN) g_model.vietnamese = false;
+        else g_model.vietnamese = r->lastVi;
+    } else if (g_model.policy == vk::NewAppPolicy::AlwaysVI) {
+        g_model.vietnamese = true;
+    } else if (g_model.policy == vk::NewAppPolicy::AlwaysEN) {
+        g_model.vietnamese = false;
+    }
+    UpdateTrayTooltip();
+    if (before != g_model.vietnamese) {
+        ScheduleSave(vk::kChangeSettings);
+        RefreshWindows();
+    }
+}
+
+// ---------------------------------------------------------------------------------------------
 // Atomic SendInput for Backspaces + UTF-16 Unicode string
 static void SendVisKeyReplacement(int backspaces, const std::string& commitText, bool needAutocompleteFix) {
     std::vector<INPUT> inputs;
 
-    auto addKeyVk = [&](WORD vk, bool down) {
+    auto addKeyVk = [&](WORD vkey, bool down) {
         INPUT in = {};
         in.type = INPUT_KEYBOARD;
-        in.ki.wVk = vk;
+        in.ki.wVk = vkey;
         in.ki.dwFlags = down ? 0 : KEYEVENTF_KEYUP;
         in.ki.dwExtraInfo = kVisKeyEventMagic;
         inputs.push_back(in);
@@ -194,7 +356,7 @@ static void SendVisKeyReplacement(int backspaces, const std::string& commitText,
         addKeyVk(VK_BACK, false);
     }
 
-    std::wstring wcommit = utf8_to_wide(commitText);
+    std::wstring wcommit = vk::Utf8ToWide(commitText);
     for (wchar_t wc : wcommit) {
         addUnicodeChar(wc, true);
         addUnicodeChar(wc, false);
@@ -208,10 +370,53 @@ static void SendVisKeyReplacement(int backspaces, const std::string& commitText,
 static LRESULT CALLBACK LowLevelMouseProc(int nCode, WPARAM wParam, LPARAM lParam) {
     if (nCode == HC_ACTION) {
         if (wParam == WM_LBUTTONDOWN || wParam == WM_RBUTTONDOWN || wParam == WM_MBUTTONDOWN) {
-            g_engine.reset();
+            ResetEngine();
         }
     }
     return CallNextHookEx(g_hMouseHook, nCode, wParam, lParam);
+}
+
+static bool IsModifierVk(DWORD v) {
+    return v == VK_SHIFT || v == VK_LSHIFT || v == VK_RSHIFT || v == VK_CONTROL || v == VK_LCONTROL || v == VK_RCONTROL ||
+           v == VK_MENU || v == VK_LMENU || v == VK_RMENU || v == VK_LWIN || v == VK_RWIN;
+}
+
+// exact: Shift must match too. Otherwise a hotkey without Shift also fires with Shift held
+// (Ctrl+Shift+Space toggled before hotkeys became configurable, keep that).
+static bool HotkeyMatches(const vk::Hotkey& h, DWORD vkCode, bool ctrl, bool alt, bool shift, bool win, bool exact) {
+    if (h.Empty() || h.vk != vkCode) return false;
+    if (h.ctrl != ctrl || h.alt != alt || h.win != win) return false;
+    if (exact || h.shift) return h.shift == shift;
+    return true;
+}
+
+static void ToggleVietnameseFromHotkey() {
+    g_model.vietnamese = !g_model.vietnamese;
+    ResetEngine();
+    RememberModeForCurrentApp();
+    UpdateTrayTooltip();
+    ScheduleSave(vk::kChangeSettings | vk::kChangeRules);
+    RefreshWindows();
+}
+
+static void SwitchInputMethodFromHotkey() {
+    g_model.vni = !g_model.vni;
+    ApplyModelToEngine();
+    ResetEngine();
+    UpdateTrayTooltip();
+    ScheduleSave(vk::kChangeSettings);
+    RefreshWindows();
+}
+
+static void CountMacroUse(const std::string& raw) {
+    std::string key = raw;
+    for (char& c : key) {
+        if (c >= 'A' && c <= 'Z') c = (char)(c + 32);
+    }
+    if (!g_model.macros.count(key)) return;
+    uint32_t& n = g_model.usage[key];
+    if (n < 0xFFFFFFFFu) ++n;
+    ScheduleSave(vk::kChangeUsage);
 }
 
 static LRESULT CALLBACK LowLevelKeyboardProc(int nCode, WPARAM wParam, LPARAM lParam) {
@@ -228,37 +433,44 @@ static LRESULT CALLBACK LowLevelKeyboardProc(int nCode, WPARAM wParam, LPARAM lP
         return CallNextHookEx(g_hKeyboardHook, nCode, wParam, lParam);
     }
 
-    CheckForegroundAppChange();
-
     bool ctrl  = (GetAsyncKeyState(VK_CONTROL) & 0x8000) != 0;
     bool alt   = (GetAsyncKeyState(VK_MENU)    & 0x8000) != 0;
     bool win   = ((GetAsyncKeyState(VK_LWIN) | GetAsyncKeyState(VK_RWIN)) & 0x8000) != 0;
     bool shift = (GetAsyncKeyState(VK_SHIFT)   & 0x8000) != 0;
     bool caps  = (GetKeyState(VK_CAPITAL)      & 0x0001) != 0;
 
-    // Hotkey: Ctrl + Space or Alt + Z
-    if ((ctrl && !alt && !win && kb->vkCode == VK_SPACE) ||
-        (alt && !ctrl && !win && kb->vkCode == 'Z')) {
-        g_vietnameseEnabled = !g_vietnameseEnabled;
-        g_engine.reset();
-        if (g_smartPerAppMode && !g_lastExeName.empty()) {
-            g_appModes[g_lastExeName] = g_vietnameseEnabled;
-        }
-        UpdateTrayTooltip();
+    // Hotkey recorder in the settings window: forward the combo, swallow the key.
+    if (g_recordTarget) {
+        if (IsModifierVk(kb->vkCode)) return CallNextHookEx(g_hKeyboardHook, nCode, wParam, lParam);
+        DWORD mods = (ctrl ? vk::kModCtrl : 0) | (alt ? vk::kModAlt : 0) | (shift ? vk::kModShift : 0) | (win ? vk::kModWin : 0);
+        PostMessageW(g_recordTarget, vk::WM_VK_HOTKEY_RECORDED, (WPARAM)kb->vkCode, (LPARAM)mods);
         return 1;
     }
 
+    CheckForegroundAppChange();
+
+    // Configurable hotkeys (defaults: Ctrl + Space, Alt + Z; Telex <-> VNI unset).
+    for (int pass = 0; pass < 2; ++pass) {
+        for (int slot = 0; slot < vk::kHotkeyCount; ++slot) {
+            if (!HotkeyMatches(g_model.hotkeys[slot], kb->vkCode, ctrl, alt, shift, win, pass == 0)) continue;
+            if (slot == vk::kHotkeyMethod) SwitchInputMethodFromHotkey();
+            else ToggleVietnameseFromHotkey();
+            return 1;
+        }
+    }
+
     if (ctrl || alt || win) {
-        g_engine.reset();
+        ResetEngine();
         return CallNextHookEx(g_hKeyboardHook, nCode, wParam, lParam);
     }
 
-    if (!g_vietnameseEnabled) {
+    if (!g_model.vietnamese) {
         return CallNextHookEx(g_hKeyboardHook, nCode, wParam, lParam);
     }
 
     if (kb->vkCode == VK_BACK) {
         auto res = g_engine.process_backspace();
+        g_lastRawWord = res.raw_word;
         if (res.handled) {
             SendVisKeyReplacement(res.backspaces, res.commit_text, res.autocomplete_fix_needed);
             return 1;
@@ -272,7 +484,7 @@ static LRESULT CALLBACK LowLevelKeyboardProc(int nCode, WPARAM wParam, LPARAM lP
         kb->vkCode == VK_PRIOR|| kb->vkCode == VK_NEXT  ||
         kb->vkCode == VK_ESCAPE || kb->vkCode == VK_TAB ||
         kb->vkCode == VK_RETURN) {
-        g_engine.reset();
+        ResetEngine();
         return CallNextHookEx(g_hKeyboardHook, nCode, wParam, lParam);
     }
 
@@ -296,12 +508,19 @@ static LRESULT CALLBACK LowLevelKeyboardProc(int nCode, WPARAM wParam, LPARAM lP
         if (r == 1 && wbuf[0] >= 32 && wbuf[0] <= 126) {
             ch = (char)wbuf[0];
         } else {
-            g_engine.reset();
+            ResetEngine();
             return CallNextHookEx(g_hKeyboardHook, nCode, wParam, lParam);
         }
     }
 
+    // The engine expands a macro when a word boundary follows a known key; it then returns a
+    // handled result with an empty word. Detect that here to count usage without touching the core.
+    std::string rawBefore = g_lastRawWord;
     auto res = g_engine.process_key(ch);
+    g_lastRawWord = res.raw_word;
+    if (res.handled && res.raw_word.empty() && res.current_word.empty() && !rawBefore.empty() && g_engine.config().enable_macros) {
+        CountMacroUse(rawBefore);
+    }
     if (!res.handled) {
         return CallNextHookEx(g_hKeyboardHook, nCode, wParam, lParam);
     }
@@ -312,313 +531,240 @@ static LRESULT CALLBACK LowLevelKeyboardProc(int nCode, WPARAM wParam, LPARAM lP
     return 1;
 }
 
-static void SaveRegistrySettings() {
-    HKEY hKey = nullptr;
-    if (RegCreateKeyExW(HKEY_CURRENT_USER, L"Software\\VisKey", 0, nullptr, 0, KEY_WRITE, nullptr, &hKey, nullptr) == ERROR_SUCCESS) {
-        DWORD vEn = g_vietnameseEnabled ? 1 : 0;
-        DWORD vIm = (g_engine.config().input_method == "vni") ? 1 : 0;
-        DWORD vOr = g_engine.config().modern_orthography ? 1 : 0;
-        DWORD vRe = g_engine.config().auto_restore_english ? 1 : 0;
-        DWORD vAc = g_engine.config().fix_autocomplete ? 1 : 0;
-        DWORD vPa = g_smartPerAppMode ? 1 : 0;
-        DWORD vMa = g_engine.config().enable_macros ? 1 : 0;
-        DWORD vSt = g_launchAtStartup ? 1 : 0;
+// ---------------------------------------------------------------------------------------------
+// Application core used by the UI (declared in ui/common.h)
+namespace vk {
 
-        RegSetValueExW(hKey, L"VietnameseEnabled", 0, REG_DWORD, (const BYTE*)&vEn, sizeof(DWORD));
-        RegSetValueExW(hKey, L"InputMethodVNI",    0, REG_DWORD, (const BYTE*)&vIm, sizeof(DWORD));
-        RegSetValueExW(hKey, L"ModernOrthography", 0, REG_DWORD, (const BYTE*)&vOr, sizeof(DWORD));
-        RegSetValueExW(hKey, L"AutoRestore",       0, REG_DWORD, (const BYTE*)&vRe, sizeof(DWORD));
-        RegSetValueExW(hKey, L"FixAutocomplete",   0, REG_DWORD, (const BYTE*)&vAc, sizeof(DWORD));
-        RegSetValueExW(hKey, L"SmartPerApp",       0, REG_DWORD, (const BYTE*)&vPa, sizeof(DWORD));
-        RegSetValueExW(hKey, L"EnableMacros",      0, REG_DWORD, (const BYTE*)&vMa, sizeof(DWORD));
-        RegSetValueExW(hKey, L"LaunchAtStartup",   0, REG_DWORD, (const BYTE*)&vSt, sizeof(DWORD));
-        RegCloseKey(hKey);
+void Commit(unsigned flags) {
+    ApplyModelToEngine();
+    ResetEngine();
+    if (!g_model.snapshot) {
+        g_pendingSave |= flags;
+        FlushSaves();
     }
-
-    HKEY hRun = nullptr;
-    if (RegOpenKeyExW(HKEY_CURRENT_USER, L"Software\\Microsoft\\Windows\\CurrentVersion\\Run", 0, KEY_WRITE, &hRun) == ERROR_SUCCESS) {
-        if (g_launchAtStartup) {
-            wchar_t exePath[MAX_PATH] = {0};
-            GetModuleFileNameW(nullptr, exePath, MAX_PATH);
-            RegSetValueExW(hRun, L"VisKey", 0, REG_SZ, (const BYTE*)exePath, (DWORD)((wcslen(exePath) + 1) * sizeof(wchar_t)));
-        } else {
-            RegDeleteValueW(hRun, L"VisKey");
-        }
-        RegCloseKey(hRun);
-    }
+    UpdateTrayTooltip();
+    RefreshWindows();
 }
 
-static void LoadRegistrySettings() {
-    HKEY hKey = nullptr;
-    if (RegOpenKeyExW(HKEY_CURRENT_USER, L"Software\\VisKey", 0, KEY_READ, &hKey) == ERROR_SUCCESS) {
-        auto readDw = [&](const wchar_t* name, DWORD defVal) -> DWORD {
-            DWORD val = defVal, sz = sizeof(DWORD);
-            RegQueryValueExW(hKey, name, nullptr, nullptr, (LPBYTE)&val, &sz);
-            return val;
-        };
-        g_vietnameseEnabled = readDw(L"VietnameseEnabled", 1) != 0;
-        g_engine.config().input_method = (readDw(L"InputMethodVNI", 0) != 0) ? "vni" : "telex";
-        g_engine.config().modern_orthography = readDw(L"ModernOrthography", 0) != 0;
-        g_engine.config().auto_restore_english = readDw(L"AutoRestore", 1) != 0;
-        g_engine.config().fix_autocomplete = readDw(L"FixAutocomplete", 1) != 0;
-        g_smartPerAppMode = readDw(L"SmartPerApp", 1) != 0;
-        g_engine.config().enable_macros = readDw(L"EnableMacros", 1) != 0;
-        g_engine.config().quick_telex = g_engine.config().enable_macros;
-        g_launchAtStartup = readDw(L"LaunchAtStartup", 0) != 0;
-        RegCloseKey(hKey);
+void SetVietnamese(bool on) {
+    g_model.vietnamese = on;
+    ResetEngine();
+    RememberModeForCurrentApp();
+    Commit(kChangeSettings | kChangeRules);
+}
+
+void OpenSettings(int page) {
+    HideTrayFlyout();
+    if (!g_uiAvailable) {
+        MessageBoxW(nullptr, L"Không khởi tạo được Direct2D/DirectWrite nên không mở được Bảng điều khiển.\n"
+                             L"Bạn vẫn gõ được tiếng Việt và đổi tuỳ chọn qua menu chuột phải ở khay hệ thống.",
+                    L"VisKey", MB_OK | MB_ICONWARNING);
+        return;
     }
+    ShowSettingsWindow(page);
 }
 
-static void RefreshMacroListUI() {
-    if (!g_hListMacros) return;
-    SendMessageW(g_hListMacros, LB_RESETCONTENT, 0, 0);
-    for (const auto& kv : g_engine.config().macros) {
-        std::wstring item = utf8_to_wide(kv.first + "  =>  " + kv.second);
-        SendMessageW(g_hListMacros, LB_ADDSTRING, 0, (LPARAM)item.c_str());
+void QuitApp() {
+    if (g_nid.hWnd) Shell_NotifyIconW(NIM_DELETE, &g_nid);
+    g_nid.hWnd = nullptr;
+    PostQuitMessage(0);
+}
+
+void BeginHotkeyRecord(HWND target) { g_recordTarget = target; }
+void EndHotkeyRecord() { g_recordTarget = nullptr; }
+
+}  // namespace vk
+
+// ---------------------------------------------------------------------------------------------
+// Update check: manual button and automatic daily check share vk::StartUpdateCheck (one GET on a
+// worker thread); the result comes back to the tray host as WM_VK_UPDATE.
+static void BeginUpdateCheck(bool automatic) {
+    g_model.updateChecking = true;
+    g_model.lastUpdateCheck = vk::UnixNow();  // attempt time: failures count for the 24 h rule too
+    vk::SaveUpdateState(g_model);
+    vk::StartUpdateCheck(g_hHostWnd, automatic);
+    RefreshWindows();
+}
+
+void vk::RequestManualUpdateCheck() {
+    if (g_model.snapshot || g_model.updateChecking || !g_hHostWnd) return;
+    BeginUpdateCheck(false);
+}
+
+static void MaybeAutoUpdateCheck() {
+    if (g_model.snapshot || g_model.updateChecking) return;
+    if (!vk::update::AutoCheckDue(g_model.autoUpdateCheck, vk::UnixNow(), g_model.lastUpdateCheck)) return;
+    BeginUpdateCheck(true);
+}
+
+// Quiet one-off balloon (no sound, respects quiet time); clicking it opens the update page.
+static void ShowUpdateBalloon(const std::wstring& version) {
+    if (!g_nid.hWnd) return;
+    NOTIFYICONDATAW n = g_nid;
+    n.uFlags = NIF_INFO;
+    n.dwInfoFlags = NIIF_INFO | NIIF_NOSOUND | NIIF_RESPECT_QUIET_TIME;
+    std::wstring title = L"Có bản mới VisKey " + version;
+    wcsncpy_s(n.szInfoTitle, title.c_str(), _TRUNCATE);
+    wcsncpy_s(n.szInfo, L"Bấm để mở trang Cập nhật. VisKey không tự tải hay cài đặt gì.", _TRUNCATE);
+    Shell_NotifyIconW(NIM_MODIFY, &n);
+}
+
+static void OnUpdateResult(bool automatic, vk::UpdateResult* r) {
+    g_model.updateChecking = false;
+    if (!r) return;
+    g_model.update = *r;
+    g_model.haveUpdateResult = true;
+    g_model.updateResultAuto = automatic;
+    delete r;
+    const vk::UpdateResult& u = g_model.update;
+    if (!u.ok) {
+        // Automatic failures stay silent: only the "Lần kiểm tra cuối" line on the update page.
+        std::wstring log = L"VisKey: update check failed (" + std::wstring(automatic ? L"auto" : L"manual") + L"): " + u.error + L"\n";
+        OutputDebugStringW(log.c_str());
+    } else if (u.newer && vk::update::ShouldNotify(u.latest, vk::AppVersion(), g_model.lastNotifiedVersion)) {
+        // Once per version: a manual check that finds it counts as seen, so no balloon later.
+        g_model.lastNotifiedVersion = u.latest;
+        vk::SaveUpdateState(g_model);
+        if (automatic) ShowUpdateBalloon(u.latest);
     }
+    RefreshWindows();
 }
 
-static void SyncControlsFromState() {
-    if (!g_hMainWnd) return;
-    SendMessageW(g_hCmbMethod, CB_SETCURSEL, (g_engine.config().input_method == "vni") ? 1 : 0, 0);
-    SendMessageW(g_hChkRestore, BM_SETCHECK, g_engine.config().auto_restore_english ? BST_CHECKED : BST_UNCHECKED, 0);
-    SendMessageW(g_hChkAcFix,   BM_SETCHECK, g_engine.config().fix_autocomplete ? BST_CHECKED : BST_UNCHECKED, 0);
-    SendMessageW(g_hChkOrtho,   BM_SETCHECK, g_engine.config().modern_orthography ? BST_CHECKED : BST_UNCHECKED, 0);
-    SendMessageW(g_hChkPerApp,  BM_SETCHECK, g_smartPerAppMode ? BST_CHECKED : BST_UNCHECKED, 0);
-    SendMessageW(g_hChkMacro,   BM_SETCHECK, g_engine.config().enable_macros ? BST_CHECKED : BST_UNCHECKED, 0);
-    SendMessageW(g_hChkStartup, BM_SETCHECK, g_launchAtStartup ? BST_CHECKED : BST_UNCHECKED, 0);
-    RefreshMacroListUI();
-}
-
+// ---------------------------------------------------------------------------------------------
+// Tray host window
 static void ShowTrayMenu(HWND hWnd) {
     POINT pt;
     GetCursorPos(&pt);
     HMENU hMenu = CreatePopupMenu();
+    std::wstring hk = vk::HotkeyText(g_model.hotkeys[vk::kHotkeyPrimary]);
+    std::wstring toggle = g_model.vietnamese ? L"Tắt tiếng Việt" : L"Bật tiếng Việt";
+    if (!hk.empty()) toggle += L"\t" + hk;
 
-    AppendMenuW(hMenu, MF_STRING | (g_vietnameseEnabled ? MF_CHECKED : 0), ID_TRAY_TOGGLE, L"Bật Tiếng Việt (Ctrl+Space / Alt+Z)");
-    AppendMenuW(hMenu, MF_STRING, ID_TRAY_SETTINGS, L"Mở Bảng điều khiển VisKey...");
-    AppendMenuW(hMenu, MF_SEPARATOR, 0, nullptr);
-
-    bool isTelex = (g_engine.config().input_method == "telex");
-    AppendMenuW(hMenu, MF_STRING | (isTelex ? MF_CHECKED : 0), ID_TRAY_TELEX, L"Kiểu gõ Telex");
-    AppendMenuW(hMenu, MF_STRING | (!isTelex ? MF_CHECKED : 0), ID_TRAY_VNI, L"Kiểu gõ VNI");
-    AppendMenuW(hMenu, MF_SEPARATOR, 0, nullptr);
-
-    AppendMenuW(hMenu, MF_STRING | (g_engine.config().auto_restore_english ? MF_CHECKED : 0), ID_TRAY_RESTORE, L"Tự khôi phục từ tiếng Anh");
-    AppendMenuW(hMenu, MF_STRING | (g_engine.config().fix_autocomplete ? MF_CHECKED : 0), ID_TRAY_ACFIX, L"Sửa lỗi Autocomplete Trình duyệt");
-    AppendMenuW(hMenu, MF_STRING | (g_engine.config().modern_orthography ? MF_CHECKED : 0), ID_TRAY_ORTHO, L"Đặt dấu kiểu mới (hoà, thuý)");
-    AppendMenuW(hMenu, MF_STRING | (g_smartPerAppMode ? MF_CHECKED : 0), ID_TRAY_PERAPP, L"Ghi nhớ chế độ theo từng ứng dụng");
-    AppendMenuW(hMenu, MF_STRING | (g_engine.config().enable_macros ? MF_CHECKED : 0), ID_TRAY_MACROS, L"Bật Gõ tắt (Macro & Quick Telex)");
+    AppendMenuW(hMenu, MF_STRING, ID_TRAY_SETTINGS, L"Mở Bảng điều khiển");
+    AppendMenuW(hMenu, MF_STRING, ID_TRAY_TOGGLE, toggle.c_str());
     AppendMenuW(hMenu, MF_SEPARATOR, 0, nullptr);
     AppendMenuW(hMenu, MF_STRING, ID_TRAY_EXIT, L"Thoát VisKey");
+    SetMenuDefaultItem(hMenu, ID_TRAY_SETTINGS, FALSE);
 
     SetForegroundWindow(hWnd);
-    TrackPopupMenu(hMenu, TPM_BOTTOMALIGN | TPM_LEFTALIGN, pt.x, pt.y, 0, hWnd, nullptr);
+    TrackPopupMenu(hMenu, TPM_BOTTOMALIGN | TPM_LEFTALIGN | TPM_RIGHTBUTTON, pt.x, pt.y, 0, hWnd, nullptr);
+    PostMessageW(hWnd, WM_NULL, 0, 0);
     DestroyMenu(hMenu);
 }
 
-static LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
+static LRESULT CALLBACK HostWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
+    if (g_taskbarCreatedMsg && msg == g_taskbarCreatedMsg) {
+        AddTrayIcon();  // Explorer restarted
+        return 0;
+    }
     switch (msg) {
-    case WM_CREATE: {
-        HFONT hFont = (HFONT)GetStockObject(DEFAULT_GUI_FONT);
-        auto addCtrl = [&](const wchar_t* cls, const wchar_t* txt, DWORD style, int x, int y, int w, int h, int id) -> HWND {
-            HWND hc = CreateWindowExW(0, cls, txt, WS_CHILD | WS_VISIBLE | style, x, y, w, h, hWnd, (HMENU)(INT_PTR)id, g_hInst, nullptr);
-            SendMessageW(hc, WM_SETFONT, (WPARAM)hFont, TRUE);
-            return hc;
-        };
-
-        addCtrl(L"STATIC", L"Kiểu gõ Tiếng Việt:", 0, 20, 18, 130, 22, 0);
-        g_hCmbMethod = addCtrl(L"COMBOBOX", L"", CBS_DROPDOWNLIST | WS_VSCROLL, 155, 14, 180, 100, ID_CMB_METHOD);
-        SendMessageW(g_hCmbMethod, CB_ADDSTRING, 0, (LPARAM)L"Telex (Chuẩn)");
-        SendMessageW(g_hCmbMethod, CB_ADDSTRING, 0, (LPARAM)L"VNI");
-
-        g_hChkRestore = addCtrl(L"BUTTON", L"Tự động khôi phục từ tiếng Anh khi gõ song ngữ (window, software...)", BS_AUTOCHECKBOX, 20, 50, 440, 22, ID_CHK_RESTORE);
-        g_hChkAcFix   = addCtrl(L"BUTTON", L"Sửa lỗi mất/nhân đôi chữ trên Chrome, Edge, Windows Search, Excel", BS_AUTOCHECKBOX, 20, 78, 440, 22, ID_CHK_ACFIX);
-        g_hChkOrtho   = addCtrl(L"BUTTON", L"Đặt dấu kiểu mới (hoà, thuý thay vì hòa, thúy)", BS_AUTOCHECKBOX, 20, 106, 440, 22, ID_CHK_ORTHO);
-        g_hChkPerApp  = addCtrl(L"BUTTON", L"Ghi nhớ chế độ Anh/Việt theo từng ứng dụng (Tự tắt ở CMD/PowerShell)", BS_AUTOCHECKBOX, 20, 134, 440, 22, ID_CHK_PERAPP);
-        g_hChkMacro   = addCtrl(L"BUTTON", L"Bật bảng Gõ tắt (Macro) & Quick Telex (cc=ch, gg=gi, nn=ng...)", BS_AUTOCHECKBOX, 20, 162, 440, 22, ID_CHK_MACRO);
-        g_hChkStartup = addCtrl(L"BUTTON", L"Tự khởi động VisKey cùng hệ điều hành Windows", BS_AUTOCHECKBOX, 20, 190, 440, 22, ID_CHK_STARTUP);
-
-        addCtrl(L"STATIC", L"Danh sách từ Gõ tắt (Macro):", 0, 20, 224, 240, 20, 0);
-        g_hListMacros = CreateWindowExW(WS_EX_CLIENTEDGE, L"LISTBOX", L"", WS_CHILD | WS_VISIBLE | WS_VSCROLL | LBS_NOTIFY, 20, 246, 440, 110, hWnd, (HMENU)ID_LST_MACROS, g_hInst, nullptr);
-        SendMessageW(g_hListMacros, WM_SETFONT, (WPARAM)hFont, TRUE);
-
-        g_hEdtKey = CreateWindowExW(WS_EX_CLIENTEDGE, L"EDIT", L"", WS_CHILD | WS_VISIBLE | ES_AUTOHSCROLL, 20, 366, 90, 26, hWnd, (HMENU)ID_EDT_MACRO_KEY, g_hInst, nullptr);
-        SendMessageW(g_hEdtKey, WM_SETFONT, (WPARAM)hFont, TRUE);
-
-        g_hEdtVal = CreateWindowExW(WS_EX_CLIENTEDGE, L"EDIT", L"", WS_CHILD | WS_VISIBLE | ES_AUTOHSCROLL, 118, 366, 190, 26, hWnd, (HMENU)ID_EDT_MACRO_VAL, g_hInst, nullptr);
-        SendMessageW(g_hEdtVal, WM_SETFONT, (WPARAM)hFont, TRUE);
-
-        addCtrl(L"BUTTON", L"Thêm / Sửa", BS_PUSHBUTTON, 316, 365, 70, 28, ID_BTN_ADD_MACRO);
-        addCtrl(L"BUTTON", L"Xóa", BS_PUSHBUTTON, 390, 365, 70, 28, ID_BTN_DEL_MACRO);
-        addCtrl(L"BUTTON", L"Lưu cấu hình & Ẩn xuống Khay hệ thống", BS_DEFPUSHBUTTON, 180, 408, 280, 32, ID_BTN_SAVE);
-
-        SyncControlsFromState();
-        return 0;
-    }
-    case WM_COMMAND: {
-        int id = LOWORD(wParam);
-        switch (id) {
-        case ID_TRAY_TOGGLE:
-            g_vietnameseEnabled = !g_vietnameseEnabled;
-            g_engine.reset();
-            UpdateTrayTooltip();
-            SaveRegistrySettings();
-            break;
-        case ID_TRAY_SETTINGS:
-            SyncControlsFromState();
-            ShowWindow(hWnd, SW_SHOW);
-            SetForegroundWindow(hWnd);
-            break;
-        case ID_TRAY_TELEX:
-            g_engine.config().input_method = "telex";
-            g_engine.reset();
-            SyncControlsFromState();
-            SaveRegistrySettings();
-            break;
-        case ID_TRAY_VNI:
-            g_engine.config().input_method = "vni";
-            g_engine.reset();
-            SyncControlsFromState();
-            SaveRegistrySettings();
-            break;
-        case ID_TRAY_RESTORE:
-            g_engine.config().auto_restore_english = !g_engine.config().auto_restore_english;
-            SyncControlsFromState();
-            SaveRegistrySettings();
-            break;
-        case ID_TRAY_ACFIX:
-            g_engine.config().fix_autocomplete = !g_engine.config().fix_autocomplete;
-            SyncControlsFromState();
-            SaveRegistrySettings();
-            break;
-        case ID_TRAY_ORTHO:
-            g_engine.config().modern_orthography = !g_engine.config().modern_orthography;
-            SyncControlsFromState();
-            SaveRegistrySettings();
-            break;
-        case ID_TRAY_PERAPP:
-            g_smartPerAppMode = !g_smartPerAppMode;
-            SyncControlsFromState();
-            SaveRegistrySettings();
-            break;
-        case ID_TRAY_MACROS:
-            g_engine.config().enable_macros = !g_engine.config().enable_macros;
-            g_engine.config().quick_telex = g_engine.config().enable_macros;
-            SyncControlsFromState();
-            SaveRegistrySettings();
-            break;
-        case ID_TRAY_EXIT:
-            Shell_NotifyIconW(NIM_DELETE, &g_nid);
-            PostQuitMessage(0);
-            break;
-        case ID_BTN_ADD_MACRO: {
-            wchar_t kbuf[64] = {0}, vbuf[256] = {0};
-            GetWindowTextW(g_hEdtKey, kbuf, 64);
-            GetWindowTextW(g_hEdtVal, vbuf, 256);
-            std::string k = wide_to_utf8(kbuf), v = wide_to_utf8(vbuf);
-            if (!k.empty() && !v.empty()) {
-                for (char& c : k) if (c >= 'A' && c <= 'Z') c += 32;
-                g_engine.config().macros[k] = v;
-                SetWindowTextW(g_hEdtKey, L"");
-                SetWindowTextW(g_hEdtVal, L"");
-                RefreshMacroListUI();
-            }
-            break;
-        }
-        case ID_BTN_DEL_MACRO: {
-            int sel = (int)SendMessageW(g_hListMacros, LB_GETCURSEL, 0, 0);
-            if (sel != LB_ERR) {
-                wchar_t buf[320] = {0};
-                SendMessageW(g_hListMacros, LB_GETTEXT, sel, (LPARAM)buf);
-                std::string s = wide_to_utf8(buf);
-                size_t p = s.find("  =>  ");
-                if (p != std::string::npos) {
-                    g_engine.config().macros.erase(s.substr(0, p));
-                    RefreshMacroListUI();
-                }
-            }
-            break;
-        }
-        case ID_BTN_SAVE: {
-            int selMethod = (int)SendMessageW(g_hCmbMethod, CB_GETCURSEL, 0, 0);
-            g_engine.config().input_method = (selMethod == 1) ? "vni" : "telex";
-            g_engine.config().auto_restore_english = (SendMessageW(g_hChkRestore, BM_GETCHECK, 0, 0) == BST_CHECKED);
-            g_engine.config().fix_autocomplete     = (SendMessageW(g_hChkAcFix,   BM_GETCHECK, 0, 0) == BST_CHECKED);
-            g_engine.config().modern_orthography   = (SendMessageW(g_hChkOrtho,   BM_GETCHECK, 0, 0) == BST_CHECKED);
-            g_smartPerAppMode                      = (SendMessageW(g_hChkPerApp,  BM_GETCHECK, 0, 0) == BST_CHECKED);
-            g_engine.config().enable_macros        = (SendMessageW(g_hChkMacro,   BM_GETCHECK, 0, 0) == BST_CHECKED);
-            g_engine.config().quick_telex          = g_engine.config().enable_macros;
-            g_launchAtStartup                      = (SendMessageW(g_hChkStartup, BM_GETCHECK, 0, 0) == BST_CHECKED);
-            SaveRegistrySettings();
-            ShowWindow(hWnd, SW_HIDE);
-            break;
-        }
+    case WM_COMMAND:
+        switch (LOWORD(wParam)) {
+        case ID_TRAY_TOGGLE: vk::SetVietnamese(!g_model.vietnamese); break;
+        case ID_TRAY_SETTINGS: vk::OpenSettings(-1); break;
+        case ID_TRAY_EXIT: vk::QuitApp(); break;
+        default: break;
         }
         return 0;
-    }
-    case WM_TRAYICON:
-        if (lParam == WM_RBUTTONUP) {
+    case vk::WM_VK_TRAYICON:
+        switch (LOWORD(lParam)) {
+        case WM_LBUTTONUP:
+            if (g_ignoreNextTrayUp) {
+                g_ignoreNextTrayUp = false;
+            } else if (!g_uiAvailable) {
+                ShowTrayMenu(hWnd);
+            } else if (!vk::TrayFlyoutRecentlyClosed()) {
+                vk::ShowTrayFlyout(hWnd, kTrayId);
+            }
+            break;
+        case WM_LBUTTONDBLCLK:
+            g_ignoreNextTrayUp = true;
+            vk::OpenSettings(-1);
+            break;
+        case NIN_BALLOONUSERCLICK:
+            vk::OpenSettings(vk::kPageUpdate);
+            break;
+        case WM_RBUTTONUP:
+        case WM_CONTEXTMENU:
+            vk::HideTrayFlyout();
             ShowTrayMenu(hWnd);
-        } else if (lParam == WM_LBUTTONDBLCLK) {
-            SyncControlsFromState();
-            ShowWindow(hWnd, SW_SHOW);
-            SetForegroundWindow(hWnd);
-        } else if (lParam == WM_LBUTTONUP) {
-            g_vietnameseEnabled = !g_vietnameseEnabled;
-            g_engine.reset();
-            UpdateTrayTooltip();
-            SaveRegistrySettings();
+            break;
+        default: break;
         }
         return 0;
-    case WM_CLOSE:
-        ShowWindow(hWnd, SW_HIDE);
+    case WM_TIMER:
+        if (wParam == kSaveTimer) {
+            KillTimer(hWnd, kSaveTimer);
+            FlushSaves();
+            RefreshWindows();
+        } else if (wParam == kUpdateTimer) {
+            SetTimer(hWnd, kUpdateTimer, kUpdateRecheckMs, nullptr);  // first shot after startup, then every 3 h
+            MaybeAutoUpdateCheck();
+        }
+        return 0;
+    case vk::WM_VK_UPDATE:
+        OnUpdateResult(wParam != 0, reinterpret_cast<vk::UpdateResult*>(lParam));
         return 0;
     case WM_DESTROY:
-        Shell_NotifyIconW(NIM_DELETE, &g_nid);
+        if (g_nid.hWnd) Shell_NotifyIconW(NIM_DELETE, &g_nid);
+        g_nid.hWnd = nullptr;
         PostQuitMessage(0);
         return 0;
     }
     return DefWindowProcW(hWnd, msg, wParam, lParam);
 }
 
+static int RunSnapshot(int argc, wchar_t** argv) {
+    if (argc < 3) return 2;
+    g_model.snapshot = true;
+    HRESULT hr = CoInitializeEx(nullptr, COINIT_APARTMENTTHREADED);
+    int rc = vk::RunUiSnapshot(argv[2]);
+    if (SUCCEEDED(hr)) CoUninitialize();
+    return rc;
+}
+
 int APIENTRY wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, int) {
     g_hInst = hInstance;
-    LoadRegistrySettings();
+
+    int argc = 0;
+    wchar_t** argv = CommandLineToArgvW(GetCommandLineW(), &argc);
+    if (argv && argc >= 2 && lstrcmpiW(argv[1], L"--ui-snapshot") == 0) {
+        int rc = RunSnapshot(argc, argv);
+        LocalFree(argv);
+        return rc;
+    }
+    if (argv) LocalFree(argv);
+
+    vk::EnablePerMonitorDpi();
+    HRESULT coHr = CoInitializeEx(nullptr, COINIT_APARTMENTTHREADED);
+    vk::LoadModel(g_model);
+    ApplyModelToEngine();
+    g_uiAvailable = vk::GfxStartup();
 
     WNDCLASSEXW wc = {};
     wc.cbSize = sizeof(WNDCLASSEXW);
-    wc.lpfnWndProc = WndProc;
+    wc.lpfnWndProc = HostWndProc;
     wc.hInstance = hInstance;
-    wc.hCursor = LoadCursor(nullptr, IDC_ARROW);
-    wc.hIcon = LoadIconW(nullptr, IDI_APPLICATION);
-    wc.hbrBackground = (HBRUSH)(COLOR_BTNFACE + 1);
     wc.lpszClassName = L"VisKeyWin32Class";
     RegisterClassExW(&wc);
+    g_hHostWnd = CreateWindowExW(WS_EX_TOOLWINDOW, wc.lpszClassName, L"VisKey", WS_POPUP, 0, 0, 0, 0, nullptr, nullptr, hInstance, nullptr);
 
-    g_hMainWnd = CreateWindowExW(
-        0, L"VisKeyWin32Class", L"VisKey — Bảng Điều Khiển Bộ Gõ Tiếng Việt (Windows)",
-        WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX,
-        CW_USEDEFAULT, CW_USEDEFAULT, 495, 490,
-        nullptr, nullptr, hInstance, nullptr
-    );
-
-    g_nid.cbSize = sizeof(NOTIFYICONDATAW);
-    g_nid.hWnd = g_hMainWnd;
-    g_nid.uID = 1;
-    g_nid.uFlags = NIF_ICON | NIF_MESSAGE | NIF_TIP;
-    g_nid.uCallbackMessage = WM_TRAYICON;
-    g_nid.hIcon = LoadIconW(nullptr, IDI_APPLICATION);
-    wcscpy_s(g_nid.szTip, L"VisKey - Tiếng Việt (VI) [Ctrl+Space]");
-    Shell_NotifyIconW(NIM_ADD, &g_nid);
-    UpdateTrayTooltip();
+    g_taskbarCreatedMsg = RegisterWindowMessageW(L"TaskbarCreated");
+    LoadTrayIcons();
+    AddTrayIcon();
 
     g_hKeyboardHook = SetWindowsHookExW(WH_KEYBOARD_LL, LowLevelKeyboardProc, GetModuleHandleW(nullptr), 0);
     g_hMouseHook    = SetWindowsHookExW(WH_MOUSE_LL,    LowLevelMouseProc,    GetModuleHandleW(nullptr), 0);
+    g_model.hooksActive = g_hKeyboardHook != nullptr;
 
-    // Show control panel on launch so user knows VisKey is active
-    ShowWindow(g_hMainWnd, SW_SHOW);
-    UpdateWindow(g_hMainWnd);
+    // Automatic update check (if enabled): first look 30 s after startup, never more than once a day.
+    if (g_hHostWnd) SetTimer(g_hHostWnd, kUpdateTimer, kUpdateFirstDelayMs, nullptr);
+
+    // Show the control panel on launch so the user knows VisKey is active.
+    if (g_uiAvailable) {
+        vk::CreateSettingsWindow(hInstance);
+        vk::ShowSettingsWindow(-1);
+    }
 
     MSG msg;
     while (GetMessageW(&msg, nullptr, 0, 0)) {
@@ -628,5 +774,8 @@ int APIENTRY wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, int) {
 
     if (g_hKeyboardHook) UnhookWindowsHookEx(g_hKeyboardHook);
     if (g_hMouseHook)    UnhookWindowsHookEx(g_hMouseHook);
+    if (g_pendingSave) FlushSaves();
+    if (g_nid.hWnd) Shell_NotifyIconW(NIM_DELETE, &g_nid);
+    if (SUCCEEDED(coHr)) CoUninitialize();
     return 0;
 }

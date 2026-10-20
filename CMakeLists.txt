@@ -18,20 +18,47 @@ add_executable(test_cpp_engine tests/test_cpp_engine.cpp)
 # Platform-stream typing regression (cases in tests/data/typing_regression.tsv)
 add_executable(test_typing_regression tests/test_typing_regression.cpp)
 target_compile_definitions(test_typing_regression PRIVATE VISKEY_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}")
+# Pure C++ policy of the macOS automatic update check (header-only, builds on every platform).
+add_executable(test_update_policy tests/test_update_policy.cpp)
+# Pure logic of the Windows update check (24 h throttle, notify once per version). No Windows
+# headers, so it builds and runs on every platform.
+add_executable(test_update_policy_win windows/tests/test_update_policy.cpp)
 
 enable_testing()
 add_test(NAME VisKeyCoreTests COMMAND test_cpp_engine)
 add_test(NAME VisKeyTypingRegression COMMAND test_typing_regression)
+add_test(NAME VisKeyUpdatePolicyTests COMMAND test_update_policy)
+add_test(NAME VisKeyWindowsUpdatePolicyTests COMMAND test_update_policy_win)
 
 # 2. Native macOS App Bundle Target
 if(APPLE)
     enable_language(OBJCXX)
     set(CMAKE_OBJCXX_STANDARD 17)
-    add_executable(VisKey MACOSX_BUNDLE macos/VisKeyApp.mm)
+    # Keep this list in sync with scripts/build_macos_installer.sh.
+    set(VISKEY_MACOS_SOURCES
+        macos/VisKeyApp.mm
+        macos/ui/VKUIKit.mm
+        macos/ui/VKModel.mm
+        macos/ui/VKPageBase.mm
+        macos/ui/VKPageGeneral.mm
+        macos/ui/VKPageMacros.mm
+        macos/ui/VKPageApps.mm
+        macos/ui/VKPageShortcuts.mm
+        macos/ui/VKPageInfo.mm
+        macos/ui/VKSettingsWindow.mm
+        macos/ui/VKPopover.mm
+        macos/ui/VKHUD.mm
+        macos/ui/VKOnboarding.mm
+        macos/ui/VKUpdate.mm
+    )
+    add_executable(VisKey MACOSX_BUNDLE ${VISKEY_MACOS_SOURCES})
     set_target_properties(VisKey PROPERTIES
         MACOSX_BUNDLE_INFO_PLIST "${CMAKE_CURRENT_SOURCE_DIR}/macos/Info.plist"
         COMPILE_FLAGS "-fobjc-arc"
     )
+    # Match LSMinimumSystemVersion (11.0) in macos/Info.plist.
+    target_compile_options(VisKey PRIVATE -mmacosx-version-min=11.0 -Wall)
+    target_link_options(VisKey PRIVATE -mmacosx-version-min=11.0)
     target_link_libraries(VisKey
         "-framework Cocoa"
         "-framework ApplicationServices"
@@ -42,10 +69,24 @@ endif()
 # 3. Native Windows Win32 Application Target (VisKey64.exe)
 if(WIN32)
     enable_language(RC)
-    add_executable(VisKey64 WIN32 windows/VisKeyWin.cpp windows/res/VisKey.rc)
-    target_compile_definitions(VisKey64 PRIVATE UNICODE _UNICODE)
+    # Portable single-file exe. d2d1, dwrite, dwmapi and winhttp are loaded at runtime
+    # (LoadLibraryW), WIC and the file dialogs go through COM (ole32), so the static imports stay
+    # within the list checked by .github/workflows/windows.yml.
+    add_executable(VisKey64 WIN32
+        windows/VisKeyWin.cpp
+        windows/ui/gfx.cpp
+        windows/ui/widgets.cpp
+        windows/ui/pages.cpp
+        windows/ui/settings.cpp
+        windows/ui/flyout.cpp
+        windows/ui/store.cpp
+        windows/ui/snapshot.cpp
+        windows/res/VisKey.rc)
+    target_compile_definitions(VisKey64 PRIVATE UNICODE _UNICODE NOMINMAX)
     # Icon + VERSIONINFO; the version comes from project(VERSION) above.
     set_source_files_properties(windows/res/VisKey.rc PROPERTIES COMPILE_DEFINITIONS
         "VISKEY_VERSION_MAJOR=${PROJECT_VERSION_MAJOR};VISKEY_VERSION_MINOR=${PROJECT_VERSION_MINOR};VISKEY_VERSION_PATCH=${PROJECT_VERSION_PATCH};VISKEY_VERSION_STR=\"${PROJECT_VERSION}\"")
-    target_link_libraries(VisKey64 PRIVATE user32 gdi32 shell32 advapi32 comctl32)
+    # Fallback for the version shown in the UI if the VERSIONINFO resource cannot be read.
+    set_source_files_properties(windows/ui/store.cpp PROPERTIES COMPILE_DEFINITIONS "VISKEY_APP_VERSION=\"${PROJECT_VERSION}\"")
+    target_link_libraries(VisKey64 PRIVATE user32 gdi32 shell32 advapi32 comctl32 ole32 uuid)
 endif()
