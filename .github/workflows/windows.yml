@@ -84,6 +84,34 @@ jobs:
           if ($info.ProductVersion -ne '${{ steps.version.outputs.version }}') { throw 'version resource does not match CMake project version' }
           Write-Host "Size: $((Get-Item $exe).Length) bytes"
 
+      # Renders every settings page + the tray flyout offscreen (no hooks, no tray, no registry).
+      - name: UI screenshots (--ui-snapshot)
+        if: matrix.arch == 'x64'
+        run: |
+          $out = Join-Path $env:RUNNER_TEMP 'shots'
+          New-Item -ItemType Directory -Force $out | Out-Null
+          $p = Start-Process -FilePath build\Release\VisKey64.exe -ArgumentList '--ui-snapshot', "`"$out`"" -PassThru
+          $null = $p.Handle  # keep the handle so ExitCode is available afterwards
+          try {
+            Wait-Process -Id $p.Id -Timeout 120 -ErrorAction Stop
+          } catch {
+            Stop-Process -Id $p.Id -Force -ErrorAction SilentlyContinue
+            throw 'VisKey64.exe --ui-snapshot did not finish within 120 s'
+          }
+          $p.WaitForExit()
+          if (Test-Path "$out\snapshot.txt") { Get-Content "$out\snapshot.txt" }
+          $pngs = Get-ChildItem -Path $out -Filter *.png
+          if (-not $pngs) { throw "no PNG produced (exit code $($p.ExitCode))" }
+          if ($p.ExitCode -ne 0) { throw "--ui-snapshot exited with $($p.ExitCode)" }
+          $pngs | ForEach-Object { Write-Host "$($_.Name) $($_.Length) bytes" }
+
+      - uses: actions/upload-artifact@v4
+        if: matrix.arch == 'x64'
+        with:
+          name: viskey-windows-screenshots
+          path: ${{ runner.temp }}/shots/
+          if-no-files-found: error
+
       - name: Portable zip
         run: |
           $stage = 'dist\stage'
