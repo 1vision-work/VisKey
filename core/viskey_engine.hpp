@@ -117,8 +117,10 @@ public:
     }
 
     std::u32string get_displayed_u32() const {
+        // Invariant: while disabled_for_word_, chars_ holds exactly the literal text on screen
+        // and tone_ is 0, so rendering it is a no-op.
         if (disabled_for_word_) {
-            return raw_keys_;
+            return chars_;
         }
         return render_syllable();
     }
@@ -139,10 +141,10 @@ public:
         }
 
         if (disabled_for_word_) {
-            raw_keys_.pop_back();
-            if (!chars_.empty()) chars_.pop_back();
-            std::string new_disp = u32_to_utf8(raw_keys_);
-            if (raw_keys_.empty()) reset();
+            if (!raw_keys_.empty()) raw_keys_.pop_back();
+            chars_.pop_back();
+            std::string new_disp = u32_to_utf8(chars_);
+            if (chars_.empty()) reset();
             return {false, 0, "", new_disp, new_disp, false};
         }
 
@@ -215,12 +217,13 @@ public:
             }
 
             // 2. Check Word-Boundary Auto-Restore for English words
+            //    (after an escape the literal text is kept unless the raw keys spell a known English word)
             if (config_.auto_restore_english &&
-                !disabled_for_word_ &&
                 !has_backspaced_ &&
                 !raw_keys_.empty() &&
                 old_display != raw_keys_ &&
-                !is_valid_vietnamese(true)) {
+                (disabled_for_word_ ? english_collision_words_.count(to_ascii_lower(raw_utf8)) > 0
+                                    : !is_valid_vietnamese(true))) {
                 reset();
                 return {
                     true,
@@ -306,6 +309,7 @@ private:
     std::unordered_set<std::string> valid_nuclei_typing_;
     std::unordered_set<std::string> valid_circumflex_nuclei_;
     std::unordered_set<std::string> forbidden_open_nuclei_;
+    std::unordered_set<std::string> no_final_nuclei_;
     std::unordered_set<std::string> english_collision_words_;
 
     static char32_t to_lower_cp(char32_t c) {
@@ -434,7 +438,7 @@ private:
             "iêu", "oai", "oao", "oay", "oeo", "uây", "uôi", "ươi", "ươu", "uya", "uyê", "uyu", "yêu"
         };
         valid_nuclei_typing_ = valid_nuclei_committed_;
-        for (const char* s : {"ie", "uo", "ưo", "ye", "uye", "uoi", "ưoi", "uou", "ưou", "ieu", "yeu", "uay"}) {
+        for (const char* s : {"ie", "ue", "uo", "ưo", "ye", "uye", "uoi", "ưoi", "uou", "ưou", "ieu", "yeu", "uay"}) {
             valid_nuclei_typing_.insert(s);
         }
 
@@ -445,9 +449,15 @@ private:
 
         forbidden_open_nuclei_ = {"ă", "â", "iê", "yê", "uô", "ươ", "oă", "uă", "uâ", "uyê"};
 
+        // Nuclei ending in a glide (or ia/ưa/uya) never take a final consonant in committed words (during, music)
+        no_final_nuclei_ = {
+            "ai", "ao", "au", "âu", "ay", "ây", "eo", "êu", "ia", "iu", "oi", "ôi", "ơi", "ui", "ưi", "ưa", "ưu",
+            "iêu", "yêu", "oai", "oao", "oay", "oeo", "uây", "uôi", "ươi", "ươu", "uya", "uyu"
+        };
+
         english_collision_words_ = {
             "soon", "moon", "room", "noon", "spoon", "boom", "zoom", "loom", "bloom", "gloom", "broom", "groom",
-            "seen", "been", "teen", "green", "screen", "queen", "keen", "between",
+            "seen", "keen", "green", "screen", "between",
             "seem", "deem", "teem",
             "beer", "deer", "peer", "cheer", "steer", "sheer", "queer", "veer", "jeer", "sneer", "career", "engineer", "volunteer", "pioneer",
             "door", "poor", "floor", "moor", "boor",
@@ -460,9 +470,23 @@ private:
             "care", "dare", "rare", "ware", "share", "spare", "square", "stare", "aware", "compare", "prepare", "declare", "software", "hardware", "firmware", "malware", "freeware", "middleware",
             "raw", "saw", "law", "jaw", "paw", "claw", "flaw", "draw", "straw", "thaw",
             "new", "few", "knew", "flew", "grew", "crew", "drew", "screw", "threw", "chew", "stew", "brew", "view", "review", "interview", "preview", "overview",
-            "box", "fox", "tax", "wax", "max", "fax", "fix", "mix", "six", "sex", "text", "next",
-            "test", "best", "rest", "west", "list", "cost", "lost", "most", "post", "host", "fast", "last", "past", "cast", "just", "must", "dust", "trust",
-            "auto", "audio", "video", "radio", "studio", "portfolio", "scenario", "ratio", "mode", "code", "node", "home", "some", "come", "done", "none", "gone", "tone", "zone", "bone", "cone", "line", "fine", "mine", "nine", "pine", "wine", "time", "lime", "dime", "mime", "name", "same", "game", "fame", "came", "tame", "lame", "frame", "blame", "flame", "shame"
+            // Deliberately absent: words whose Telex reading is a common Vietnamese word
+            // (queen=quên, sex=sẽ, six=sĩ, max=mã, mix=mĩ, tax=tã, box=bõ, rest=rét, cast=cát, last=lát, lost=lót,
+            // list=lít, host=hót, must=mút, trust=trút, dust=dút, cost=cót, most=mót, been=bên, teen=tên).
+            "fox", "wax", "fax", "fix", "text", "next",
+            "test", "best", "west", "post", "fast", "past", "just",
+            "auto", "audio", "video", "radio", "studio", "portfolio", "scenario", "ratio", "mode", "code", "node", "home", "some", "come", "done", "none", "gone", "tone", "zone", "bone", "cone", "line", "fine", "mine", "nine", "pine", "wine", "time", "lime", "dime", "mime", "name", "same", "game", "fame", "came", "tame", "lame", "frame", "blame", "flame", "shame",
+            // Doubled Telex keys (ss/ff/rr/xx/jj, ww/aa/ee/oo, dd) would otherwise escape to a single key: issue -> isue
+            "pass", "mass", "boss", "loss", "toss", "moss", "kiss", "miss", "less", "mess", "bless",
+            "assist", "assume", "assign", "assert", "asset", "essay", "possible", "lesson", "message", "session", "mission",
+            "passion", "passive", "passing", "missing", "massive", "messy", "assess", "dissolve",
+            "off", "offer", "office", "effect", "effort", "affect", "afford", "coffee", "differ", "buffer", "suffer", "offset",
+            "sorry", "error", "mirror", "carry", "marry", "hurry", "arrow", "narrow", "terror", "horror", "array", "arrive",
+            "added", "odd", "add", "diff", "tomorrow",
+            "assistant", "assignment", "assets", "assessment", "passed", "password", "missed", "essential", "necessary",
+            "lessons", "messages", "bass", "guess", "effective", "official", "officer", "difference", "different", "tariff",
+            "toffee", "errors", "worry", "berry", "cherry", "current", "correct", "correctly", "borrow", "sorrow", "arrange",
+            "barrel", "carrot", "parrot", "terrible", "referred", "merry", "ress", "isset", "buff"
         };
     }
 
@@ -535,6 +559,20 @@ private:
         return vowel_indices[1];
     }
 
+    // Escape (double modifier key): freeze the rendered syllable as literal text.
+    void disable_as_literal() {
+        chars_ = render_syllable();
+        tone_ = 0;
+        disabled_for_word_ = true;
+    }
+
+    // Not Vietnamese (e.g. 'windows', 'express'): fall back to the raw keystrokes.
+    void disable_as_raw() {
+        chars_ = raw_keys_;
+        tone_ = 0;
+        disabled_for_word_ = true;
+    }
+
     std::u32string render_syllable() const {
         if (chars_.empty()) return U"";
         if (tone_ == 0) return chars_;
@@ -578,7 +616,8 @@ private:
 
         if (vowel.empty()) {
             if (!final_c.empty()) return false;
-            return !committed;
+            // A lone 'đ' (dd) stays Vietnamese at commit, like UniKey
+            return !committed || initial == "đ";
         }
 
         int last_vowel_idx = vowel_indices.back();
@@ -612,7 +651,14 @@ private:
             if (committed && tone_ == 0) return false;
         }
 
-        if (committed && final_c.empty() && forbidden_open_nuclei_.count(vowel)) {
+        if (committed && !final_c.empty()) {
+            if (no_final_nuclei_.count(vowel)) return false;
+            // Vietnamese spells these 'inh' / 'ich' (things, kings)
+            if (vowel == "i" && (final_c == "ng" || final_c == "c")) return false;
+        }
+
+        // (a bare vowel without initial consonant, e.g. 'ă', 'â', 'ươ', is kept as typed, like UniKey)
+        if (committed && !initial.empty() && final_c.empty() && forbidden_open_nuclei_.count(vowel)) {
             return false;
         }
 
@@ -657,7 +703,7 @@ private:
                     } else if (to_lower_cp(chars_[0]) == U'đ' && last_modifier_key_ == ch_lower) {
                         chars_[0] = is_upper_cp(chars_[0]) ? U'D' : U'd';
                         chars_.push_back(ch);
-                        disabled_for_word_ = true;
+                        disable_as_literal();
                         return true;
                     }
                 }
@@ -688,13 +734,13 @@ private:
                     if (tone_ == new_tone && last_modifier_key_ == ch_lower) {
                         tone_ = 0;
                         chars_.push_back(ch);
-                        disabled_for_word_ = true;
+                        disable_as_literal();
                         return true;
                     }
                     tone_ = new_tone;
                     last_modifier_key_ = ch_lower;
                     if (config_.auto_restore_english && !is_valid_vietnamese(false)) {
-                        disabled_for_word_ = true;
+                        disable_as_raw();
                     }
                     return true;
                 }
@@ -726,7 +772,11 @@ private:
                     std::vector<int> c_vi;
                     split_syllable(c_init, c_v, c_fin, c_vi);
                     if (c_v != "oo") {
-                        disabled_for_word_ = true;
+                        disable_as_literal();
+                    } else {
+                        // Still composing (boong, xoọc): drop the escape key so raw_keys_
+                        // matches the literal text if the word is later reverted to raw.
+                        raw_keys_.pop_back();
                     }
                     last_modifier_key_ = 0;
                     return true;
@@ -747,7 +797,7 @@ private:
                     if (valid_circumflex_nuclei_.count(n_vowel)) {
                         last_modifier_key_ = ch_lower;
                         if (config_.auto_restore_english && !is_valid_vietnamese(false)) {
-                            disabled_for_word_ = true;
+                            disable_as_raw();
                         }
                         return true;
                     } else {
@@ -760,20 +810,25 @@ private:
         // 4b. Horn/Breve (Telex 'w' or VNI '7', '8')
         if ((im == "telex" && ch_lower == U'w') || (im == "vni" && (ch == U'7' || ch == U'8'))) {
             if (im == "telex" && last_modifier_key_ == U'w') {
-                std::map<char32_t, char32_t> unw_map = {
-                    {U'ă', U'a'}, {U'Ă', U'A'}, {U'ơ', U'o'}, {U'Ơ', U'O'}, {U'ư', U'u'}, {U'Ư', U'U'}
-                };
-                for (auto it = vowel_indices.rbegin(); it != vowel_indices.rend(); ++it) {
-                    if (unw_map.count(chars_[*it])) chars_[*it] = unw_map[chars_[*it]];
+                // 'ư' produced by a standalone 'w' (ww, tww) turns back into that literal 'w'
+                const size_t nraw = raw_keys_.size();
+                const int last = static_cast<int>(chars_.size()) - 1;
+                bool standalone_w = vowel_indices.size() == 1 && vowel_indices[0] == last &&
+                                    to_lower_cp(chars_[last]) == U'ư' &&
+                                    nraw >= 2 && to_lower_cp(raw_keys_[nraw - 2]) == U'w' &&
+                                    !(nraw >= 3 && to_lower_cp(raw_keys_[nraw - 3]) == U'u');
+                if (standalone_w) {
+                    chars_[last] = raw_keys_[nraw - 2];
+                } else {
+                    std::map<char32_t, char32_t> unw_map = {
+                        {U'ă', U'a'}, {U'Ă', U'A'}, {U'ơ', U'o'}, {U'Ơ', U'O'}, {U'ư', U'u'}, {U'Ư', U'U'}
+                    };
+                    for (auto it = vowel_indices.rbegin(); it != vowel_indices.rend(); ++it) {
+                        if (unw_map.count(chars_[*it])) chars_[*it] = unw_map[chars_[*it]];
+                    }
+                    chars_.push_back(ch);
                 }
-                if (raw_keys_.size() >= 2 && to_lower_cp(raw_keys_[raw_keys_.size() - 2]) == U'w' &&
-                    chars_.size() == 1 && to_lower_cp(chars_[0]) == U'ư') {
-                    chars_[0] = raw_keys_[raw_keys_.size() - 2];
-                    disabled_for_word_ = true;
-                    return true;
-                }
-                chars_.push_back(ch);
-                disabled_for_word_ = true;
+                disable_as_literal();
                 return true;
             }
 
@@ -804,7 +859,7 @@ private:
                     if ((v_low == U'a' || v_low == U'ă' || v_low == U'â') && (im == "telex" || ch == U'8')) {
                         chars_[idx] = is_upper_cp(v_ch) ? U'Ă' : U'ă';
                         last_modifier_key_ = ch_lower;
-                        if (config_.auto_restore_english && !is_valid_vietnamese(false)) disabled_for_word_ = true;
+                        if (config_.auto_restore_english && !is_valid_vietnamese(false)) disable_as_raw();
                         return true;
                     }
                     if ((v_low == U'o' || v_low == U'ô' || v_low == U'ơ') && (im == "telex" || ch == U'7')) {
@@ -819,13 +874,13 @@ private:
                                 }
                             }
                         }
-                        if (config_.auto_restore_english && !is_valid_vietnamese(false)) disabled_for_word_ = true;
+                        if (config_.auto_restore_english && !is_valid_vietnamese(false)) disable_as_raw();
                         return true;
                     }
                     if ((v_low == U'u' || v_low == U'ư') && (im == "telex" || ch == U'7')) {
                         chars_[idx] = is_upper_cp(v_ch) ? U'Ư' : U'ư';
                         last_modifier_key_ = ch_lower;
-                        if (config_.auto_restore_english && !is_valid_vietnamese(false)) disabled_for_word_ = true;
+                        if (config_.auto_restore_english && !is_valid_vietnamese(false)) disable_as_raw();
                         return true;
                     }
                 }
@@ -858,7 +913,7 @@ private:
 
         // 7. Phonotactics validity check
         if (config_.auto_restore_english && !is_valid_vietnamese(false)) {
-            disabled_for_word_ = true;
+            disable_as_raw();
         }
         return false;
     }
