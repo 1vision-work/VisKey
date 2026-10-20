@@ -297,6 +297,7 @@ if IBus is not None:
                         return True
                     return False
                 else:
+                    had_preedit = bool(self.engine.get_displayed_word())
                     res = self.engine.process_backspace()
                     cur = self.engine.get_displayed_word()
                     if cur:
@@ -304,7 +305,9 @@ if IBus is not None:
                         return True
                     else:
                         self.hide_preedit_text()
-                        return False
+                        # The last preedit char was erased: swallow the key so the app
+                        # does not also delete the committed char before it.
+                        return had_preedit
 
             # Navigation / Enter / Escape / Tab keys
             if keyval in (
@@ -327,6 +330,7 @@ if IBus is not None:
                     return True
                 else:
                     # Clean Preedit Mode (Wayland fallback)
+                    word_before = self.engine.get_displayed_word()
                     res = self._process_printable(ch)
                     cur = self.engine.get_displayed_word()
                     if cur:
@@ -339,6 +343,9 @@ if IBus is not None:
                             self.commit_text(IBus.Text.new_from_string(res.commit_text))
                             return True
                         self.hide_preedit_text()
+                        # Commit the composed word, then let the boundary key through
+                        if word_before:
+                            self.commit_text(IBus.Text.new_from_string(word_before))
                         return False
 
             self._commit_preedit_if_any()
