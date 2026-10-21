@@ -200,7 +200,15 @@ int main() {
         {"tieengs\b ", "tiến "},
         {"tieengs\b\b ", "tiế "},
         {"tieengs\b\b\b ", "ti "},
-        {"hoasn\b ", "hóa "}
+        {"hoasn\b ", "hóa "},
+        // Backspace over the space re-opens the previous word for editing
+        {"hoaxn \bs ", "hoán "},
+        {"hoaxn \bz ", "hoan "},
+        {"hoaxn, \b\bs ", "hoán "},
+        {"hoaxn x\b\bs ", "hoán "},
+        {"Vieetj Nam \bf ", "Việt Nàm "},
+        {"text \bs", "texts"},
+        {"vn \bs", "Việt Nams"}
     };
     for (const auto& p : bs_cases) {
         std::string actual = engine.feed_sequence(p.first);

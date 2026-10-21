@@ -182,6 +182,14 @@ def run_tests():
         ("tieengs\b\b ", "tiế "),
         ("tieengs\b\b\b ", "ti "),
         ("hoasn\b ", "hóa "),   # Deleting 'n' from 'hoán' dynamically shifts tone back to 'ó' -> 'hóa'!
+        # Backspace over the space re-opens the previous word for editing
+        ("hoaxn \bs ", "hoán "),
+        ("hoaxn \bz ", "hoan "),
+        ("hoaxn, \b\bs ", "hoán "),
+        ("hoaxn x\b\bs ", "hoán "),
+        ("Vieetj Nam \bf ", "Việt Nàm "),
+        ("text \bs", "texts"),
+        ("vn \bs", "Việt Nams"),
     ]
     for typed, expected in bs_cases:
         actual = engine.feed_sequence(typed)

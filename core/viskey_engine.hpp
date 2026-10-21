@@ -107,13 +107,12 @@ public:
     EngineConfig& config() { return config_; }
     const EngineConfig& config() const { return config_; }
 
+    // Full reset (cursor moved, focus changed, ...): also forgets the last committed word,
+    // since the text before the cursor can no longer be trusted.
     void reset() {
-        raw_keys_.clear();
-        chars_.clear();
-        tone_ = 0;
-        disabled_for_word_ = false;
-        has_backspaced_ = false;
-        last_modifier_key_ = 0;
+        clear_word();
+        prev_word_.valid = false;
+        prev_word_.trailing = 0;
     }
 
     std::u32string get_displayed_u32() const {
@@ -131,12 +130,19 @@ public:
 
     KeyProcessResult process_backspace() {
         if (raw_keys_.empty() && chars_.empty()) {
+            // Erasing the boundary after a committed word ("hoãn |" -> "hoãn|") puts that word
+            // back in the buffer so it can still be edited (s -> hoán, z -> hoan).
+            if (prev_word_.valid && prev_word_.trailing > 0 && --prev_word_.trailing == 0) {
+                restore_prev_word();
+                std::string disp = get_displayed_word();
+                return {false, 0, "", disp, u32_to_utf8(raw_keys_), false};
+            }
             return {false, 0, "", "", "", false};
         }
         has_backspaced_ = true;
         std::u32string old_display = get_displayed_u32();
         if (old_display.empty()) {
-            reset();
+            clear_word();
             return {false, 0, "", "", "", false};
         }
 
@@ -144,7 +150,7 @@ public:
             if (!raw_keys_.empty()) raw_keys_.pop_back();
             chars_.pop_back();
             std::string new_disp = u32_to_utf8(chars_);
-            if (chars_.empty()) reset();
+            if (chars_.empty()) clear_word();
             return {false, 0, "", new_disp, new_disp, false};
         }
 
@@ -158,7 +164,7 @@ public:
         if (!raw_keys_.empty()) raw_keys_.pop_back();
 
         if (chars_.empty()) {
-            reset();
+            clear_word();
             return {false, 0, "", "", "", false};
         }
 
@@ -198,13 +204,20 @@ public:
             std::string raw_utf8 = u32_to_utf8(raw_keys_);
             std::string ch_str(1, ch);
 
+            // Another boundary key after a committed word (", ", "  "): one more to erase
+            // before that word can be edited again.
+            if (raw_keys_.empty() && chars_.empty()) {
+                if (prev_word_.valid) prev_word_.trailing++;
+                return {false, 0, "", "", "", false};
+            }
+
             // 1. Check Macro expansion
             if (config_.enable_macros && !raw_utf8.empty()) {
                 std::string raw_lower = to_ascii_lower(raw_utf8);
                 auto it = config_.macros.find(raw_lower);
                 if (it != config_.macros.end()) {
                     std::string expanded = apply_case_pattern(raw_utf8, it->second);
-                    reset();
+                    reset();  // the expansion is not a syllable we could edit back
                     return {
                         true,
                         static_cast<int>(old_display.size()),
@@ -224,7 +237,9 @@ public:
                 old_display != raw_keys_ &&
                 (disabled_for_word_ ? english_collision_words_.count(to_ascii_lower(raw_utf8)) > 0
                                     : !is_valid_vietnamese(true))) {
-                reset();
+                // The screen now shows the raw keys: remember them as a literal word
+                disable_as_raw();
+                commit_word();
                 return {
                     true,
                     static_cast<int>(old_display.size()),
@@ -235,7 +250,7 @@ public:
                 };
             }
 
-            reset();
+            commit_word();
             return {false, 0, "", "", "", false};
         }
 
@@ -290,6 +305,17 @@ public:
     }
 
 private:
+    // The word committed by the last boundary key, kept so Backspace over the boundary can
+    // bring it back. `trailing` counts boundary chars typed after it that are still on screen.
+    struct PrevWord {
+        bool valid = false;
+        int trailing = 0;
+        std::u32string raw_keys;
+        std::u32string chars;
+        int tone = 0;
+        bool disabled_for_word = false;
+    };
+
     EngineConfig config_;
     std::u32string raw_keys_;
     std::u32string chars_;
@@ -297,6 +323,41 @@ private:
     bool disabled_for_word_ = false;
     bool has_backspaced_ = false;
     char32_t last_modifier_key_ = 0;
+    PrevWord prev_word_;
+
+    void clear_word() {
+        raw_keys_.clear();
+        chars_.clear();
+        tone_ = 0;
+        disabled_for_word_ = false;
+        has_backspaced_ = false;
+        last_modifier_key_ = 0;
+    }
+
+    // Called on a word boundary whose key reaches the screen right after the current word.
+    void commit_word() {
+        if (chars_.empty()) {
+            reset();
+            return;
+        }
+        prev_word_.valid = true;
+        prev_word_.trailing = 1;
+        prev_word_.raw_keys = raw_keys_;
+        prev_word_.chars = chars_;
+        prev_word_.tone = tone_;
+        prev_word_.disabled_for_word = disabled_for_word_;
+        clear_word();
+    }
+
+    void restore_prev_word() {
+        raw_keys_ = prev_word_.raw_keys;
+        chars_ = prev_word_.chars;
+        tone_ = prev_word_.tone;
+        disabled_for_word_ = prev_word_.disabled_for_word;
+        // Editing a finished word: never auto-restore it to English on the next boundary
+        has_backspaced_ = true;
+        prev_word_.valid = false;
+    }
 
     std::unordered_map<char32_t, std::vector<char32_t>> vowel_table_;
     std::unordered_set<char32_t> base_vowels_lower_;
