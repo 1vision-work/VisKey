@@ -5,7 +5,11 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 BUILD_DIR="$ROOT_DIR/build_macos"
 APP_BUNDLE="$BUILD_DIR/VisKey.app"
-DMG_PATH="$ROOT_DIR/VisKey-macOS-Installer.dmg"
+# Version from the git tag (v1.1.0-beta.5 -> 1.1.0-beta.5), else the default; see scripts/viskey_version.sh.
+APP_VER="$(bash "$SCRIPT_DIR/viskey_version.sh")"
+APP_VER_NUMERIC="$(bash "$SCRIPT_DIR/viskey_version.sh" --numeric)"
+DMG_NAME="VisKey-${APP_VER}-macOS.dmg"
+DMG_PATH="$ROOT_DIR/$DMG_NAME"
 
 echo "============================================================"
 echo "  VisKey - Trinh tao bo cai dat macOS (.app & .dmg)       "
@@ -36,6 +40,9 @@ mkdir -p "$APP_BUNDLE/Contents/MacOS"
 mkdir -p "$APP_BUNDLE/Contents/Resources"
 
 cp "$ROOT_DIR/macos/Info.plist" "$APP_BUNDLE/Contents/Info.plist"
+# Shown in the app (Settings sidebar, About, update check) and in Finder.
+/usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString $APP_VER" "$APP_BUNDLE/Contents/Info.plist"
+/usr/libexec/PlistBuddy -c "Set :CFBundleVersion $APP_VER_NUMERIC" "$APP_BUNDLE/Contents/Info.plist"
 
 # Sources: keep in sync with VISKEY_MACOS_SOURCES in CMakeLists.txt.
 MACOS_SOURCES=(
@@ -72,7 +79,7 @@ fi
 # Ad-hoc codesign so macOS Gatekeeper & TCC Accessibility recognize the bundle cleanly
 codesign --force --deep --sign - "$APP_BUNDLE"
 
-echo "[4/4] Dong goi bo cai dat VisKey-macOS-Installer.dmg..."
+echo "[4/4] Dong goi bo cai dat $DMG_NAME..."
 DMG_STAGE="$BUILD_DIR/dmg_stage"
 rm -rf "$DMG_STAGE" "$DMG_PATH"
 mkdir -p "$DMG_STAGE"

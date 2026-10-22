@@ -619,7 +619,7 @@ float PageUpdate(Ctx& c, float y) {
             icon = Icon::Download;
             ic = c.t.accent;
             title = L"Có bản mới " + available;
-            body = L"Bạn đang dùng " + AppVersion() + L". Tải tệp zip mới từ trang phát hành rồi thay VisKey64.exe. VisKey không tự tải hay tự cài.";
+            body = L"Bạn đang dùng " + AppVersion() + L". Tải tệp zip mới từ trang phát hành rồi thay VisKey.exe. VisKey không tự tải hay tự cài.";
             break;
         case UpdateState::Failed:
             icon = Icon::Warning;
@@ -649,7 +649,7 @@ float PageUpdate(Ctx& c, float y) {
     y += 34.f;
     {
         std::wstring body =
-            L"1. Tải tệp zip mới từ trang Bản phát hành.\n2. Thoát VisKey (chuột phải biểu tượng ở khay → Thoát).\n3. Giải nén và thay VisKey64.exe cũ "
+            L"1. Tải tệp zip mới từ trang Bản phát hành.\n2. Thoát VisKey (chuột phải biểu tượng ở khay → Thoát).\n3. Giải nén và thay VisKey.exe cũ "
             L"bằng tệp mới, rồi chạy lại.\nCài đặt, gõ tắt và quy tắc theo ứng dụng nằm trong Registry (HKCU\\Software\\VisKey) nên được giữ nguyên.";
         float textW = c.x1 - c.x0 - 48.f;
         float bh = c.g.WrappedHeight(body, textW, TS(14.f));

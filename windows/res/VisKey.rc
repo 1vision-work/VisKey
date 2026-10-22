@@ -36,9 +36,9 @@ BEGIN
             VALUE "CompanyName",      "1VISION"
             VALUE "FileDescription",  "VisKey - Vietnamese input method"
             VALUE "FileVersion",      VISKEY_VERSION_STR
-            VALUE "InternalName",     "VisKey64"
+            VALUE "InternalName",     "VisKey"
             VALUE "LegalCopyright",   "MIT License"
-            VALUE "OriginalFilename", "VisKey64.exe"
+            VALUE "OriginalFilename", "VisKey.exe"
             VALUE "ProductName",      "VisKey"
             VALUE "ProductVersion",   VISKEY_VERSION_STR
             VALUE "Comments",         "https://github.com/1vision-work/VisKey"

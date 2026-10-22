@@ -315,6 +315,27 @@ void LoadModel(Model& m) {
     } else {
         SaveRules(m);
     }
+
+    // The exe was renamed (VisKey64.exe -> VisKey.exe) and may be moved on upgrade: repoint an
+    // existing "start with Windows" entry whose target file is gone at this exe.
+    HKEY run = nullptr;
+    if (m.launchAtStartup && RegOpenKeyExW(HKEY_CURRENT_USER, kRunKey, 0, KEY_READ | KEY_WRITE, &run) == ERROR_SUCCESS) {
+        wchar_t buf[1024] = {0};
+        DWORD type = 0, size = sizeof(buf) - sizeof(wchar_t);
+        if (RegQueryValueExW(run, L"VisKey", nullptr, &type, reinterpret_cast<LPBYTE>(buf), &size) == ERROR_SUCCESS && type == REG_SZ) {
+            std::wstring target = buf;
+            if (target.size() >= 2 && target[0] == L'"') {  // the installer writes a quoted path
+                size_t q = target.find(L'"', 1);
+                target = target.substr(1, q == std::wstring::npos ? std::wstring::npos : q - 1);
+            }
+            if (!target.empty() && GetFileAttributesW(target.c_str()) == INVALID_FILE_ATTRIBUTES) {
+                wchar_t exePath[MAX_PATH] = {0};
+                GetModuleFileNameW(nullptr, exePath, MAX_PATH);
+                RegSetValueExW(run, L"VisKey", 0, REG_SZ, reinterpret_cast<const BYTE*>(exePath), (DWORD)((wcslen(exePath) + 1) * sizeof(wchar_t)));
+            }
+        }
+        RegCloseKey(run);
+    }
 }
 
 void SaveSettings(const Model& m) {
@@ -766,6 +787,11 @@ bool PickSaveFile(HWND owner, const wchar_t* title, const wchar_t* filterName, c
 std::wstring AppVersion() {
     static std::wstring cached;
     if (!cached.empty()) return cached;
+#ifdef VISKEY_APP_VERSION
+    // Full version string from CMake (e.g. "1.1.0-beta.5"); VS_FIXEDFILEINFO below only holds x.y.z.
+    cached = Utf8ToWide(VISKEY_APP_VERSION);
+    if (!cached.empty()) return cached;
+#endif
     HRSRC res = FindResourceW(nullptr, MAKEINTRESOURCEW(1), MAKEINTRESOURCEW(16) /* RT_VERSION */);
     if (res) {
         HGLOBAL h = LoadResource(nullptr, res);
@@ -784,9 +810,6 @@ std::wstring AppVersion() {
             break;
         }
     }
-#ifdef VISKEY_APP_VERSION
-    if (cached.empty() || cached == L"0.0.0") cached = Utf8ToWide(VISKEY_APP_VERSION);
-#endif
     if (cached.empty()) cached = L"0.0.0";
     return cached;
 }

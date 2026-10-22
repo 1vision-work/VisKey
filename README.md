@@ -48,10 +48,10 @@ Bộ lõi có hai bản tương đương: C++17 header-only (`core/viskey_engine
 
 ### 3.3. Bảng điều khiển (tự lưu, không có nút "Lưu")
 * **macOS:** các trang *Chung, Gõ tắt, Theo ứng dụng, Phím tắt, Quyền & Bảo mật, Giới thiệu* (kiểm tra cập nhật nằm trong *Giới thiệu*). Lần đầu mở, hoặc khi chưa có quyền Trợ năng, có cửa sổ hướng dẫn 3 bước: chọn kiểu gõ, cấp quyền, gõ thử. Cấu hình lưu trong `NSUserDefaults`. Tùy chọn khởi động cùng máy (tắt mặc định) tạo file `~/Library/LaunchAgents/org.viskey.inputmethod.plist`.
-* **Windows (`VisKey64.exe`):** các trang *Chung, Gõ tắt, Theo ứng dụng, Phím tắt, Cập nhật, Giới thiệu*, giao diện sáng/tối theo Windows. Cấu hình lưu trong Registry `HKCU\Software\VisKey` (khóa con `Macros`, `MacroUsage`, `AppRules`). Tùy chọn khởi động cùng Windows ghi giá trị `VisKey` vào `HKCU\Software\Microsoft\Windows\CurrentVersion\Run`.
+* **Windows (`VisKey.exe`):** các trang *Chung, Gõ tắt, Theo ứng dụng, Phím tắt, Cập nhật, Giới thiệu*, giao diện sáng/tối theo Windows. Cấu hình lưu trong Registry `HKCU\Software\VisKey` (khóa con `Macros`, `MacroUsage`, `AppRules`). Tùy chọn khởi động cùng Windows ghi giá trị `VisKey` vào `HKCU\Software\Microsoft\Windows\CurrentVersion\Run`.
 * **Linux (`viskey-settings`):** giao diện GTK4/libadwaita (nếu thiếu thì dùng bản Tkinter) với các tab *Chung, Gõ tắt, Giới thiệu*. Cấu hình lưu ở `~/.config/viskey/config.json`; bộ gõ đọc lại file này khi ô nhập nhận focus, nên không cần khởi động lại IBus.
 * Cả 3 nền tảng đều có tham số `--ui-snapshot <thư-mục>` để chụp ảnh giao diện bằng dữ liệu mẫu (không bắt phím, không đọc cấu hình thật):
-  `VisKey.app/Contents/MacOS/VisKey --ui-snapshot ./shots` · `VisKey64.exe --ui-snapshot shots` · `python3 linux/ibus/viskey_settings.py --ui-snapshot shots`.
+  `VisKey.app/Contents/MacOS/VisKey --ui-snapshot ./shots` · `VisKey.exe --ui-snapshot shots` · `python3 linux/ibus/viskey_settings.py --ui-snapshot shots`.
 
 ## 4. Cấu trúc Thư mục Dự án
 
@@ -61,13 +61,13 @@ VisKey/
 ├── LICENSE                            # Giấy phép MIT
 ├── VISKEY_BUILD_GUIDE.md              # Hướng dẫn build & đóng gói chi tiết
 ├── VISKEY_ARCHITECTURE_FOR_DEVS.md    # Kiến trúc & thuật toán cho developer
-├── CMakeLists.txt                     # CMake: CLI, các bài test (ctest), VisKey.app (macOS), VisKey64.exe (Windows)
+├── CMakeLists.txt                     # CMake: CLI, các bài test (ctest), VisKey.app (macOS), VisKey.exe (Windows)
 ├── Install_macOS.command              # Nhấp đúp trên macOS để chạy scripts/build_macos_installer.sh
 ├── Build_Windows.bat                  # Script build Windows cũ (xem mục 6.3)
-├── Run_VisKey_Windows.bat             # Chạy VisKey64.exe nếu có, nếu không thì chạy bản Python portable
+├── Run_VisKey_Windows.bat             # Chạy VisKey.exe nếu có, nếu không thì chạy bản Python portable
 ├── .github/workflows/
 │   ├── ci.yml                         # Linux (.deb) + macOS (.app/.dmg), tạo pre-release khi push tag v*
-│   └── windows.yml                    # VisKey64.exe x64/ARM64, zip portable, bộ cài Inno Setup
+│   └── windows.yml                    # VisKey.exe x64/ARM64, zip portable, bộ cài Inno Setup
 ├── core/
 │   ├── viskey_engine.hpp              # Bộ lõi C++17 header-only
 │   ├── viskey_engine.py               # Bộ lõi Python 3 (dùng cho Linux)
@@ -95,7 +95,7 @@ VisKey/
 ├── design/                            # tokens.json (màu, bố cục) và biểu tượng SVG
 ├── docs/UI_V2.md                      # Đặc tả giao diện chung cho 3 nền tảng
 ├── scripts/
-│   ├── build_macos_installer.sh       # Build VisKey.app (Universal nếu được) + VisKey-macOS-Installer.dmg
+│   ├── build_macos_installer.sh       # Build VisKey.app (Universal nếu được) + VisKey-<phiên bản>-macOS.dmg
 │   ├── build_linux_deb.sh             # Đóng gói ibus-viskey_<phiên bản>_all.deb
 │   └── install_linux.sh               # Cài đặt trên Debian/Ubuntu (qua .deb) hoặc chép file trực tiếp
 └── tests/
@@ -117,13 +117,13 @@ Khi push tag `v*`, CI tạo một **pre-release** trên trang [Releases](https:/
 
 | Nền tảng | File |
 | :--- | :--- |
-| macOS (Apple Silicon + Intel) | `VisKey-macOS-Installer.dmg` |
+| macOS (Apple Silicon + Intel) | `VisKey-<phiên bản>-macOS.dmg` |
 | Linux (Debian/Ubuntu) | `ibus-viskey_<phiên bản>_all.deb` |
 | Windows x64 | `VisKey-<phiên bản>-Windows-x64-portable.zip`, `VisKey-<phiên bản>-Windows-Setup.exe` |
 | Windows ARM64 (thử nghiệm) | `VisKey-<phiên bản>-Windows-arm64-portable.zip` |
 
 ### 5.1. macOS
-1. Mở `VisKey-macOS-Installer.dmg` rồi kéo **VisKey.app** vào **Applications**.
+1. Mở `VisKey-<phiên bản>-macOS.dmg` rồi kéo **VisKey.app** vào **Applications**.
 2. Ứng dụng chỉ được ký ad-hoc. Lần đầu, bấm chuột phải vào VisKey.app → **Open**, hoặc chạy:
    ```bash
    xattr -cr /Applications/VisKey.app
@@ -150,14 +150,14 @@ export XMODIFIERS=@im=ibus
 ```
 
 ### 5.3. Windows
-* **Portable:** giải nén `VisKey-*-Windows-*-portable.zip` vào một thư mục bất kỳ rồi chạy `VisKey64.exe`. Chỉ có một file exe, không cần cài đặt.
+* **Portable:** giải nén `VisKey-*-Windows-*-portable.zip` vào một thư mục bất kỳ rồi chạy `VisKey.exe`. Chỉ có một file exe, không cần cài đặt.
 * **Bộ cài:** chạy `VisKey-*-Windows-Setup.exe`. Chỉ có bản x64, cài cho người dùng hiện tại, không cần quyền admin.
 * File chưa được ký số. Nếu SmartScreen cảnh báo, bấm **More info → Run anyway**.
-* Để cập nhật, thoát VisKey rồi thay `VisKey64.exe` bằng bản mới; cài đặt được giữ nguyên. Cách gỡ bỏ có trong `README-Windows.txt` (đi kèm file zip).
+* Để cập nhật, thoát VisKey rồi thay `VisKey.exe` bằng bản mới; cài đặt được giữ nguyên. Cách gỡ bỏ có trong `README-Windows.txt` (đi kèm file zip).
 
 ## 6. Build từ mã nguồn
 
-Chi tiết xem thêm [`VISKEY_BUILD_GUIDE.md`](VISKEY_BUILD_GUIDE.md). Số phiên bản nằm ở `project(VisKey VERSION …)` trong `CMakeLists.txt`, `macos/Info.plist` và `linux/ibus/viskey_version.py`.
+Chi tiết xem thêm [`VISKEY_BUILD_GUIDE.md`](VISKEY_BUILD_GUIDE.md). Số phiên bản của bản phát hành lấy từ tag git: tag `v1.1.0-beta.5` cho ra `VisKey-1.1.0-beta.5-macOS.dmg`, `ibus-viskey_1.1.0~beta.5_all.deb` (dạng phiên bản của Debian), `VisKey-1.1.0-beta.5-Windows-x64-portable.zip` và `VisKey-1.1.0-beta.5-Windows-Setup.exe`, và ứng dụng hiển thị `1.1.0-beta.5`. `scripts/viskey_version.sh` tính số này (biến môi trường `VISKEY_VERSION`, rồi tag `v*` đang build, rồi tag `v*` trỏ đúng vào `HEAD`). Bản build không có tag dùng phiên bản mặc định ở `project(VisKey VERSION …)` trong `CMakeLists.txt`, `macos/Info.plist` và `linux/ibus/viskey_version.py`.
 
 ### 6.1. macOS (cần Xcode Command Line Tools: `xcode-select --install`)
 ```bash
@@ -168,7 +168,7 @@ Script sẽ:
 1. Kiểm tra `clang++`.
 2. Chạy `tests/test_cpp_engine.cpp` (109 bài test) và `tests/test_update_policy.cpp`.
 3. Build `build_macos/VisKey.app` dạng Universal (arm64 + x86_64); nếu không được thì build cho kiến trúc của máy. Sau đó ký ad-hoc (`codesign --force --deep --sign -`).
-4. Tạo `VisKey-macOS-Installer.dmg` ở thư mục gốc, rồi hỏi có cài vào `/Applications` và mở luôn không (mặc định là có).
+4. Tạo `VisKey-<phiên bản>-macOS.dmg` ở thư mục gốc, rồi hỏi có cài vào `/Applications` và mở luôn không (mặc định là có).
 
 Nếu dùng CMake: `cmake -S . -B build && cmake --build build -j && ctest --test-dir build` (cho ra `build/VisKey.app`).
 
@@ -190,16 +190,16 @@ Script kết thúc bằng `ibus restart`.
 
 ### 6.3. Windows (Visual Studio + CMake)
 ```bat
-cmake -S . -B build -A x64
+cmake -S . -B build -A x64 -DVISKEY_VERSION=1.1.0-beta.5   # bỏ -DVISKEY_VERSION để dùng phiên bản mặc định
 cmake --build build --config Release --parallel
 ctest --test-dir build -C Release --output-on-failure
 ```
-Kết quả là `build\Release\VisKey64.exe`: một file exe, không cần DLL runtime đi kèm. Dùng `-A ARM64` để build cho ARM64. Có thể tạo bộ cài (tùy chọn) bằng Inno Setup 6:
+Kết quả là `build\Release\VisKey.exe`: một file exe, không cần DLL runtime đi kèm. Dùng `-A ARM64` để build cho ARM64. Có thể tạo bộ cài (tùy chọn) bằng Inno Setup 6:
 ```bat
-iscc /DAppVersion=1.0.0 /DSourceExe=build\Release\VisKey64.exe /DRepoRoot=. /Odist windows\installer\VisKey.iss
+iscc /DAppVersion=1.1.0-beta.5 /DSourceExe=build\Release\VisKey.exe /DRepoRoot=. /Odist windows\installer\VisKey.iss
 ```
 
-> **Lưu ý:** `Build_Windows.bat` hiện chỉ biên dịch `windows\VisKeyWin.cpp`, thiếu các file `windows\ui\*.cpp` và `VisKey.rc`, nên không build được bản hiện tại. Hãy dùng CMake như trên. `Run_VisKey_Windows.bat` chạy `VisKey64.exe` ở thư mục gốc nếu có; nếu không có, nó chạy `windows\VisKey_Windows_Portable.pyw` bằng Python, và nếu cũng không có Python thì gọi `Build_Windows.bat`.
+> **Lưu ý:** `Build_Windows.bat` hiện chỉ biên dịch `windows\VisKeyWin.cpp`, thiếu các file `windows\ui\*.cpp` và `VisKey.rc`, nên không build được bản hiện tại. Hãy dùng CMake như trên. `Run_VisKey_Windows.bat` chạy `VisKey.exe` ở thư mục gốc nếu có; nếu không có, nó chạy `windows\VisKey_Windows_Portable.pyw` bằng Python, và nếu cũng không có Python thì gọi `Build_Windows.bat`.
 >
 > `VisKey_Windows_Portable.pyw` là bản rút gọn, không cần biên dịch (cửa sổ Tkinter, `Ctrl + Space` / `Alt + Z` cố định). Bản này không có biểu tượng khay, không ghi nhớ theo ứng dụng, không kiểm tra cập nhật, và **không lưu cấu hình** khi thoát.
 
@@ -226,7 +226,7 @@ cmake -S . -B build && cmake --build build -j && ctest --test-dir build --output
 g++ -std=c++17 -O2 core/viskey_cli.cpp -o viskey_cli && ./viskey_cli
 ```
 
-CI (`.github/workflows/`) chạy các bài test này trên Linux, macOS và Windows. CI cũng build và kiểm tra file `.deb`, `.dmg` và `VisKey64.exe`, và chụp ảnh giao diện bằng `--ui-snapshot`.
+CI (`.github/workflows/`) chạy các bài test này trên Linux, macOS và Windows. CI cũng build và kiểm tra file `.deb`, `.dmg` và `VisKey.exe`, và chụp ảnh giao diện bằng `--ui-snapshot`.
 
 ## 8. Credits / Ghi công
 

@@ -51,10 +51,14 @@ jobs:
       - name: CLI smoke test
         run: echo q | ./build/viskey_cli >/dev/null
 
+      # v1.1.0-beta.5 tag -> ibus-viskey_1.1.0~beta.5_all.deb (Debian form of the tag version).
       - name: Build .deb
         run: |
           bash scripts/build_linux_deb.sh
           ls -l ibus-viskey_*_all.deb
+          deb="ibus-viskey_$(bash scripts/viskey_version.sh --deb)_all.deb"
+          test -f "$deb" || { echo "missing $deb"; exit 1; }
+          test "$(dpkg-deb --field "$deb" Version)" = "$(bash scripts/viskey_version.sh --deb)"
 
       - name: Inspect .deb
         run: |
@@ -104,7 +108,7 @@ jobs:
         run: |
           unset DISPLAY WAYLAND_DISPLAY
           /usr/bin/python3 -c "import sys; sys.path.insert(0, '/usr/share/viskey/ibus'); import ibus_viskey; assert ibus_viskey.IBus is not None, 'IBus typelib not available'; assert ibus_viskey.settings_model is not None; print('ibus_viskey OK')"
-          /usr/bin/python3 -c "import sys; sys.path.insert(0, '/usr/share/viskey/ibus'); import viskey_settings as s, viskey_settings_model as m, viskey_version as v; assert s.HAVE_GTK, 'GTK4/libadwaita typelibs not available'; assert s.VERSION == v.VERSION; print('viskey_settings OK', v.VERSION)"
+          /usr/bin/python3 -c "import sys; sys.path.insert(0, '/usr/share/viskey/ibus'); import viskey_settings as s, viskey_settings_model as m, viskey_version as v; assert s.HAVE_GTK, 'GTK4/libadwaita typelibs not available'; assert s.VERSION == v.VERSION; assert v.VERSION == sys.argv[1], (v.VERSION, sys.argv[1]); print('viskey_settings OK', v.VERSION)" "$(bash "$GITHUB_WORKSPACE/scripts/viskey_version.sh")"
           /usr/bin/python3 -c "import sys; p = sys.argv[1]; compile(open(p, encoding='utf-8').read(), p, 'exec'); print('viskey_settings_tk syntax OK')" /usr/share/viskey/ibus/viskey_settings_tk.py
 
       # Renders every settings tab (light + dark) offscreen with demo data; no real config, no network.
@@ -168,9 +172,12 @@ jobs:
           lipo -archs "$app/Contents/MacOS/VisKey" | grep -q arm64
           codesign -v --deep --strict --verbose=2 "$app"
           plutil -lint "$app/Contents/Info.plist"
-          test -f VisKey-macOS-Installer.dmg
-          hdiutil imageinfo VisKey-macOS-Installer.dmg >/dev/null
-          ls -l VisKey-macOS-Installer.dmg
+          ver="$(bash scripts/viskey_version.sh)"
+          test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$app/Contents/Info.plist")" = "$ver"
+          dmg="VisKey-$ver-macOS.dmg"
+          test -f "$dmg"
+          hdiutil imageinfo "$dmg" >/dev/null
+          ls -l "$dmg"
 
       # Offscreen UI screenshots: no event tap, no Accessibility prompt, in-memory demo settings.
       # macOS has no `timeout`; perl's alarm kills the app if it hangs.
@@ -190,7 +197,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: viskey-macos
-          path: VisKey-macOS-Installer.dmg
+          path: VisKey-*-macOS.dmg
           if-no-files-found: error
 
       # Not on v* tags: the release job publishes every artifact of the run as release files.
@@ -230,12 +237,12 @@ jobs:
             VisKey ${{ github.ref_name }} - bộ gõ tiếng Việt Telex/VNI (Vietnamese input method). MIT License, by 1VISION.
 
             **Windows** (x64 / ARM64)
-            - Portable: unzip `VisKey-*-Windows-*-portable.zip` and run `VisKey64.exe`. Toggle Vietnamese with Ctrl+Space or Alt+Z.
+            - Portable: unzip `VisKey-*-Windows-*-portable.zip` and run `VisKey.exe` (a single exe, no installation). Toggle Vietnamese with Ctrl+Space or Alt+Z.
             - Or run `VisKey-*-Windows-Setup.exe` (x64, per-user install, no admin needed).
             - The binaries are unsigned: on the SmartScreen prompt click "More info" -> "Run anyway".
 
             **macOS** (Apple Silicon + Intel)
-            - Open `VisKey-macOS-Installer.dmg` and drag VisKey.app into Applications.
+            - Open `VisKey-*-macOS.dmg` and drag VisKey.app into Applications.
             - The app is ad-hoc signed: right-click VisKey.app -> Open the first time (or `xattr -cr /Applications/VisKey.app`).
             - Grant Accessibility: System Settings -> Privacy & Security -> Accessibility -> VisKey.
 
