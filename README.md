@@ -33,6 +33,26 @@ Bộ lõi có hai bản tương đương: C++17 header-only (`core/viskey_engine
 
 ## 3. Giao diện & Phím tắt
 
+### Ảnh chụp giao diện (Linux)
+
+<img src="docs/screenshots/linux-general-light.png" alt="viskey-settings – tab Chung" width="600">
+
+*Bảng điều khiển `viskey-settings` – tab **Chung**: bật/tắt tiếng Việt, chọn Telex/VNI, vị trí đặt dấu, Quick Telex, không gạch chân.*
+
+<img src="docs/screenshots/linux-macros-light.png" alt="viskey-settings – tab Gõ tắt" width="600">
+
+*Tab **Gõ tắt**: thêm/lọc/nhập/xuất cụm từ gõ tắt, đếm số lần dùng.*
+
+<img src="docs/screenshots/linux-about-update-light.png" alt="viskey-settings – tab Giới thiệu" width="600">
+
+*Tab **Giới thiệu** với thông báo có bản cập nhật mới.*
+
+<img src="docs/screenshots/linux-general-dark.png" alt="viskey-settings – giao diện tối" width="600">
+
+*Giao diện tối.*
+
+> Ảnh được tạo bằng `python3 linux/ibus/viskey_settings.py --ui-snapshot` với dữ liệu mẫu; ảnh giao diện macOS/Windows sẽ được bổ sung sau.
+
 ### 3.1. Biểu tượng trạng thái
 * **macOS:** biểu tượng VisKey kèm chữ `VI` / `EN` trên thanh menu. Bấm chuột trái mở bảng nhanh (VI/EN, Telex/VNI, quy tắc cho ứng dụng đang mở). Bấm chuột phải (hoặc Ctrl+click) mở menu rút gọn: *Bảng điều khiển…* (`Cmd + ,`), *Thoát VisKey*. Khi đổi VI/EN, một HUD nhỏ hiện lên (tắt được).
 * **Windows:** biểu tượng ở khay hệ thống (màu khi đang gõ VI, xám khi đang gõ EN). Bấm chuột trái mở bảng nhanh, bấm đúp mở Bảng điều khiển, bấm chuột phải mở menu (Mở Bảng điều khiển / Bật-Tắt tiếng Việt / Thoát VisKey).
