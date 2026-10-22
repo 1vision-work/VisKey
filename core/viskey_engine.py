@@ -166,12 +166,45 @@ class VisKeyEngine:
         self.reset()
 
     def reset(self) -> None:
+        """Full reset (cursor moved, focus changed, ...): also forgets the last committed word,
+        since the text before the cursor can no longer be trusted."""
+        self._clear_word()
+        # The word committed by the last boundary key, kept so Backspace over the boundary can
+        # bring it back; `prev_trailing` counts boundary chars typed after it still on screen.
+        self.prev_word: Optional[dict] = None
+        self.prev_trailing: int = 0
+
+    def _clear_word(self) -> None:
         self.raw_keys: List[str] = []
         self.chars: List[str] = []       # Base characters (vowels without tone, 'đ'/'d', consonants)
         self.tone: int = 0               # 0..5
         self.disabled_for_word: bool = False
         self.has_backspaced: bool = False
         self.last_modifier_key: Optional[str] = None
+
+    def _commit_word(self) -> None:
+        """Called on a word boundary whose key reaches the screen right after the current word."""
+        if not self.chars:
+            self.reset()
+            return
+        self.prev_word = {
+            "raw_keys": list(self.raw_keys),
+            "chars": list(self.chars),
+            "tone": self.tone,
+            "disabled_for_word": self.disabled_for_word,
+        }
+        self.prev_trailing = 1
+        self._clear_word()
+
+    def _restore_prev_word(self) -> None:
+        prev = self.prev_word
+        self.prev_word = None
+        self.raw_keys = list(prev["raw_keys"])
+        self.chars = list(prev["chars"])
+        self.tone = prev["tone"]
+        self.disabled_for_word = prev["disabled_for_word"]
+        # Editing a finished word: never auto-restore it to English on the next boundary
+        self.has_backspaced = True
 
     def get_displayed_word(self) -> str:
         # Invariant: while disabled_for_word, `chars` holds exactly the literal text on screen
@@ -373,12 +406,19 @@ class VisKeyEngine:
         Deletes the last visible character on screen, keeping syllable tone on remaining vowels if valid.
         """
         if not self.raw_keys and not self.chars:
+            # Erasing the boundary after a committed word ("hoãn |" -> "hoãn|") puts that word
+            # back in the buffer so it can still be edited (s -> hoán, z -> hoan).
+            if self.prev_word is not None and self.prev_trailing > 0:
+                self.prev_trailing -= 1
+                if self.prev_trailing == 0:
+                    self._restore_prev_word()
+                    return KeyProcessResult(False, 0, "", self.get_displayed_word(), "".join(self.raw_keys))
             return KeyProcessResult(False, 0, "", "", "")
         self.has_backspaced = True
 
         old_display = self.get_displayed_word()
         if not old_display:
-            self.reset()
+            self._clear_word()
             return KeyProcessResult(False, 0, "", "", "")
 
         if self.disabled_for_word:
@@ -387,7 +427,7 @@ class VisKeyEngine:
             self.chars.pop()
             new_display = "".join(self.chars)
             if not self.chars:
-                self.reset()
+                self._clear_word()
             return KeyProcessResult(False, 0, "", new_display, new_display)
 
         # In Vietnamese mode, remove the last character from `self.chars`
@@ -399,7 +439,7 @@ class VisKeyEngine:
             self.raw_keys.pop()
 
         if not self.chars:
-            self.reset()
+            self._clear_word()
             return KeyProcessResult(False, 0, "", "", "")
 
         # If the vowel carrying the tone was deleted, or no vowels remain, clear the tone
@@ -626,12 +666,19 @@ class VisKeyEngine:
             old_display = self.get_displayed_word()
             raw_word = "".join(self.raw_keys)
 
+            # Another boundary key after a committed word (", ", "  "): one more to erase
+            # before that word can be edited again.
+            if not self.raw_keys and not self.chars:
+                if self.prev_word is not None:
+                    self.prev_trailing += 1
+                return KeyProcessResult(False, 0, "", "", "")
+
             # 1. Check Macro expansion
             if self.config.enable_macros and raw_word:
                 raw_lower = raw_word.lower()
                 if raw_lower in self.config.macros:
                     expanded = self._apply_case_pattern(raw_word, self.config.macros[raw_lower])
-                    self.reset()
+                    self.reset()  # the expansion is not a syllable we could edit back
                     return KeyProcessResult(
                         handled=True,
                         backspaces=len(old_display),
@@ -654,7 +701,9 @@ class VisKeyEngine:
                     else not self.is_valid_vietnamese(committed=True)
                 )
             ):
-                self.reset()
+                # The screen now shows the raw keys: remember them as a literal word
+                self._disable_as_raw()
+                self._commit_word()
                 return KeyProcessResult(
                     handled=True,
                     backspaces=len(old_display),
@@ -664,7 +713,7 @@ class VisKeyEngine:
                     autocomplete_fix_needed=self.config.fix_autocomplete,
                 )
 
-            self.reset()
+            self._commit_word()
             return KeyProcessResult(False, 0, "", "", "")
 
         old_display = self.get_displayed_word()

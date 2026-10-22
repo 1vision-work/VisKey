@@ -298,6 +298,11 @@ if IBus is not None:
                     return False
                 else:
                     had_preedit = bool(self.engine.get_displayed_word())
+                    if not had_preedit:
+                        # The previous word is already committed text, not preedit: it
+                        # cannot be pulled back for editing here, so just let the app erase.
+                        self.engine.reset()
+                        return False
                     res = self.engine.process_backspace()
                     cur = self.engine.get_displayed_word()
                     if cur:
