@@ -1,5 +1,5 @@
 // VisKey for Windows - Direct2D / DirectWrite drawing layer (MIT License, 1VISION).
-// d2d1.dll and dwrite.dll are loaded at runtime (LoadLibraryW + GetProcAddress) so VisKey64.exe
+// d2d1.dll and dwrite.dll are loaded at runtime (LoadLibraryW + GetProcAddress) so VisKey.exe
 // keeps a minimal static import table. If either is missing, GfxStartup() returns false and the
 // app falls back to the classic tray menu.
 #pragma once

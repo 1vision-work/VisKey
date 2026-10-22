@@ -1,6 +1,7 @@
 ﻿; Inno Setup script for VisKey for Windows (MIT License, 1VISION).
 ; Optional: the portable zip is the primary download. Built by .github/workflows/windows.yml:
-;   iscc /DAppVersion=1.0.0 /DSourceExe=build\Release\VisKey64.exe /DRepoRoot=. /Odist windows\installer\VisKey.iss
+;   iscc /DAppVersion=1.1.0-beta.5 /DSourceExe=build\Release\VisKey.exe /DRepoRoot=. /Odist windows\installer\VisKey.iss
+; AppVersion is the output of scripts/viskey_version.sh (the release tag without the leading v).
 ;
 ; Installs per user by default (no admin prompt) into %LOCALAPPDATA%\Programs\VisKey; the user may pick
 ; "all users" (Program Files) in the dialog. Settings live in HKCU\Software\VisKey.
@@ -12,7 +13,7 @@
   #define RepoRoot "..\.."
 #endif
 #ifndef SourceExe
-  #define SourceExe RepoRoot + "\build\Release\VisKey64.exe"
+  #define SourceExe RepoRoot + "\build\Release\VisKey.exe"
 #endif
 
 [Setup]
@@ -35,7 +36,7 @@ ArchitecturesInstallIn64BitMode=x64compatible
 LicenseFile={#RepoRoot}\LICENSE
 OutputBaseFilename=VisKey-{#AppVersion}-Windows-Setup
 SetupIconFile={#RepoRoot}\windows\res\VisKey.ico
-UninstallDisplayIcon={app}\VisKey64.exe
+UninstallDisplayIcon={app}\VisKey.exe
 WizardStyle=modern
 Compression=lzma2
 SolidCompression=yes
@@ -54,20 +55,34 @@ Source: "{#SourceExe}"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#RepoRoot}\LICENSE"; DestDir: "{app}"; DestName: "LICENSE.txt"; Flags: ignoreversion
 Source: "{#RepoRoot}\windows\README-Windows.txt"; DestDir: "{app}"; Flags: ignoreversion isreadme
 
+[InstallDelete]
+; Older versions installed the exe as VisKey64.exe (stopped in PrepareToInstall below).
+Type: files; Name: "{app}\VisKey64.exe"
+
 [Icons]
-Name: "{autoprograms}\VisKey"; Filename: "{app}\VisKey64.exe"
-Name: "{autodesktop}\VisKey"; Filename: "{app}\VisKey64.exe"; Tasks: desktopicon
+Name: "{autoprograms}\VisKey"; Filename: "{app}\VisKey.exe"
+Name: "{autodesktop}\VisKey"; Filename: "{app}\VisKey.exe"; Tasks: desktopicon
 
 [Registry]
-; Same Run value VisKey64.exe writes itself ("Tự khởi động VisKey cùng hệ điều hành Windows").
-Root: HKCU; Subkey: "Software\Microsoft\Windows\CurrentVersion\Run"; ValueType: string; ValueName: "VisKey"; ValueData: """{app}\VisKey64.exe"""; Tasks: startup
+; Same Run value VisKey.exe writes itself ("Tự khởi động VisKey cùng hệ điều hành Windows").
+Root: HKCU; Subkey: "Software\Microsoft\Windows\CurrentVersion\Run"; ValueType: string; ValueName: "VisKey"; ValueData: """{app}\VisKey.exe"""; Tasks: startup
 Root: HKCU; Subkey: "Software\Microsoft\Windows\CurrentVersion\Run"; ValueName: "VisKey"; Flags: uninsdeletevalue dontcreatekey
 ; Keep the in-app checkbox consistent with the startup task.
 Root: HKCU; Subkey: "Software\VisKey"; ValueType: dword; ValueName: "LaunchAtStartup"; ValueData: "1"; Tasks: startup
 Root: HKCU; Subkey: "Software\VisKey"; Flags: uninsdeletekeyifempty
 
 [Run]
-Filename: "{app}\VisKey64.exe"; Description: "{cm:LaunchProgram,VisKey}"; Flags: nowait postinstall skipifsilent
+Filename: "{app}\VisKey.exe"; Description: "{cm:LaunchProgram,VisKey}"; Flags: nowait postinstall skipifsilent
 
 [UninstallRun]
-Filename: "{sys}\taskkill.exe"; Parameters: "/IM VisKey64.exe /F"; Flags: runhidden; RunOnceId: "StopVisKey"
+Filename: "{sys}\taskkill.exe"; Parameters: "/IM VisKey.exe /F"; Flags: runhidden; RunOnceId: "StopVisKey"
+
+[Code]
+// An older install still running as VisKey64.exe would keep its file locked and its hooks active.
+function PrepareToInstall(var NeedsRestart: Boolean): String;
+var
+  ResultCode: Integer;
+begin
+  Exec(ExpandConstant('{sys}\taskkill.exe'), '/IM VisKey64.exe /F', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
+  Result := '';
+end;

@@ -1,8 +1,8 @@
 @echo off
 chcp 65001 >nul
 cd /d "%~dp0"
-if exist "VisKey64.exe" (
-    start "" "VisKey64.exe"
+if exist "VisKey.exe" (
+    start "" "VisKey.exe"
     exit /b 0
 )
 where pythonw >nul 2>nul

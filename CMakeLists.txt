@@ -1,10 +1,20 @@
 cmake_minimum_required(VERSION 3.15)
 project(VisKey VERSION 1.0.0 LANGUAGES CXX)
 
+# Full release version (e.g. 1.1.0-beta.5 from tag v1.1.0-beta.5; CI passes the output of
+# scripts/viskey_version.sh). Defaults to project(VERSION) for local, untagged builds.
+set(VISKEY_VERSION "${PROJECT_VERSION}" CACHE STRING "VisKey version: x.y.z[-prerelease][+build]")
+if(NOT VISKEY_VERSION MATCHES "^([0-9]+)\\.([0-9]+)\\.([0-9]+)(-[0-9A-Za-z.-]+)?(\\+[0-9A-Za-z.-]+)?$")
+    message(FATAL_ERROR "VISKEY_VERSION '${VISKEY_VERSION}' is not x.y.z[-prerelease][+build]")
+endif()
+set(VISKEY_VERSION_MAJOR ${CMAKE_MATCH_1})
+set(VISKEY_VERSION_MINOR ${CMAKE_MATCH_2})
+set(VISKEY_VERSION_PATCH ${CMAKE_MATCH_3})
+
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# MSVC: static runtime (no vcruntime/msvcp DLLs next to VisKey64.exe) and UTF-8 sources.
+# MSVC: static runtime (no vcruntime/msvcp DLLs next to VisKey.exe) and UTF-8 sources.
 if(MSVC)
     set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
     add_compile_options($<$<COMPILE_LANGUAGE:CXX>:/utf-8>)
@@ -66,13 +76,13 @@ if(APPLE)
     )
 endif()
 
-# 3. Native Windows Win32 Application Target (VisKey64.exe)
+# 3. Native Windows Win32 Application Target (VisKey.exe)
 if(WIN32)
     enable_language(RC)
     # Portable single-file exe. d2d1, dwrite, dwmapi and winhttp are loaded at runtime
     # (LoadLibraryW), WIC and the file dialogs go through COM (ole32), so the static imports stay
     # within the list checked by .github/workflows/windows.yml.
-    add_executable(VisKey64 WIN32
+    add_executable(VisKey WIN32
         windows/VisKeyWin.cpp
         windows/ui/gfx.cpp
         windows/ui/widgets.cpp
@@ -82,11 +92,12 @@ if(WIN32)
         windows/ui/store.cpp
         windows/ui/snapshot.cpp
         windows/res/VisKey.rc)
-    target_compile_definitions(VisKey64 PRIVATE UNICODE _UNICODE NOMINMAX)
-    # Icon + VERSIONINFO; the version comes from project(VERSION) above.
+    target_compile_definitions(VisKey PRIVATE UNICODE _UNICODE NOMINMAX)
+    # Icon + VERSIONINFO; the version comes from VISKEY_VERSION above (numeric x.y.z in the fixed
+    # part, the full string in FileVersion/ProductVersion).
     set_source_files_properties(windows/res/VisKey.rc PROPERTIES COMPILE_DEFINITIONS
-        "VISKEY_VERSION_MAJOR=${PROJECT_VERSION_MAJOR};VISKEY_VERSION_MINOR=${PROJECT_VERSION_MINOR};VISKEY_VERSION_PATCH=${PROJECT_VERSION_PATCH};VISKEY_VERSION_STR=\"${PROJECT_VERSION}\"")
-    # Fallback for the version shown in the UI if the VERSIONINFO resource cannot be read.
-    set_source_files_properties(windows/ui/store.cpp PROPERTIES COMPILE_DEFINITIONS "VISKEY_APP_VERSION=\"${PROJECT_VERSION}\"")
-    target_link_libraries(VisKey64 PRIVATE user32 gdi32 shell32 advapi32 comctl32 ole32 uuid)
+        "VISKEY_VERSION_MAJOR=${VISKEY_VERSION_MAJOR};VISKEY_VERSION_MINOR=${VISKEY_VERSION_MINOR};VISKEY_VERSION_PATCH=${VISKEY_VERSION_PATCH};VISKEY_VERSION_STR=\"${VISKEY_VERSION}\"")
+    # Version shown in the UI (full string, so pre-releases read e.g. "1.1.0-beta.5").
+    set_source_files_properties(windows/ui/store.cpp PROPERTIES COMPILE_DEFINITIONS "VISKEY_APP_VERSION=\"${VISKEY_VERSION}\"")
+    target_link_libraries(VisKey PRIVATE user32 gdi32 shell32 advapi32 comctl32 ole32 uuid)
 endif()

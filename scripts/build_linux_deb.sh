@@ -4,12 +4,11 @@ set -e
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 PKG_NAME="ibus-viskey"
-# Single source of the version: linux/ibus/viskey_version.py (VERSION = "x.y.z").
-PKG_VER="$(sed -n 's/^VERSION = "\([^"]*\)".*/\1/p' "$ROOT_DIR/linux/ibus/viskey_version.py")"
-if [[ -z "$PKG_VER" ]]; then
-    echo "Cannot read VERSION from linux/ibus/viskey_version.py" >&2
-    exit 1
-fi
+# Version from the git tag (v1.1.0-beta.5 -> 1.1.0-beta.5), else the default in
+# linux/ibus/viskey_version.py; see scripts/viskey_version.sh. The package uses the Debian form
+# (1.1.0~beta.5, so the pre-release sorts before 1.1.0); the app shows the original string.
+APP_VER="$(bash "$SCRIPT_DIR/viskey_version.sh")"
+PKG_VER="$(bash "$SCRIPT_DIR/viskey_version.sh" --deb)"
 DEB_STAGE="/tmp/${PKG_NAME}_${PKG_VER}_all"
 OUT_DEB="$ROOT_DIR/${PKG_NAME}_${PKG_VER}_all.deb"
 ICON_SRC="$ROOT_DIR/linux/ibus/icons/hicolor/scalable/actions"
@@ -69,6 +68,10 @@ cp "$ROOT_DIR/linux/ibus/viskey_settings_tk.py" "$DEB_STAGE/usr/share/viskey/ibu
 cp "$ROOT_DIR/linux/ibus/viskey_settings_model.py" "$DEB_STAGE/usr/share/viskey/ibus/"
 cp "$ROOT_DIR/linux/ibus/viskey_version.py" "$DEB_STAGE/usr/share/viskey/ibus/"
 cp "$ROOT_DIR/linux/ibus/viskey.xml" "$DEB_STAGE/usr/share/ibus/component/"
+# Stamp the build version into the packaged copies (shown in viskey-settings and by IBus).
+sed -i "s/^VERSION = \".*\"/VERSION = \"$APP_VER\"/" "$DEB_STAGE/usr/share/viskey/ibus/viskey_version.py"
+sed -i "s|<version>.*</version>|<version>$APP_VER</version>|" "$DEB_STAGE/usr/share/ibus/component/viskey.xml"
+grep -qx "VERSION = \"$APP_VER\"" "$DEB_STAGE/usr/share/viskey/ibus/viskey_version.py"
 cp "$ROOT_DIR/design/icons/appicon-1024.svg" "$DEB_STAGE/usr/share/viskey/icons/"
 cp "$ROOT_DIR/design/icons/appicon-1024.svg" "$DEB_STAGE/usr/share/icons/hicolor/scalable/apps/org.viskey.Settings.svg"
 cp "$ICON_SRC"/viskey-*-symbolic.svg "$DEB_STAGE/usr/share/viskey/icons/hicolor/scalable/actions/"

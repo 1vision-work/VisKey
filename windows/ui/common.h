@@ -153,7 +153,7 @@ bool IsValidMacroKey(const std::string& key);
 bool ParseMacroFile(const std::string& utf8, std::map<std::string, std::string>& out, int& skipped);
 std::string ExportMacrosJson(const std::map<std::string, std::string>& macros);
 
-std::wstring AppVersion();          // "1.0.0" from the VERSIONINFO resource
+std::wstring AppVersion();          // "1.1.0-beta.5": the build version (VISKEY_VERSION in CMake)
 std::wstring SystemInfoText(const Model& m);
 std::wstring WindowsVersionText();  // "Windows 10.0.22631"
 const wchar_t* ArchText();          // "x64" / "ARM64"

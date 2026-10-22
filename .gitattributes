@@ -1,0 +1,4 @@
+# Shell scripts must keep LF line endings: windows.yml runs scripts/viskey_version.sh with Git Bash,
+# and Windows runners check out with core.autocrlf=true.
+*.sh text eol=lf
+*.command text eol=lf

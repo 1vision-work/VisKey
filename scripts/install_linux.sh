@@ -13,7 +13,7 @@ python3 "$ROOT_DIR/core/viskey_engine.py"
 
 if command -v apt-get >/dev/null 2>&1 && command -v dpkg >/dev/null 2>&1; then
     echo "[2/3] Phat hien he thong Debian/Ubuntu/Mint. Dang cai dat goi .deb..."
-    PKG_VER="$(sed -n 's/^VERSION = "\([^"]*\)".*/\1/p' "$ROOT_DIR/linux/ibus/viskey_version.py")"
+    PKG_VER="$(bash "$ROOT_DIR/scripts/viskey_version.sh" --deb)"
     DEB_FILE="$ROOT_DIR/ibus-viskey_${PKG_VER}_all.deb"
     if [[ ! -f "$DEB_FILE" ]]; then
         bash "$ROOT_DIR/scripts/build_linux_deb.sh"

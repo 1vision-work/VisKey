@@ -1,4 +1,4 @@
-# VisKey for Windows: VisKey64.exe, portable zip and optional installer. MIT License, 1VISION.
+# VisKey for Windows: VisKey.exe, portable zip and optional installer. MIT License, 1VISION.
 # A v* tag also attaches the Windows files to the GitHub pre-release created by ci.yml (same tag).
 name: Windows
 
@@ -35,22 +35,22 @@ jobs:
         with:
           arch: x64
 
+      # v1.1.0-beta.5 tag -> 1.1.0-beta.5; other builds use the default in linux/ibus/viskey_version.py.
       - name: Version
         id: version
+        shell: bash
         run: |
-          $m = Select-String -Path CMakeLists.txt -Pattern 'project\(VisKey VERSION ([0-9.]+)'
-          if (-not $m) { throw 'project(VisKey VERSION x.y.z) not found in CMakeLists.txt' }
-          $v = $m.Matches[0].Groups[1].Value
-          "version=$v" >> $env:GITHUB_OUTPUT
-          $arch = '${{ matrix.arch }}'.ToLower()
-          "zip=VisKey-$v-Windows-$arch-portable.zip" >> $env:GITHUB_OUTPUT
-          Write-Host "VisKey $v ($arch)"
+          v="$(bash scripts/viskey_version.sh)"
+          arch="$(echo '${{ matrix.arch }}' | tr '[:upper:]' '[:lower:]')"
+          echo "version=$v" >> "$GITHUB_OUTPUT"
+          echo "zip=VisKey-$v-Windows-$arch-portable.zip" >> "$GITHUB_OUTPUT"
+          echo "VisKey $v ($arch)"
 
       # No -G: CMake defaults to the newest installed Visual Studio generator.
       - name: Configure
         run: |
           cmake --version
-          cmake -S . -B build -A ${{ matrix.arch }}
+          cmake -S . -B build -A ${{ matrix.arch }} "-DVISKEY_VERSION=${{ steps.version.outputs.version }}"
           if ($LASTEXITCODE -ne 0) { exit 1 }
 
       - name: Build
@@ -60,9 +60,9 @@ jobs:
         if: matrix.arch == 'x64'
         run: ctest --test-dir build -C Release --output-on-failure
 
-      - name: Verify VisKey64.exe
+      - name: Verify VisKey.exe
         run: |
-          $exe = 'build\Release\VisKey64.exe'
+          $exe = 'build\Release\VisKey.exe'
           if (-not (Test-Path $exe)) { throw "missing $exe" }
           $expected = @{ x64 = '8664 machine (x64)'; ARM64 = 'AA64 machine (ARM64)' }['${{ matrix.arch }}']
           $headers = dumpbin /nologo /headers $exe | Out-String
@@ -81,7 +81,7 @@ jobs:
           $info = (Get-Item $exe).VersionInfo
           Write-Host "ProductName=$($info.ProductName) CompanyName=$($info.CompanyName) ProductVersion=$($info.ProductVersion)"
           if ($info.ProductName -ne 'VisKey' -or $info.CompanyName -ne '1VISION') { throw 'bad version resource' }
-          if ($info.ProductVersion -ne '${{ steps.version.outputs.version }}') { throw 'version resource does not match CMake project version' }
+          if ($info.ProductVersion -ne '${{ steps.version.outputs.version }}') { throw 'version resource does not match the build version' }
           Write-Host "Size: $((Get-Item $exe).Length) bytes"
 
       # Renders every settings page + the tray flyout offscreen (no hooks, no tray, no registry).
@@ -90,13 +90,13 @@ jobs:
         run: |
           $out = Join-Path $env:RUNNER_TEMP 'shots'
           New-Item -ItemType Directory -Force $out | Out-Null
-          $p = Start-Process -FilePath build\Release\VisKey64.exe -ArgumentList '--ui-snapshot', "`"$out`"" -PassThru
+          $p = Start-Process -FilePath build\Release\VisKey.exe -ArgumentList '--ui-snapshot', "`"$out`"" -PassThru
           $null = $p.Handle  # keep the handle so ExitCode is available afterwards
           try {
             Wait-Process -Id $p.Id -Timeout 120 -ErrorAction Stop
           } catch {
             Stop-Process -Id $p.Id -Force -ErrorAction SilentlyContinue
-            throw 'VisKey64.exe --ui-snapshot did not finish within 120 s'
+            throw 'VisKey.exe --ui-snapshot did not finish within 120 s'
           }
           $p.WaitForExit()
           if (Test-Path "$out\snapshot.txt") { Get-Content "$out\snapshot.txt" }
@@ -113,18 +113,26 @@ jobs:
           path: ${{ runner.temp }}/shots/
           if-no-files-found: error
 
+      # Like UniKey: one self-contained VisKey.exe (no installer, no Python), plus license and readme.
       - name: Portable zip
         run: |
           $stage = 'dist\stage'
           New-Item -ItemType Directory -Force $stage | Out-Null
-          Copy-Item build\Release\VisKey64.exe $stage\
+          Copy-Item build\Release\VisKey.exe $stage\
           Copy-Item LICENSE $stage\LICENSE.txt
-          Copy-Item windows\VisKey_Windows_Portable.pyw $stage\
           # CRLF so old Notepad versions show the text correctly.
           (Get-Content windows\README-Windows.txt -Raw -Encoding utf8) -replace "`r?`n", "`r`n" |
             Set-Content $stage\README-Windows.txt -Encoding utf8 -NoNewline
           Compress-Archive -Path "$stage\*" -DestinationPath "dist\${{ steps.version.outputs.zip }}" -Force
           Remove-Item -Recurse $stage
+
+          Add-Type -AssemblyName System.IO.Compression.FileSystem
+          $zip = [IO.Compression.ZipFile]::OpenRead("$PWD\dist\${{ steps.version.outputs.zip }}")
+          $names = @($zip.Entries | ForEach-Object { $_.FullName } | Sort-Object)
+          $zip.Dispose()
+          Write-Host "Zip contents: $($names -join ', ')"
+          $expected = @('LICENSE.txt', 'README-Windows.txt', 'VisKey.exe')
+          if (Compare-Object $names $expected) { throw "unexpected zip contents: $($names -join ', ')" }
           Get-ChildItem dist
 
       - name: Installer (optional, Inno Setup)
@@ -142,7 +150,7 @@ jobs:
             $iscc = "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe"
           }
           if (-not (Test-Path $iscc)) { throw 'Inno Setup not available; skipping installer' }
-          & $iscc /Q "/DAppVersion=${{ steps.version.outputs.version }}" "/DSourceExe=$PWD\build\Release\VisKey64.exe" "/DRepoRoot=$PWD" "/O$PWD\dist" windows\installer\VisKey.iss
+          & $iscc /Q "/DAppVersion=${{ steps.version.outputs.version }}" "/DSourceExe=$PWD\build\Release\VisKey.exe" "/DRepoRoot=$PWD" "/O$PWD\dist" windows\installer\VisKey.iss
           if ($LASTEXITCODE -ne 0) { throw "iscc failed ($LASTEXITCODE)" }
           Get-ChildItem dist
 

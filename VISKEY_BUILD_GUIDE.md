@@ -15,7 +15,7 @@ Khi giải nén `VisKey-macOS-Linux.zip`, bạn sẽ có đầy đủ các thàn
 | `macos/Info.plist` | Khai báo metadata của gói ứng dụng `VisKey.app` (Bundle ID: `org.viskey.inputmethod`, `LSUIElement`). |
 | `windows/VisKeyWin.cpp` | Mã nguồn ứng dụng Windows gốc (Win32 C++17): Khay hệ thống `Shell_NotifyIconW`, cửa sổ cấu hình Win32, hook `WH_KEYBOARD_LL`, `SendInput` nguyên tử và lưu trữ Registry. |
 | `windows/VisKey_Windows_Portable.pyw` | Bản chạy ngay không cần biên dịch cho Windows (dùng Win32 `ctypes` + giao diện `Tkinter`). |
-| `Build_Windows.bat` & `Run_VisKey_Windows.bat` | Script 1-click trên Windows để biên dịch ra `VisKey64.exe` hoặc chạy trực tiếp bản Portable. |
+| `Build_Windows.bat` & `Run_VisKey_Windows.bat` | Script 1-click trên Windows để biên dịch ra `VisKey.exe` hoặc chạy trực tiếp bản Portable. |
 | `linux/ibus/ibus_viskey.py` | Daemon bộ gõ IBus cho Linux (hỗ trợ X11 & Wayland, chế độ Không gạch chân và tự động đọc cấu hình thời gian thực). |
 | `linux/ibus/viskey_settings.py` | Ứng dụng Giao diện Bảng điều khiển & Quản lý Gõ tắt (GUI) trên Linux (`viskey-settings`), lưu cấu hình vào `~/.config/viskey/config.json`. |
 | `linux/ibus/viskey.xml` | File đăng ký thành phần bộ gõ với hệ thống IBus (`/usr/share/ibus/component/viskey.xml`). |
@@ -24,9 +24,9 @@ Khi giải nén `VisKey-macOS-Linux.zip`, bạn sẽ có đầy đủ các thàn
 | `CMakeLists.txt` | File cấu hình hệ thống build CMake đa nền tảng (macOS & Linux). |
 | `Install_macOS.command` | File chạy tự động bằng cú nhấp đúp chuột trên macOS để test, build `VisKey.app` và tạo bộ cài `.dmg`. |
 | `scripts/build_macos_installer.sh` | Script build chuyên sâu cho macOS: biên dịch Universal Binary (`arm64` + `x86_64`), ký `codesign`, đóng gói `.dmg`. |
-| `scripts/build_linux_deb.sh` | Script đóng gói bộ cài chuẩn Debian/Ubuntu (`ibus-viskey_1.0.0_all.deb`). |
+| `scripts/build_linux_deb.sh` | Script đóng gói bộ cài chuẩn Debian/Ubuntu (`ibus-viskey_<phiên bản>_all.deb`). |
 | `scripts/install_linux.sh` | Script cài đặt tự động trên mọi bản phân phối Linux (Ubuntu/Debian/Mint, Fedora, Arch). |
-| `ibus-viskey_1.0.0_all.deb` | File cài đặt `.deb` đã được đóng gói sẵn cho họ Debian/Ubuntu. |
+| `ibus-viskey_<phiên bản>_all.deb` | File cài đặt `.deb` đã được đóng gói sẵn cho họ Debian/Ubuntu. |
 
 ## 2. Bước kiểm thử trước khi Build (Chạy trên cả macOS & Linux)
 
@@ -57,7 +57,7 @@ g++ -std=c++17 -O2 core/viskey_cli.cpp -o viskey_cli
 xcode-select --install
 ```
 
-### 3.2. Cách 1: Build tự động ra `VisKey.app` và `VisKey-macOS-Installer.dmg` (Khuyên dùng)
+### 3.2. Cách 1: Build tự động ra `VisKey.app` và `VisKey-<phiên bản>-macOS.dmg` (Khuyên dùng)
 Bạn có thể nhấp đúp chuột trực tiếp vào file **`Install_macOS.command`** trong Finder, hoặc mở Terminal tại thư mục `VisKey` và chạy:
 
 ```bash
@@ -68,7 +68,7 @@ Script này thực hiện tự động 4 công đoạn:
 1. Biên dịch và chạy toàn bộ 109 bài Unit Test C++17 để đảm bảo không có lỗi.
 2. Biên dịch `macos/VisKeyApp.mm` cùng `core/viskey_engine.hpp` thành gói ứng dụng hoàn chỉnh tại `build_macos/VisKey.app` dưới dạng **Universal Binary** (chạy gốc trên cả chip Apple Silicon M1/M2/M3/M4 và chip Intel `x86_64`).
 3. Thực hiện ký số cục bộ (`codesign --force --deep --sign - build_macos/VisKey.app`) để macOS Gatekeeper và hệ thống quyền Accessibility nhận diện chữ ký ổn định.
-4. Tạo bộ cài ảnh đĩa **`VisKey-macOS-Installer.dmg`** (có sẵn shortcut kéo-thả vào thư mục `/Applications`) và hỏi bạn có muốn cài đặt tự động vào `/Applications/VisKey.app` ngay lập tức hay không.
+4. Tạo bộ cài ảnh đĩa **`VisKey-<phiên bản>-macOS.dmg`** (có sẵn shortcut kéo-thả vào thư mục `/Applications`) và hỏi bạn có muốn cài đặt tự động vào `/Applications/VisKey.app` ngay lập tức hay không.
 
 ### 3.3. Cách 2: Build thủ công từng bước hoặc dùng CMake / tạo bộ cài `.pkg`
 Nếu bạn muốn tự kiểm soát từng lệnh biên dịch hoặc tích hợp vào CI/CD (GitHub Actions):
@@ -117,13 +117,13 @@ Trên Linux, ứng dụng hoàn chỉnh của VisKey bao gồm 2 thành phần c
 1. **Daemon bộ gõ IBus (`ibus-engine-viskey`)**: Tích hợp trực tiếp vào hệ thống nhập liệu của GNOME, KDE Plasma, XFCE, Cinnamon trên cả **X11** và **Wayland**.
 2. **Ứng dụng Giao diện Bảng điều khiển (`viskey-settings`)**: Có biểu tượng riêng trong menu ứng dụng của hệ điều hành (`VisKey - Cấu hình Bộ gõ Tiếng Việt`), cho phép chỉnh mọi tùy chọn và quản lý danh sách Gõ tắt (Macro) bằng giao diện đồ họa.
 
-### 4.1. Cách 1: Cài đặt ngay từ gói `ibus-viskey_1.0.0_all.deb` (Ubuntu, Debian, Linux Mint, Pop!_OS, Kali)
+### 4.1. Cách 1: Cài đặt ngay từ gói `ibus-viskey_<phiên bản>_all.deb` (Ubuntu, Debian, Linux Mint, Pop!_OS, Kali)
 Trong thư mục giải nén đã có sẵn gói `.deb` hoàn chỉnh. Bạn chỉ cần chạy:
 
 ```bash
 sudo apt update
 sudo apt install -y ibus python3-gi gir1.2-ibus-1.0 python3-tk
-sudo dpkg -i ibus-viskey_1.0.0_all.deb
+sudo dpkg -i ibus-viskey_*_all.deb
 ibus restart
 ```
 
@@ -132,7 +132,7 @@ Nếu bạn sửa mã nguồn Python và muốn **tự đóng gói lại file `.
 ```bash
 bash scripts/build_linux_deb.sh
 ```
-File `ibus-viskey_1.0.0_all.deb` mới sẽ được xuất ra ngay tại thư mục gốc của dự án.
+File `ibus-viskey_<phiên bản>_all.deb` mới sẽ được xuất ra ngay tại thư mục gốc của dự án.
 
 ### 4.2. Cách 2: Cài đặt trên Fedora / RHEL, Arch Linux / Manjaro hoặc openSUSE
 Với các bản phân phối không dùng `.deb`, trước tiên hãy cài các gói thư viện hệ thống (`ibus`, `pygobject`, `tkinter`), sau đó chạy script cài đặt tự động `scripts/install_linux.sh`:
@@ -172,7 +172,7 @@ bash scripts/install_linux.sh
 
 ## 5. Hướng dẫn Chạy và Build Hoàn chỉnh trên Windows (Windows 10 & Windows 11)
 
-Phiên bản **VisKey cho Windows** cung cấp **2 lựa chọn linh hoạt**: chạy ngay lập tức không cần cài trình biên dịch C++ (Portable Edition) hoặc biên dịch ra file thực thi gốc **`VisKey64.exe`** độc lập (Native Win32 C++17, dung lượng dưới 500 KB, không cần cài `.NET` hay thư viện ngoài).
+Phiên bản **VisKey cho Windows** cung cấp **2 lựa chọn linh hoạt**: chạy ngay lập tức không cần cài trình biên dịch C++ (Portable Edition) hoặc biên dịch ra file thực thi gốc **`VisKey.exe`** độc lập (Native Win32 C++17, dung lượng dưới 500 KB, không cần cài `.NET` hay thư viện ngoài).
 
 ### 5.1. Cách 1: Chạy trực tiếp bản Portable không cần Build (`Run_VisKey_Windows.bat`)
 Nếu máy Windows của bạn đã có sẵn Python 3:
@@ -180,18 +180,18 @@ Nếu máy Windows của bạn đã có sẵn Python 3:
 2. Nhấp đúp vào **`Run_VisKey_Windows.bat`** (hoặc `windows\VisKey_Windows_Portable.pyw`).
 3. Cửa sổ **Bảng Điều Khiển VisKey (Windows 10/11)** sẽ mở lên ngay lập tức và kích hoạt bộ bắt phím `WH_KEYBOARD_LL` toàn hệ thống.
 
-### 5.2. Cách 2: Build ra file thực thi độc lập `VisKey64.exe` (`Build_Windows.bat`)
+### 5.2. Cách 2: Build ra file thực thi độc lập `VisKey.exe` (`Build_Windows.bat`)
 Nếu máy Windows của bạn có **MinGW-w64 (`g++`)** (qua MSYS2 / WinLibs) hoặc **Visual Studio (MSVC `cl.exe`)**:
 1. Nhấp đúp vào file **`Build_Windows.bat`** (hoặc chạy trong *Developer Command Prompt for VS* / *PowerShell*).
-2. Script sẽ tự động chạy 109 bài Unit Test C++17 và biên dịch `windows\VisKeyWin.cpp` thành file **`VisKey64.exe`** ngay tại thư mục gốc:
+2. Script sẽ tự động chạy 109 bài Unit Test C++17 và biên dịch `windows\VisKeyWin.cpp` thành file **`VisKey.exe`** ngay tại thư mục gốc:
    ```bat
    :: Biên dịch bằng MinGW-w64 (GCC trên Windows):
-   g++ -std=c++17 -O2 -mwindows -municode windows\VisKeyWin.cpp -luser32 -lgdi32 -lshell32 -ladvapi32 -lcomctl32 -o VisKey64.exe
+   g++ -std=c++17 -O2 -mwindows -municode windows\VisKeyWin.cpp -luser32 -lgdi32 -lshell32 -ladvapi32 -lcomctl32 -o VisKey.exe
 
    :: Hoặc biên dịch bằng MSVC (Visual Studio):
-   cl /std:c++17 /O2 /EHsc /utf-8 /DUNICODE /D_UNICODE windows\VisKeyWin.cpp user32.lib gdi32.lib shell32.lib advapi32.lib comctl32.lib /link /SUBSYSTEM:WINDOWS /OUT:VisKey64.exe
+   cl /std:c++17 /O2 /EHsc /utf-8 /DUNICODE /D_UNICODE windows\VisKeyWin.cpp user32.lib gdi32.lib shell32.lib advapi32.lib comctl32.lib /link /SUBSYSTEM:WINDOWS /OUT:VisKey.exe
    ```
-3. Khi chạy `VisKey64.exe`, biểu tượng **VisKey** xuất hiện dưới khay hệ thống (System Tray góc dưới bên phải màn hình):
+3. Khi chạy `VisKey.exe`, biểu tượng **VisKey** xuất hiện dưới khay hệ thống (System Tray góc dưới bên phải màn hình):
    * Nhấn **`Ctrl + Space`** hoặc **`Alt + Z`** (hoặc click chuột trái vào icon dưới khay hệ thống) để đổi nhanh giữa Tiếng Việt (`VI`) và Tiếng Anh (`EN`).
    * Click đúp (hoặc chuột phải vào icon chọn *"Mở Bảng điều khiển VisKey..."*) để mở cửa sổ cấu hình, thêm/xóa từ Gõ tắt và bật **"Tự khởi động VisKey cùng hệ điều hành Windows"**.
    * Mọi cấu hình được lưu bền vững trong Windows Registry tại `HKEY_CURRENT_USER\Software\VisKey`.
