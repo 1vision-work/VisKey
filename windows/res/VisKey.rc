@@ -34,10 +34,10 @@ BEGIN
         BLOCK "040904B0"
         BEGIN
             VALUE "CompanyName",      "1VISION"
-            VALUE "FileDescription",  "VisKey - Vietnamese input method"
+            VALUE "FileDescription",  "VisKey - Vietnamese input method (Telex/VNI)"
             VALUE "FileVersion",      VISKEY_VERSION_STR
             VALUE "InternalName",     "VisKey"
-            VALUE "LegalCopyright",   "MIT License"
+            VALUE "LegalCopyright",   "Copyright (c) 2026 VisKey Project (1VISION). MIT License."
             VALUE "OriginalFilename", "VisKey.exe"
             VALUE "ProductName",      "VisKey"
             VALUE "ProductVersion",   VISKEY_VERSION_STR

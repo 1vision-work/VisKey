@@ -233,13 +233,15 @@ jobs:
           prerelease: true
           files: dist/*
           fail_on_unmatched_files: true
+          # Appends GitHub's generated change list (categories in .github/release.yml) below the body.
+          generate_release_notes: true
           body: |
             VisKey ${{ github.ref_name }} - bộ gõ tiếng Việt Telex/VNI (Vietnamese input method). MIT License, by 1VISION.
 
             **Windows** (x64 / ARM64)
             - Portable: unzip `VisKey-*-Windows-*-portable.zip` and run `VisKey.exe` (a single exe, no installation). Toggle Vietnamese with Ctrl+Space or Alt+Z.
             - Or run `VisKey-*-Windows-Setup.exe` (x64, per-user install, no admin needed).
-            - The binaries are unsigned: on the SmartScreen prompt click "More info" -> "Run anyway".
+            - The binaries are not code-signed yet: on the SmartScreen prompt click "More info" -> "Run anyway".
 
             **macOS** (Apple Silicon + Intel)
             - Open `VisKey-*-macOS.dmg` and drag VisKey.app into Applications.
@@ -251,3 +253,5 @@ jobs:
             - `ibus restart`, then add "VisKey" in your input sources. Settings: `viskey-settings`.
 
             Windows files are attached by a separate workflow and may appear a few minutes later.
+
+            **Code signing & privacy:** [Code signing policy](${{ github.server_url }}/${{ github.repository }}/blob/HEAD/CODE_SIGNING_POLICY.md) (SignPath Foundation application pending; this release is not signed) · [Privacy](${{ github.server_url }}/${{ github.repository }}/blob/HEAD/PRIVACY.md) (the only network request is the optional GitHub update check).

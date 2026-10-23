@@ -1,0 +1,15 @@
+# Categories of the change list GitHub generates for release notes (generate_release_notes in
+# .github/workflows/ci.yml). The release body written by ci.yml links CODE_SIGNING_POLICY.md and PRIVACY.md.
+changelog:
+  exclude:
+    labels:
+      - skip-changelog
+  categories:
+    - title: Bug fixes
+      labels: [bug, fix]
+    - title: New features
+      labels: [enhancement, feature]
+    - title: Documentation
+      labels: [documentation, docs]
+    - title: Other changes
+      labels: ["*"]
