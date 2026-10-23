@@ -8,6 +8,17 @@
 
 **VisKey** là bộ gõ Tiếng Việt Telex/VNI cho **macOS** 11 trở lên (Apple Silicon & Intel), **Linux** (qua IBus) và **Windows** 10/11 (x64; bản ARM64 là thử nghiệm).
 
+> **Quyền riêng tư & ký số:** VisKey không gửi nội dung gõ hay cấu hình đi đâu cả; kết nối mạng duy nhất là kiểm tra cập nhật trên GitHub (tắt được) — xem [`PRIVACY.md`](PRIVACY.md). Chính sách ký số (đang chờ duyệt, bản phát hành hiện **chưa** được ký): [`CODE_SIGNING_POLICY.md`](CODE_SIGNING_POLICY.md). Đóng góp: [`CONTRIBUTING.md`](CONTRIBUTING.md).
+
+## English
+
+**VisKey** is a free, open-source (MIT) Vietnamese input method (Telex and VNI) for **Windows** 10/11, **macOS** 11+ and **Linux** (IBus), published by 1VISION. Builds are available on [GitHub Releases](https://github.com/1vision-work/VisKey/releases).
+
+* **Privacy:** keystrokes, typed text and settings stay on your computer. There is no telemetry or analytics. The only network request is an anonymous update check against the public GitHub releases API, which runs when you click *Check for updates* or automatically at most once a day. The automatic check can be switched off, and VisKey never downloads or installs anything by itself. Details: [PRIVACY.md](PRIVACY.md).
+* **Code signing:** an application to the SignPath Foundation is planned. Current releases are **not** code-signed. See [CODE_SIGNING_POLICY.md](CODE_SIGNING_POLICY.md).
+* **Contributing:** issues and pull requests are welcome. All external pull requests must be reviewed and approved by a maintainer before they are merged. See [CONTRIBUTING.md](CONTRIBUTING.md).
+* **Build & test:** see section 6 and section 7 below (the commands are the same on every platform), as well as [VISKEY_BUILD_GUIDE.md](VISKEY_BUILD_GUIDE.md).
+
 ## 1. Giấy phép & Mã nguồn
 
 * **Giấy phép MIT** ([`LICENSE`](LICENSE), Copyright (c) 2026 VisKey Project): được tự do sử dụng, sửa đổi, phân phối lại và dùng cho mục đích thương mại, với điều kiện giữ nguyên thông báo bản quyền và nội dung giấy phép trong các bản sao.
@@ -29,7 +40,7 @@ Bộ lõi có hai bản tương đương: C++17 header-only (`core/viskey_engine
 | **Tự bật lại event tap & Secure Input** | Tự bật lại `CGEventTap` khi macOS tắt nó (do quá thời gian hoặc do người dùng). Khi bật Secure Input (ô mật khẩu), VisKey để phím đi thẳng, không xử lý. | macOS |
 | **Gõ tắt giữ kiểu chữ hoa** | Có sẵn: `vn` → `Việt Nam`, `ko` → `không`, `dc` → `được`, `uh` → `ừ`, `ntn` → `như thế nào`, `bt` → `bình thường`, `mn` → `mọi người`. Giữ kiểu chữ (`ko` → `không`, `Ko` → `Không`, `KO` → `KHÔNG`). Nhập/xuất danh sách dạng JSON hoặc dạng `viết tắt<TAB>nội dung`, có đếm số lần dùng. | Cả 3 |
 | **Quick Telex** | `cc=ch`, `gg=gi`, `kk=kh`, `nn=ng`, `qq=qu`, `pp=ph`, `tt=th` ở đầu từ, chỉ trong Telex. Tắt mặc định. | Cả 3 |
-| **Kiểm tra cập nhật** | Bấm nút kiểm tra, hoặc tự kiểm tra tối đa 1 lần mỗi 24 giờ (bật mặc định, tắt được). Chỉ đọc danh sách bản phát hành công khai trên GitHub và báo khi có bản mới; không tự tải hay tự cài. | Cả 3 |
+| **Kiểm tra cập nhật** | Bấm nút kiểm tra, hoặc tự kiểm tra tối đa 1 lần mỗi 24 giờ (bật mặc định, tắt được). Chỉ đọc danh sách bản phát hành công khai trên GitHub và báo khi có bản mới; không tự tải hay tự cài (chi tiết: [`PRIVACY.md`](PRIVACY.md)). | Cả 3 |
 
 ## 3. Giao diện & Phím tắt
 
@@ -79,15 +90,21 @@ Bộ lõi có hai bản tương đương: C++17 header-only (`core/viskey_engine
 VisKey/
 ├── README.md                          # Tài liệu tổng quan (file này)
 ├── LICENSE                            # Giấy phép MIT
+├── PRIVACY.md                         # Chính sách quyền riêng tư (kết nối mạng, dữ liệu lưu trên máy)
+├── CODE_SIGNING_POLICY.md             # Chính sách ký số (SignPath Foundation, đang chờ duyệt)
+├── CONTRIBUTING.md                    # Hướng dẫn đóng góp, quy định review PR
 ├── VISKEY_BUILD_GUIDE.md              # Hướng dẫn build & đóng gói chi tiết
 ├── VISKEY_ARCHITECTURE_FOR_DEVS.md    # Kiến trúc & thuật toán cho developer
 ├── CMakeLists.txt                     # CMake: CLI, các bài test (ctest), VisKey.app (macOS), VisKey.exe (Windows)
 ├── Install_macOS.command              # Nhấp đúp trên macOS để chạy scripts/build_macos_installer.sh
 ├── Build_Windows.bat                  # Script build Windows cũ (xem mục 6.3)
 ├── Run_VisKey_Windows.bat             # Chạy VisKey.exe nếu có, nếu không thì chạy bản Python portable
-├── .github/workflows/
-│   ├── ci.yml                         # Linux (.deb) + macOS (.app/.dmg), tạo pre-release khi push tag v*
-│   └── windows.yml                    # VisKey.exe x64/ARM64, zip portable, bộ cài Inno Setup
+├── .github/
+│   ├── PULL_REQUEST_TEMPLATE.md       # Mẫu mô tả pull request
+│   ├── release.yml                    # Nhóm thay đổi trong ghi chú phát hành tự sinh
+│   └── workflows/
+│       ├── ci.yml                     # Linux (.deb) + macOS (.app/.dmg), tạo pre-release khi push tag v*
+│       └── windows.yml                # VisKey.exe x64/ARM64, zip portable, bộ cài Inno Setup
 ├── core/
 │   ├── viskey_engine.hpp              # Bộ lõi C++17 header-only
 │   ├── viskey_engine.py               # Bộ lõi Python 3 (dùng cho Linux)
@@ -172,7 +189,7 @@ export XMODIFIERS=@im=ibus
 ### 5.3. Windows
 * **Portable:** giải nén `VisKey-*-Windows-*-portable.zip` vào một thư mục bất kỳ rồi chạy `VisKey.exe`. Chỉ có một file exe, không cần cài đặt.
 * **Bộ cài:** chạy `VisKey-*-Windows-Setup.exe`. Chỉ có bản x64, cài cho người dùng hiện tại, không cần quyền admin.
-* File chưa được ký số. Nếu SmartScreen cảnh báo, bấm **More info → Run anyway**.
+* File chưa được ký số (xem [`CODE_SIGNING_POLICY.md`](CODE_SIGNING_POLICY.md)). Nếu SmartScreen cảnh báo, bấm **More info → Run anyway**.
 * Để cập nhật, thoát VisKey rồi thay `VisKey.exe` bằng bản mới; cài đặt được giữ nguyên. Cách gỡ bỏ có trong `README-Windows.txt` (đi kèm file zip).
 
 ## 6. Build từ mã nguồn

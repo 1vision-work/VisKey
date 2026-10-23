@@ -43,6 +43,7 @@ jobs:
           v="$(bash scripts/viskey_version.sh)"
           arch="$(echo '${{ matrix.arch }}' | tr '[:upper:]' '[:lower:]')"
           echo "version=$v" >> "$GITHUB_OUTPUT"
+          echo "numeric=$(bash scripts/viskey_version.sh --numeric)" >> "$GITHUB_OUTPUT"
           echo "zip=VisKey-$v-Windows-$arch-portable.zip" >> "$GITHUB_OUTPUT"
           echo "VisKey $v ($arch)"
 
@@ -150,8 +151,14 @@ jobs:
             $iscc = "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe"
           }
           if (-not (Test-Path $iscc)) { throw 'Inno Setup not available; skipping installer' }
-          & $iscc /Q "/DAppVersion=${{ steps.version.outputs.version }}" "/DSourceExe=$PWD\build\Release\VisKey.exe" "/DRepoRoot=$PWD" "/O$PWD\dist" windows\installer\VisKey.iss
+          & $iscc /Q "/DAppVersion=${{ steps.version.outputs.version }}" "/DAppVersionNumeric=${{ steps.version.outputs.numeric }}" "/DSourceExe=$PWD\build\Release\VisKey.exe" "/DRepoRoot=$PWD" "/O$PWD\dist" windows\installer\VisKey.iss
           if ($LASTEXITCODE -ne 0) { throw "iscc failed ($LASTEXITCODE)" }
+          $setup = "dist\VisKey-${{ steps.version.outputs.version }}-Windows-Setup.exe"
+          if (-not (Test-Path $setup)) { throw "missing $setup" }
+          $info = (Get-Item $setup).VersionInfo
+          Write-Host "Setup: ProductName=$($info.ProductName) CompanyName=$($info.CompanyName) ProductVersion=$($info.ProductVersion)"
+          if ($info.ProductName -ne 'VisKey' -or $info.CompanyName -ne '1VISION') { throw 'bad installer version resource' }
+          if ($info.ProductVersion -ne '${{ steps.version.outputs.version }}') { throw 'installer version does not match the build version' }
           Get-ChildItem dist
 
       - uses: actions/upload-artifact@v4
@@ -181,6 +188,8 @@ jobs:
 
       - run: ls -l dist
 
+      # No body here: ci.yml writes the release notes (incl. the CODE_SIGNING_POLICY.md link). An
+      # update without a body keeps the existing notes, so the order of the two jobs does not matter.
       - uses: softprops/action-gh-release@v2
         with:
           prerelease: true
