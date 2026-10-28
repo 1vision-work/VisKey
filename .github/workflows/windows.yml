@@ -113,6 +113,7 @@ jobs:
           name: viskey-windows-screenshots
           path: ${{ runner.temp }}/shots/
           if-no-files-found: error
+          retention-days: 7
 
       # Like UniKey: one self-contained VisKey.exe (no installer, no Python), plus license and readme.
       - name: Portable zip
@@ -166,6 +167,7 @@ jobs:
           name: ${{ matrix.arch == 'x64' && 'viskey-windows' || 'viskey-windows-arm64' }}
           path: dist/*
           if-no-files-found: error
+          retention-days: 7
 
   release:
     name: Pre-release (Windows files)

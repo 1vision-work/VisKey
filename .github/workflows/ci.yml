@@ -131,12 +131,14 @@ jobs:
           name: viskey-linux-screenshots
           path: ${{ runner.temp }}/viskey-linux-screenshots/*.png
           if-no-files-found: error
+          retention-days: 7
 
       - uses: actions/upload-artifact@v4
         with:
           name: viskey-linux-deb
           path: ibus-viskey_*_all.deb
           if-no-files-found: error
+          retention-days: 7
 
   macos:
     name: macOS
@@ -199,6 +201,7 @@ jobs:
           name: viskey-macos
           path: VisKey-*-macOS.dmg
           if-no-files-found: error
+          retention-days: 7
 
       # Not on v* tags: the release job publishes every artifact of the run as release files.
       - uses: actions/upload-artifact@v4
@@ -207,6 +210,7 @@ jobs:
           name: viskey-macos-screenshots
           path: ${{ runner.temp }}/shots/*.png
           if-no-files-found: error
+          retention-days: 7
 
   release:
     name: Pre-release
